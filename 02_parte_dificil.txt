@@ -1,0 +1,35 @@
+NOMBRE DEL SISTEMA: SimonCloud
+
+PARTE DEL SISTEMA QUE CONSIDERAMOS MÁS DIFÍCIL: Homologación y Sincronización de Calificaciones desde Múltiples LMS (Moodle, Google Classroom)
+
+¿POR QUÉ ES DIFÍCIL? (3 a 5 líneas, en lenguaje de negocio, NO en lenguaje técnico):
+Es difícil porque cada plataforma educativa externa maneja escalas de calificación, identificadores de estudiantes y estructuras de tareas completamente diferentes. La complejidad de negocio radica en que SimonCloud debe tomar estos datos heterogéneos, resolver conflictos de duplicidad o discrepancia de notas, y homologarlos en un formato único y oficial (sobre 100 puntos) sin perder la trazabilidad de su origen.
+
+ESCENARIO CONCRETO:
+• Actor: Docente
+• Punto de partida (datos o situación): El docente tiene a sus alumnos trabajando en Moodle (donde califica sobre 50 puntos) y en Google Classroom (donde califica con letras A, B, C). Necesita consolidar y homologar esas notas en SimonCloud para armar su acta.
+• Pasos que ocurren:
+  1. El docente ordena a SimonCloud importar las notas de la materia "Ingeniería de Software" desde ambas plataformas simultáneamente.
+  2. El sistema identifica y agrupa a los estudiantes cruzando sus correos o IDs universitarios, evitando duplicados.
+  3. El sistema aplica reglas de conversión de negocio (ej. convertir las notas sobre 50 de Moodle a porcentaje sobre 100, y las letras de Classroom a valores numéricos equivalentes).
+  4. SimonCloud consolida todo y presenta una única libreta de calificaciones unificada al docente.
+• Resultado esperado: Una planilla centralizada donde las notas provenientes de distintas plataformas están normalizadas en la escala oficial de la universidad, listas para su verificación y envío.
+
+REGLAS / RESTRICCIONES QUE NO PUEDEN ROMPERSE:
+1. Ningún estudiante puede quedar duplicado en la lista final aunque tenga diferentes formatos de nombre en Moodle y en Classroom; el cruce de identidad debe ser exacto mediante su correo o ID institucional.
+2. Toda nota importada debe mantener obligatoriamente la trazabilidad de su fuente original (saber si vino de Moodle o de Classroom).
+3. Si la escala de origen no es numérica (como letras o conceptos), debe existir una tabla de equivalencias oficial aprobada por la administración para su conversión.
+
+CASO DE PRUEBA CONCRETO (obligatorio):
+• DATOS DE ENTRADA (ejemplo realista, inventado, sin datos sensibles):
+  Estudiante: Juan Pérez (Correo: jperez@umss.edu)
+  Datos recibidos de Moodle: ID: 1234, Tarea 1: 45/50 puntos.
+  Datos recibidos de Classroom: Correo: jperez@umss.edu, Tarea 2: Calificación "A" (Equivalente normativo a 90/100).
+
+• DATOS DE SALIDA ESPERADOS para esa misma entrada:
+  Cruce de identidad: "Juan Pérez" es identificado como el mismo alumno por el correo jperez@umss.edu.
+  Conversión: Tarea 1 (Moodle) = 90/100. Tarea 2 (Classroom) = 90/100.
+  Resultado final consolidado en SimonCloud: "Juan Pérez | Tarea 1: 90/100 (Moodle) | Tarea 2: 90/100 (Classroom)".
+
+¿CÓMO MEDIRÍAMOS QUE FUNCIONA? (criterio observable en lenguaje de negocio):
+El docente logra generar su planilla consolidada en menos de 5 minutos, con un 0% de alumnos duplicados y sin necesidad de realizar fórmulas de conversión de escalas manualmente en Excel, validado por la auditoría del sistema.

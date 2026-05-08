@@ -1,0 +1,47 @@
+NOMBRE DEL SISTEMA: SimonCloud
+
+PROBLEMA QUE RESUELVE (3 a 5 líneas):
+Centraliza la gestión académica al consolidar la información que suele estar fragmentada en diferentes plataformas educativas (LMS como Moodle o Classroom). Simplifica la administración de materias y calificaciones en un entorno unificado, reduciendo la altísima carga operativa de los docentes para homologar notas, y mejorando la experiencia frente a los sistemas legacy actuales.
+
+USUARIO PRINCIPAL #1: Docente
+• ¿Qué quiere lograr? Administrar eficientemente sus materias, publicar recursos didácticos y evaluar a sus estudiantes sin tener que saltar entre múltiples plataformas.
+• 3 a 5 tareas más importantes que realiza en el sistema:
+  1. Centralizar la gestión de sus materias y recursos educativos provenientes de distintas plataformas.
+  2. Sincronizar y homologar las calificaciones de sus estudiantes desde diferentes LMS hacia un acta única.
+  3. Comunicarse con los estudiantes mediante anuncios oficiales de la materia.
+
+USUARIO PRINCIPAL #2: Estudiante
+• ¿Qué quiere lograr? Acceder rápidamente a sus materias, materiales de estudio y tener visibilidad clara de su rendimiento académico consolidado en tiempo real.
+• 3 a 5 tareas más importantes:
+  1. Consultar el material didáctico y recursos unificados por el docente.
+  2. Enviar trabajos y evaluaciones dentro de los plazos establecidos.
+  3. Revisar sus notas parciales y finales consolidadas en un solo lugar.
+
+USUARIO PRINCIPAL #3: Administrativo
+• ¿Qué quiere lograr? Gestionar el ciclo académico de manera centralizada y supervisar la emisión de actas oficiales.
+• 3 a 5 tareas más importantes:
+  1. Asignar materias y horarios a docentes y estudiantes.
+  2. Validar y consolidar las actas de notas finales enviadas por los docentes.
+  3. Resolver solicitudes o cambios excepcionales de calificaciones.
+
+USUARIO PRINCIPAL #4: Administrador del sistema
+• ¿Qué quiere lograr? Garantizar el correcto funcionamiento, seguridad y disponibilidad de la plataforma para todos los usuarios.
+• 3 a 5 tareas más importantes:
+  1. Gestionar roles, permisos y accesos de usuarios de la plataforma.
+  2. Monitorear las integraciones con sistemas externos (LMS) y la infraestructura.
+  3. Realizar copias de seguridad y mantenimiento de la base de datos.
+
+¿QUÉ DEBE HACER EL SISTEMA? (6 a 10 capacidades funcionales clave, en lenguaje de negocio):
+1. Gestión de identidad y control de acceso seguro por roles (Docente, Estudiante, Administrativo, Administrador).
+2. Integración y sincronización de datos con plataformas externas de aprendizaje (LMS).
+3. Panel de control (Dashboard) unificado para docentes con sus materias correspondientes.
+4. Homologación automática de calificaciones de diferentes escalas hacia el formato oficial universitario.
+5. Sistema de seguimiento y consolidación de calificaciones de todo el semestre.
+6. Herramienta de anuncios para la comunicación unidireccional o bidireccional ágil.
+7. Generación de actas finales y reportes de rendimiento con validación administrativa.
+
+REGLAS DE NEGOCIO IMPORTANTES (3 a 5 líneas):
+Solo los docentes asignados oficialmente a una materia pueden sincronizar calificaciones desde sus LMS. Las notas finales, una vez cerradas y enviadas en el periodo académico, no pueden ser alteradas por el docente sin un proceso de autorización de perfil Administrativo. Los estudiantes solo tienen acceso de lectura a sus propias notas consolidadas.
+
+¿CÓMO SABRÍAMOS QUE FUNCIONA? (criterio de éxito en lenguaje de negocio):
+Por la reducción de al menos un 80% en el tiempo que los docentes invierten cruzando datos en Excel para homologar notas de Moodle/Classroom, y por la ausencia de errores en las actas finales.
