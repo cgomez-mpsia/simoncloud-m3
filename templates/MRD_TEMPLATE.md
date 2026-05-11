@@ -23,6 +23,8 @@
 
 De 150 a 250 palabras. Responde: **¿qué producto, para qué mercado, con qué diferenciación y qué tamaño de oportunidad?**.
 
+> **Formato alternativo (opcional)**: el grupo puede presentar este MRD como **6‑pager narrativo estilo Amazon** (ver S04 §B7.1). El 6‑pager Amazon‑style sustituye el formato de tabla por una narrativa de ≤ 6 páginas con prosa estructurada (problema → tamaño de mercado → personas → diferenciación → riesgos → recomendación). Si el grupo elige esa ruta, conserve igualmente la sección §14 *Trazabilidad* y los anexos.
+
 ## 2. Visión del producto
 
 Una frase inspiradora (máx. 25 palabras) que condense **para quién, qué, por qué y cuándo**.
@@ -49,19 +51,36 @@ Una frase inspiradora (máx. 25 palabras) que condense **para quién, qué, por 
 
 - Ley 164 Bolivia, ASFI, PCI‑DSS, GDPR, etc.
 
+### 3.4 Cadencia de Continuous Discovery
+
+> Ver S04 §B6 (*Continuous Discovery + Dual‑Track Agile*). El MRD es un documento **vivo** que se alimenta semanalmente del *track de Discovery*.
+
+| Aspecto | Valor |
+|---------|-------|
+| Cadencia de entrevistas | `<semanal / quincenal>` |
+| Usuarios contactados por ciclo | `<n>` (Torres recomienda ≥ 1 por semana) |
+| Formato de hipótesis | *Cuando `<situación>`, espero `<resultado>`, porque `<razón>`* |
+| Backlog de hipótesis | `<link a tablero / sección de §12>` |
+| Output del track | Validaciones que actualizan §3, §5, §11 y §12 de este MRD |
+
+> **Criterio**: si en una semana no hubo contacto con usuarios, declárelo explícitamente como riesgo en §13.
+
 ## 4. Segmentación y *personas*
 
 ### 4.1 Segmentos de clientes
 
-| Segmento | Tamaño | Necesidad principal | Disposición a pagar |
-|----------|--------|----------------------|---------------------|
-| `<Estudiante de pregrado>` | 38 000 | `<trámite rápido>` | incluido en matrícula |
-| `<…>` | | | |
+| Segmento | Tamaño | Necesidad principal | Disposición a pagar | Origen M2 (segmento equivalente del Módulo anterior) |
+|----------|--------|----------------------|---------------------|------------------------------------------------------|
+| `<Estudiante de pregrado>` | 38 000 | `<trámite rápido>` | incluido en matrícula | `<Persona del M2 que valida este segmento>` |
+| `<…>` | | | | |
 
 ### 4.2 Personas
 
+> **Trazabilidad con M2 (UI/UX)**: si una persona del MRD ya fue caracterizada en el módulo anterior (entregables M2), declárelo en el campo *"Origen M2"* y enlace al artefacto. No replique trabajo: complemente con la mirada de mercado (tamaño, *willingness‑to‑pay*, segmento competitivo).
+
 #### Persona 1 – `<Nombre>`
 
+- **Origen M2**: `<ruta al artefacto del módulo anterior, p. ej. M2/personas/persona_estudiante.md>` (vacío si es nueva en MRD).
 - **Rol**: `<…>`.
 - **Demografía**: edad, ocupación, contexto.
 - **Objetivos**: `<…>`.

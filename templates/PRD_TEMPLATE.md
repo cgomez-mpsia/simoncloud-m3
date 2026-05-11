@@ -19,6 +19,19 @@
 | Estado | Borrador / En revisión / Aprobado |
 | BRD de referencia | `<BRD v…>` |
 | MRD de referencia | `<MRD v…>` |
+| Insumos M2 (UI/UX) | `<rutas a wireframes, mockups, use cases, journeys del módulo anterior>` |
+| Fase Spec Kit cubierta | Specify ✅ / Plan ⬜ / Tasks ⬜ / Implement ⬜ |
+| Prompts utilizados | `<IDs de docs/PROMPT_MAPPING.md, p. ej. PR-PRD-001>` |
+
+## 0.1 Constitution (opcional — Spec Kit)
+
+> **Opcional**. Si el grupo aplica **Spec‑Driven Development con GitHub Spec Kit** (ver S04 §B7.2), declare aquí la *constitution* del proyecto: principios **no negociables** que cualquier decisión posterior debe respetar. Si no se aplica, deje vacío.
+
+- **Principio 1**: `<p. ej. "todo flujo crítico debe completarse en ≤ 3 pasos">`.
+- **Principio 2**: `<p. ej. "ningún dato sensible se loggea ni en producción ni en debug">`.
+- **Principio 3**: `<p. ej. "toda funcionalidad debe poder usarse sin internet por ≥ 60 segundos">`.
+
+> Estos principios funcionan como *invariantes a nivel de producto*: aparecerán como guardrails en los prompts del FSD y como criterios de auditoría en revisiones.
 
 ## 1. Resumen del producto
 
@@ -44,13 +57,24 @@ Cada objetivo enlaza a un objetivo de negocio (BRD).
 
 - `<Funcionalidad pospuesta>` – justificación.
 
-### 3.3 Roadmap de versiones
+### 3.3 Roadmap de versiones (Delivery track)
 
 | Versión | Contenido | Fecha objetivo |
 |---------|-----------|----------------|
 | v1.0 | MVP | `<…>` |
 | v1.1 | | |
 | v2.0 | | |
+
+### 3.4 Roadmap de validación (Discovery track)
+
+> Ver S04 §B6 (*Continuous Discovery + Dual‑Track Agile*). En paralelo al *Delivery track* corre el *Discovery track*: hipótesis a validar **antes** de construir.
+
+| Sprint / Semana | Hipótesis a validar | Método | Criterio de éxito | Estado |
+|-----------------|---------------------|--------|-------------------|--------|
+| `<S1>` | `<estudiante prefiere QR sobre transferencia>` | encuesta + 5 entrevistas | ≥ 70 % preferencia | abierta |
+| `<S2>` | `<…>` | | | |
+
+> **Regla de oro**: ninguna *user story* `Must` entra al Delivery track sin una hipótesis validada en el Discovery track.
 
 ## 4. Personas y *user journeys*
 
@@ -145,6 +169,37 @@ Tabla RICE (para las 10 historias *top*):
 
 - Referencia a Figma / mockups (Módulo 2 UX/UI).
 - Lineamientos de diseño (design system, accesibilidad WCAG 2.2 AA).
+
+### 11.1 Trazabilidad con M2 (UI/UX)
+
+> Ver S04 §B8 (*Continuidad con el Módulo Anterior + Agente Explorador*). El trabajo del módulo M2 **no se pierde y no está fuera de orden**: aterriza aquí como evidencia validada.
+
+#### Use Cases del M2 ↔ User Stories del PRD
+
+| Use Case M2 | User Story PRD | Estado de la traza |
+|-------------|----------------|---------------------|
+| `<UC-M2-01: Estudiante consulta calendario>` | `PRD-US-003` | ✅ cubierto / ⚠️ parcial / ❌ pendiente |
+| `<UC-M2-02: …>` | `PRD-US-…` | |
+
+#### Wireframes / Mockups M2 ↔ Pantallas del PRD
+
+| Wireframe M2 | Pantalla / flujo PRD | Estado |
+|--------------|----------------------|--------|
+| `<wireframe_login_v2.png>` | flujo §4.2 *Iniciar sesión* | validado |
+| `<…>` | | |
+
+> **Regla**: si un wireframe M2 no aparece en este PRD, declárelo como *fuera de alcance* en §3.2 con justificación. No silencie trabajo previo.
+
+### 11.2 Exploración con Vibe Coding (opcional)
+
+> **Opcional**. Si el grupo usó **Vibe Coding** durante Discovery o validación de UI/UX (ver S04 §B0 Ficha 6), regístrelo aquí. Esto es legítimo cuando alimenta al PRD; **no** lo es cuando reemplaza la especificación.
+
+| Exploración | Pregunta de Discovery que valida | Prompts utilizados (PROMPT_MAPPING) | Conclusión que entra al PRD |
+|-------------|----------------------------------|--------------------------------------|------------------------------|
+| `<prototipo de flujo de pago QR>` | "¿el usuario completa el pago en ≤ 30s?" | `PR-VIBE-001` | confirma `PRD-US-005`, sugiere ajuste en §4.2 |
+| `<…>` | | | |
+
+> **Trazabilidad obligatoria**: cada fila debe enlazar a un *prompt registrado* en `docs/PROMPT_MAPPING.md` y a una *user story* o *NFR* del PRD que se modificó como consecuencia.
 
 ## 12. Métricas de éxito del producto
 
