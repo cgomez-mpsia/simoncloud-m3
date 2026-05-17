@@ -4,10 +4,10 @@
 | Campo | Valor |
 |-------|-------|
 | Producto | SimonCloud |
-| Grupo | Beto (Individual) |
+| Grupo | Carlos Alberto Gomez Ormachea (Individual) |
 | Versión | `v1.0.0` |
 | Fecha | 2026-05-17 |
-| Product Manager | Beto |
+| Product Manager | Carlos Alberto Gomez Ormachea |
 | Estado | Aprobado |
 | Relación con BRD | `BRD_v2.md` |
 
@@ -54,14 +54,24 @@ Para los estudiantes y personal de la UMSS que sufren por la desorganización do
 |---------|---------|---------|-------------|
 | JTBD-01 | Necesito un certificado de notas | Solicitarlo desde mi celular y pagar por QR | Ahorrar medio día de viaje a la universidad |
 | JTBD-02 | Un archivo se extravía | Rastrear exactamente en qué oficina está digitalmente | Evitar que el trámite se detenga por semanas |
+| JTBD-03 | entrego un trabajo final de alto valor | obtener un comprobante inmutable con hash SHA-256 | tener prueba legal de que entregué a tiempo |
 
 ## 6. Análisis competitivo
 ### 6.1 Tabla comparativa
 | Criterio | SimonCloud | Sistema Actual (Papel/Manual) | Otras U Públicas |
 |----------|------------|-------------------------------|------------------|
-| Trazabilidad | Total (Audit Logs) | Nula o muy baja | Media (Sistemas fragmentados) |
-| Accesibilidad | Nube (24/7) | Horario de oficina | Parcial |
-| Alertas proactivas | Sí (Notificaciones push) | No | No |
+| Trazabilidad | Total (Audit Logs + Hash SHA-256) | Nula o muy baja | Media (Sistemas fragmentados) |
+| Accesibilidad | Nube (24/7, móvil y desktop) | Horario de oficina | Parcial |
+| Alertas proactivas | Sí (Email + Push en tiempo real) | No | No |
+| Integración LMS | Moodle + Google Classroom | No | Solo Moodle (algunos) |
+| Inmutabilidad legal | Hash SHA-256 (Ley 164 Bolivia) | Ninguna garantía | Ninguna garantía |
+
+### 6.2 *Positioning statement*
+> Para **estudiantes y docentes de la UMSS** que hoy pierden tiempo en filas presenciales y no tienen garantía de integridad en sus documentos, **SimonCloud** es el **ecosistema documental universitario** que proporciona trazabilidad legal inmutable y homologación automática de notas, a diferencia del sistema actual (papel y email) que no ofrece ni auditoría ni automatización.
+
+### 6.3 Ventaja competitiva sostenible
+- **Integración nativa con WebSISS SSO**: ningún competidor externo puede ofrecer autenticación institucional sin acuerdo formal con la UMSS.
+- **Cumplimiento Ley 164 Bolivia**: el Hash SHA-256 es un diferenciador regulatorio que convierte al producto en el único con validez legal explícita.
 
 ## 7. Propuesta de valor
 - **Para el estudiante**: Ahorro de tiempo masivo y predictibilidad.
@@ -90,3 +100,22 @@ Para los estudiantes y personal de la UMSS que sufren por la desorganización do
 |--------|--------|--------|
 | MRD-01 | BR-01 | PRD-REQ-01 |
 | MRD-02 | BR-02 | PRD-REQ-02 |
+
+## 12. Supuestos e Hipótesis a Validar
+
+| ID | Hipótesis | Cómo validar | Criterio de éxito |
+|----|-----------|--------------|-------------------|
+| H1 | El 70% de estudiantes dejaría de usar WeTransfer si SimonCloud genera comprobantes inmutables | Encuesta piloto en FCyT | ≥ 60% en piloto |
+| H2 | Los docentes dedican > 30 min por materia a consolidar notas manualmente | Entrevistas a 10 docentes | Promedio confirmado ≥ 25 min |
+| H3 | La integración con SSO WebSISS reduce la fricción de adopción en más del 80% | Test A/B (SSO vs. registro manual) | Tasa de activación ≥ 80% con SSO |
+
+## 13. Voz del Cliente (Extractos de Campo)
+
+> *"Siempre tengo miedo de que el enlace de WeTransfer expire antes de que el docente descargue mi tesis. Una vez perdí puntos por eso."*
+> — Estudiante de Ingeniería de Sistemas, UMSS (Trabajo de Campo M2)
+
+> *"Recibo 80 archivos por email cuando abro un trabajo. Algunos duplicados, algunos corruptos. Necesito un sistema que centralice todo."*
+> — Docente, Lic. A. Terceros, Facultad de Ciencias y Tecnología
+
+> *"El mayor problema es que no sé si el archivo que aprobé es el mismo que tengo guardado. No hay ninguna garantía de integridad."*
+> — Personal Administrativo, Dirección Académica UMSS

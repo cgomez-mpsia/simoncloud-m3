@@ -1,0 +1,8 @@
+---
+description: Obliga a registrar cada prompt que genere código en PROMPT_MAPPINGS.md
+globs: *
+---
+# Prompt Traceability Rule
+Todo prompt asistido por IA que produzca cambios en archivos versionados (código o docs) DEBE registrar una entrada nueva en `docs/PROMPT_MAPPINGS.md` (sección Bitácora ALCOA+).
+- Formato ID: `PM-YYYYMMDD-NNN`
+- Append-only: No editar entradas previas.

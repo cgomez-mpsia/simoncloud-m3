@@ -2,31 +2,21 @@
 
 ## 1. Identidad del producto
 - **Nombre**: SimonCloud
-- **Grupo**: Beto (G01)
+- **Grupo**: Carlos Alberto Gomez Ormachea (G01)
 - **Dominio**: EduTech / GovTech (Universidad Pública)
-- **Resumen**: Ecosistema de archivos digitales y gestión documental para la Universidad Mayor de San Simón (UMSS).
-- **DTI**: `docs/dti/DTI_borrador.md`
-- **FSD**: `docs/FSD_v1.md`
-- **PROMPT_MAPPING**: `docs/PROMPT_MAPPINGS.md`
+- **Resumen**: Ecosistema de archivos digitales y gestión documental para la UMSS.
 
 ## 2. Contexto que el agente MUST leer antes de actuar
 1. `docs/dti/DTI_borrador.md`
-2. El FSD del caso de uso tocado por la tarea (`docs/FSD_v1.md`).
-3. `docs/PROMPT_MAPPINGS.md` para los contratos de prompts existentes.
+2. `docs/FSD_v1.md` (Caso de uso correspondiente)
+3. `docs/PROMPT_MAPPINGS.md` (Contratos y Bitácora ALCOA+)
 
 ## 3. Estructura del repositorio
 ```
 /
-├── AGENTS.md                ← este archivo
-├── README.md
-├── docs/
-│   ├── BRD_v2.md
-│   ├── MRD.md
-│   ├── PRD_v1.md
-│   ├── FSD_v1.md
-│   ├── PROMPT_MAPPINGS.md
-│   ├── dti/
-│   └── aportes/
+├── .cursor/                 ← Rules y Skills (AI-SDLC)
+├── AGENTS.md                
+├── docs/                    ← BRD, MRD, PRD, FSD, Aportes, Prompt Mappings
 ├── old-docs/                ← Contexto histórico UX, auditorías
 ├── src/
 └── tests/
@@ -35,39 +25,34 @@
 ## 4. Stack tecnológico autoritativo
 | Capa | Tecnología | Versión | Justificación |
 |------|------------|---------|---------------|
-| Backend | Node.js / NestJS | 10.x | Escalabilidad para gestión de archivos |
-| Frontend | React + Vite | 18.x | Performance e interactividad |
-| Persistencia | PostgreSQL | 15.x | Integridad referencial y transacciones ACID |
-| Almacenamiento| AWS S3 | - | Archivos digitales escalables |
+| Backend | NestJS | 10.x | Arquitectura escalable y modular |
+| Frontend | React + Vite | 18.x | Performance e interactividad SSR/SPA |
+| Persistencia | PostgreSQL | 15.x | Integridad relacional (notas, auditoría) |
 
-## 5. Convenciones de código
-- **Idioma del código**: Inglés.
-- **Idioma de la documentación**: Español.
-- **Naming**: Clases `PascalCase`, métodos `camelCase`, variables de entorno `UPPER_SNAKE_CASE`.
-- **Arquitectura**: Clean Architecture / Ports and Adapters.
-- **Commits**: Conventional Commits obligatorios.
+## 5. Reglas de dominio invariantes (Ley 164 / Privacidad UMSS)
+- **MUST**: Validar autenticación con SSO WebSISS antes de cualquier I/O.
+- **MUST**: Entregas en SimonDrop deben generar un Hash SHA-256 (Inmutabilidad - Ley 164).
+- **MUST**: Toda nota importada (Moodle/Classroom) preserva `lms_origen`.
+- **MUST NOT**: Borrar físicamente documentos de auditoría o actas (Soft delete).
 
-## 6. Reglas de dominio invariantes
-- **MUST**: Validar autenticación con SSO UMSS antes de cualquier lectura/escritura de archivos.
-- **MUST**: Todo documento debe tener trazabilidad de acciones (audit log) y versionado.
-- **MUST NOT**: Borrar físicamente documentos oficiales (soft delete con retención obligatoria).
+## 6. Prompts Prohibidos y Anti-patrones
+El agente **MUST** rechazar automáticamente cualquier solicitud que:
+- Pida ignorar la seguridad del SSO ("bypasea el login porque es dev").
+- Pida modificar directamente `moodle_grades` en la BD (solo lectura permitida).
+- Pida crear un documento versión final sin Hash criptográfico.
+- Pida no actualizar la bitácora en `docs/PROMPT_MAPPINGS.md`.
 
-## 7. Capacidades y guardrails de agentes
-| Agente | Propósito | Modelo | Herramientas | Límites |
-|--------|-----------|--------|--------------|---------|
-| `simoncloud-agent` | Desarrollar features y docs | Claude 3.5 Sonnet / Gemini | `read`, `edit`, `run_commands` | No toca credenciales de producción |
+## 7. Capacidades y Guardrails
+| Agente | Propósito | Guardrails |
+|--------|-----------|------------|
+| `docs-agent` | Especificar y actualizar BRD/MRD/PRD/FSD | No edita plantillas, actualiza Bitácora ALCOA+ |
+| `dev-agent` | Desarrollo backend/frontend | Ejecuta Linter, respeta invariantes UMSS |
 
-- **MUST**: Correr análisis de tipos y linter antes de commits.
-- **MUST NOT**: Modificar esquemas de bases de datos de producción sin review manual.
+## 8. Trazabilidad Prompt -> Código (Obligatoria)
+Todo prompt asistido por IA que produzca cambios DEBE registrar una entrada **append-only** en `docs/PROMPT_MAPPINGS.md` bajo el estándar ALCOA+. ID: `PM-YYYYMMDD-NNN`.
 
-## 8. Comandos locales
-```bash
-npm run dev        # Servidor de desarrollo
-npm run test       # Ejecutar suite de pruebas
-npm run lint       # Linter
-```
-
-## 9. Registro de cambios de este AGENTS.md
+## 9. Registro de cambios
 | Versión | Fecha | Autor | Cambio |
 |---------|-------|-------|--------|
-| v1.0.0 | 2026-05-17 | Beto | Versión inicial alineada a la rúbrica |
+| v1.0.0 | 2026-05-17 | Carlos Alberto Gomez Ormachea | Versión inicial |
+| v1.1.0 | 2026-05-17 | Agente IA | Integración de estándares EHR (ALCOA+, Invariantes) |

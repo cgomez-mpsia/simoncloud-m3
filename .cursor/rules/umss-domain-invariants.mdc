@@ -1,0 +1,9 @@
+---
+description: Reglas de dominio estrictas UMSS y Ley 164
+globs: src/backend/**/*
+---
+# Invariantes de Dominio Institucional
+- MUST: Toda nota homologada debe retener `lms_origen`.
+- MUST: Archivos de actas cerradas son INMUTABLES (borrado lógico retenido).
+- MUST: Cumplimiento de Ley 164 (Bolivia): Cada entrega de tarea genera comprobante Hash SHA-256.
+- MUST NOT: Modificar contraseñas o datos del SSO WebSISS, son de solo lectura.

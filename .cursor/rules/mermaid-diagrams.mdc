@@ -1,0 +1,8 @@
+---
+description: Estándar para diagramación técnica con Mermaid
+globs: docs/**/*.md
+---
+# Convenciones Mermaid
+- MUST: Todo caso de uso crítico debe tener su diagrama de estado o de secuencia.
+- MUST: Usar `stateDiagram-v2` para estados.
+- MUST: Todos los diagramas C4 deben usar la sintaxis `graph TD`.

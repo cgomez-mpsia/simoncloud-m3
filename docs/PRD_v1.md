@@ -92,6 +92,21 @@ journey
 | PRD-US-003 | Como estudiante, quiero obtener un hash SHA-256 de mi archivo subido para tener prueba de entrega inmutable. | Must | 9 | ... |
 | PRD-US-004 | Como estudiante, quiero pagar por QR para aumentar mi cuota de 15GB a 50GB. | Should | 6 | ... |
 
+#### 5.1.0 Criterios PRD-US-002
+```gherkin
+Escenario: Estudiante sube archivo antes del cierre del buzón
+  Dado un SimonDrop activo con fecha de cierre futura
+  Cuando el estudiante sube el archivo "informe.pdf" (20MB)
+  Entonces el sistema acepta la subida y muestra confirmación
+  Y el archivo aparece en la lista de entregas del docente
+
+Escenario: Intento de subida en buzón cerrado
+  Dado un SimonDrop con fecha de cierre pasada
+  Cuando el estudiante intenta subir un archivo
+  Entonces el sistema rechaza la subida
+  Y muestra "El plazo de entrega ha vencido"
+```
+
 #### 5.1.1 Criterios PRD-US-003
 ```gherkin
 Escenario: Estudiante sube archivo a buzón
@@ -119,6 +134,41 @@ Escenario: Homologación de alumno en dos plataformas
 ```
 
 *(Más historias se detallarán en el backlog ágil)*
+
+### 5.5 Épica 5: Gestión Documental y Administrativa (Basado en old-docs)
+| ID | Historia | Prioridad | Valor | Criterios Gherkin |
+|----|----------|-----------|-------|-------------------|
+| PRD-US-017 | Como administrativo, quiero aprobar o rechazar documentos usando etiquetas de estado visuales para agilizar el flujo de trámites. | Must | 9 | Ver §5.5.1 |
+| PRD-US-018 | Como administrativo, quiero ver el historial de versiones (V1, V2) de un archivo para restaurar una versión anterior en caso de error. | Must | 10 | ... |
+| PRD-US-019 | Como estudiante, quiero que los archivos borrados vayan a una papelera de reciclaje retenida por 30 días para evitar pérdida accidental. | Must | 8 | ... |
+| PRD-US-020 | Como administrador, quiero ver un panel de métricas globales (salud, tráfico, almacenamiento) para monitorear el servidor. | Should | 7 | ... |
+| PRD-US-021 | Como estudiante, quiero importar archivos directamente desde Google Drive usando su API para no tener que descargar y volver a subir. | Could | 6 | ... |
+
+#### 5.5.1 Criterios PRD-US-017
+```gherkin
+Escenario: Administrativo etiqueta un documento
+  Dado un administrativo autenticado visualizando el detalle de un archivo
+  Cuando selecciona la etiqueta "Aprobado"
+  Entonces el sistema actualiza el estado del documento
+  Y notifica al propietario original del archivo
+  Y bloquea la edición del documento para prevenir alteraciones post-aprobación
+```
+
+
+#### 5.2.2 Criterios PRD-US-006
+```gherkin
+Escenario: Docente convierte nota letra A a numérico
+  Dado un docente que importa la nota "A" de Classroom para "maria@umss.edu.bo"
+  Cuando el sistema aplica la tabla de equivalencias
+  Entonces la nota homologada es 90/100
+  Y el campo lms_origen tiene valor "Classroom"
+
+Escenario: Letra desconocida bloquea el cierre del acta
+  Dado una nota con valor "E+" importada desde Classroom
+  Cuando el sistema intenta homologar
+  Entonces marca la celda en rojo
+  Y el botón "Guardar Acta" queda deshabilitado hasta resolver la discrepancia
+```
 
 ### 5.3 Épica 3: Almacenamiento y Cuotas
 | ID | Historia | Prioridad | Valor | Criterios Gherkin |
