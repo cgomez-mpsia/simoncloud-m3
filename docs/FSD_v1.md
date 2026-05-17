@@ -171,6 +171,242 @@ Escenario: Webhook con firma inválida
   Y registra el intento en los logs de seguridad
 ```
 
+### 4.4 FSD-UC-004 – Autenticación SSO WebSISS
+- **Trazabilidad**: PRD-US-012 → BRD: BR-006 (RBAC)
+- **Actor principal**: Cualquier usuario (Estudiante / Docente / Administrativo)
+- **Precondiciones**: Cuenta activa en el sistema WebSISS de la UMSS.
+- **Disparador**: Usuario hace clic en "Ingresar con WebSISS" en la pantalla de login.
+- **Flujo principal**:
+  1. El sistema redirige al usuario al portal SSO WebSISS de la UMSS.
+  2. El usuario ingresa sus credenciales institucionales (código SIS + contraseña).
+  3. WebSISS valida las credenciales y retorna un token de autorización.
+  4. SimonCloud intercambia el token por un JWT propio con duración de 8 horas.
+  5. El sistema asigna el rol correspondiente (Docente/Estudiante/Administrativo) basado en atributos del SSO.
+  6. El usuario es redirigido al Dashboard Unificado según su rol.
+- **Flujos alternativos**:
+  - **A1 – Credenciales inválidas**: WebSISS retorna `401`; SimonCloud muestra "Credenciales incorrectas. Verifica tu código SIS." y permite reintentar.
+  - **A2 – WebSISS no disponible**: El sistema muestra "El servicio de autenticación está temporalmente no disponible. Intenta en unos minutos." con código de error rastreable.
+  - **A3 – Sesión expirada**: Al detectar JWT vencido, el sistema redirige silenciosamente a re-login sin perder la URL de destino.
+- **Postcondiciones**:
+  1. El usuario tiene un JWT válido almacenado en cookie HttpOnly.
+  2. El audit log registra: usuario, IP, timestamp y rol asignado.
+- **Datos de entrada**: `{ codigo_sis: string, password: string }`
+- **Datos de salida**: `{ jwt_token, rol, nombre_completo, expires_at }`
+- **Criterios de aceptación**:
+```gherkin
+Escenario: Login exitoso con credenciales WebSISS válidas
+  Dado un usuario con código SIS "20220001" y contraseña activa
+  Cuando selecciona "Ingresar con WebSISS"
+  Entonces el sistema autentica al usuario en menos de 3 segundos
+  Y le asigna el rol "Estudiante"
+  Y lo redirige al Dashboard sin pedir datos adicionales
+
+Escenario: Login fallido por contraseña incorrecta
+  Dado un usuario con código SIS "20220001" y contraseña incorrecta
+  Cuando selecciona "Ingresar con WebSISS"
+  Entonces el sistema muestra "Credenciales incorrectas"
+  Y no genera ningún JWT
+  Y registra el intento fallido en el log de auditoría
+```
+
+### 4.5 FSD-UC-005 – Control de Versiones de Documentos
+- **Trazabilidad**: PRD-US-018 → BRD: BR-005 (inmutabilidad)
+- **Actor principal**: Administrativo
+- **Precondiciones**: Usuario autenticado con rol Administrativo. Documento con al menos 2 versiones.
+- **Disparador**: El administrativo hace clic en "Ver Historial" en el panel de detalles de un documento.
+- **Flujo principal**:
+  1. El sistema recupera la cadena de versiones del documento ordenada por fecha descendente.
+  2. Se muestra una lista: V3 (actual), V2, V1 con fecha, autor y tamaño.
+  3. El administrativo selecciona una versión anterior (ej. V1).
+  4. El sistema muestra una vista previa de V1 en modo solo lectura.
+  5. El administrativo hace clic en "Restaurar esta versión".
+  6. El sistema crea una nueva entrada V4 con el contenido de V1 y SHA-256 recalculado, preservando V1, V2, V3 intactas.
+- **Flujos alternativos**:
+  - **A1 – Solo existe 1 versión**: El botón "Ver Historial" aparece deshabilitado con tooltip "Sin versiones anteriores".
+  - **A2 – Restauración de versión firmada**: Si V1 tiene firma digital, el sistema advierte "Esta versión está firmada. Restaurarla creará una copia sin firma."
+- **Postcondiciones**:
+  1. La nueva versión queda registrada con `parent_id` apuntando al documento original.
+  2. Ninguna versión anterior es eliminada (soft-immutability).
+- **Criterios de aceptación**:
+```gherkin
+Escenario: Administrativo restaura versión anterior
+  Dado un documento "Resolución-001" con versiones V1, V2 y V3
+  Cuando el administrativo selecciona V1 y confirma restaurar
+  Entonces el sistema crea V4 con el contenido de V1
+  Y el hash SHA-256 de V4 es recalculado
+  Y las versiones V1, V2 y V3 permanecen sin cambios
+
+Escenario: Documento con una sola versión
+  Dado un documento con solo la versión V1
+  Cuando el administrativo abre el historial
+  Entonces el botón "Restaurar" aparece deshabilitado
+  Y el sistema muestra "Sin versiones anteriores"
+```
+
+### 4.6 FSD-UC-006 – Aprobación y Rechazo de Documentos
+- **Trazabilidad**: PRD-US-017 → BRD: BR-005 (inmutabilidad de actas)
+- **Actor principal**: Administrativo
+- **Precondiciones**: Documento en estado `PENDIENTE`. Usuario con rol Administrativo.
+- **Disparador**: El administrativo abre un documento en la bandeja de entrada de trámites.
+- **Flujo principal**:
+  1. El administrativo visualiza el documento y sus metadatos (solicitante, fecha, tipo de trámite).
+  2. Selecciona la etiqueta "Aprobar" del menú de acciones.
+  3. El sistema solicita confirmación: "¿Confirma la aprobación del documento?"
+  4. Al confirmar, el estado cambia a `APROBADO` y el documento pasa a solo lectura.
+  5. El sistema notifica al solicitante original vía email institucional.
+  6. El sistema registra: administrativo responsable, timestamp y justificación.
+- **Flujos alternativos**:
+  - **A1 – Rechazo**: El administrativo selecciona "Rechazar" e ingresa obligatoriamente una justificación de mínimo 20 caracteres. El estado pasa a `RECHAZADO`.
+  - **A2 – Solicitar corrección**: Nuevo estado intermedio `EN_CORRECCION`; el solicitante puede subir una versión corregida sin perder el historial.
+- **Postcondiciones**:
+  1. El documento tiene estado final `APROBADO` o `RECHAZADO` inmutable.
+  2. El solicitante recibe notificación del resultado.
+- **Criterios de aceptación**:
+```gherkin
+Escenario: Administrativo aprueba un documento
+  Dado un documento "Acta-Final-2026" en estado PENDIENTE
+  Cuando el administrativo selecciona "Aprobar" y confirma
+  Entonces el estado del documento cambia a APROBADO
+  Y el documento queda en solo lectura
+  Y el solicitante recibe notificación de aprobación
+
+Escenario: Rechazo sin justificación
+  Dado un documento en estado PENDIENTE
+  Cuando el administrativo selecciona "Rechazar" sin ingresar justificación
+  Entonces el sistema bloquea la acción
+  Y muestra "Debes ingresar una justificación de al menos 20 caracteres"
+```
+
+### 4.7 FSD-UC-007 – Notificaciones al Docente por Nueva Entrega
+- **Trazabilidad**: PRD-US-015 → BRD: BR-006 (RBAC)
+- **Actor principal**: Sistema (evento), Docente (receptor)
+- **Precondiciones**: El SimonDrop está activo. El docente tiene notificaciones habilitadas en su perfil.
+- **Disparador**: Un estudiante completa exitosamente la subida de un archivo a un SimonDrop del docente.
+- **Flujo principal**:
+  1. Al completarse la subida (FSD-UC-002), el sistema emite un evento interno `file.uploaded`.
+  2. El worker de notificaciones consume el evento desde la cola.
+  3. El worker consulta el propietario del SimonDrop y sus preferencias de notificación.
+  4. El sistema envía email institucional al docente con: nombre del estudiante, nombre del archivo, hash SHA-256 y timestamp.
+  5. Si el docente tiene la app abierta, recibe también notificación push en tiempo real.
+- **Flujos alternativos**:
+  - **A1 – Notificaciones deshabilitadas**: Si el docente deshabilitó las alertas, el sistema solo registra el evento en el log sin enviar notificación.
+  - **A2 – Error de envío de email**: El sistema reintenta 3 veces con back-off exponencial. Si falla, registra en Dead Letter Queue.
+- **Postcondiciones**:
+  1. El docente conoce la entrega sin necesidad de revisar manualmente el buzón.
+  2. Evento notificación registrado en audit_log.
+- **Criterios de aceptación**:
+```gherkin
+Escenario: Docente recibe notificación de nueva entrega
+  Dado un SimonDrop activo del docente "Prof. Lic. Mamani"
+  Cuando el estudiante "Juan Pérez" sube exitosamente "proyecto.pdf"
+  Entonces el docente recibe un email con el nombre del archivo y su hash SHA-256
+  Y el evento queda registrado en el log de auditoría
+
+Escenario: Notificaciones deshabilitadas
+  Dado un docente con notificaciones deshabilitadas en su perfil
+  Cuando un estudiante realiza una entrega en su SimonDrop
+  Entonces el sistema NO envía email ni push
+  Y el evento se registra silenciosamente en el log
+```
+
+### 4.8 FSD-UC-008 – Compartir Archivo con Correo @umss.edu.bo
+- **Trazabilidad**: PRD-US-013 → BRD: BR-006 (RBAC)
+- **Actor principal**: Docente / Administrativo
+- **Precondiciones**: Usuario autenticado con un archivo propio en Mi Nube.
+- **Disparador**: El usuario selecciona "Compartir" en el menú de acciones de un archivo.
+- **Flujo principal**:
+  1. El sistema abre el modal de compartir con un campo de texto para correos.
+  2. El usuario ingresa el correo destino (ej. `estudiante@umss.edu.bo`).
+  3. El sistema valida que el dominio sea `@umss.edu.bo` o `@est.umss.edu.bo`.
+  4. El sistema genera un enlace de acceso único con expiración de 7 días.
+  5. El sistema envía el enlace al correo destino y notifica al propietario.
+- **Flujos alternativos**:
+  - **A1 – Correo externo no institucional**: El sistema rechaza con "Solo se puede compartir con correos @umss.edu.bo".
+  - **A2 – Enlace expirado**: Al intentar acceder, el sistema muestra "Este enlace ha expirado. Solicita uno nuevo al propietario."
+- **Postcondiciones**:
+  1. El destinatario recibe acceso de solo lectura al archivo durante 7 días.
+  2. El acceso queda registrado en el panel de detalles del archivo.
+- **Criterios de aceptación**:
+```gherkin
+Escenario: Compartir archivo con correo institucional válido
+  Dado un docente con el archivo "Guia-Practica.pdf" en Mi Nube
+  Cuando ingresa "alumno@est.umss.edu.bo" en el modal de compartir
+  Entonces el sistema genera un enlace con expiración de 7 días
+  Y envía el enlace al correo destino
+  Y registra el evento de compartir en el historial del archivo
+
+Escenario: Intento de compartir con correo externo
+  Dado un docente intentando compartir un archivo
+  Cuando ingresa "personal@gmail.com" en el modal de compartir
+  Entonces el sistema rechaza la operación
+  Y muestra "Solo se puede compartir con correos @umss.edu.bo"
+```
+
+### 4.9 FSD-UC-009 – Papelera de Reciclaje (Retención 30 Días)
+- **Trazabilidad**: PRD-US-019 → BRD: BR-005 (soft delete)
+- **Actor principal**: Estudiante / Docente / Administrativo
+- **Precondiciones**: Usuario autenticado. Archivo en estado `ACTIVO`.
+- **Disparador**: El usuario selecciona "Eliminar" en el menú de acciones de un archivo.
+- **Flujo principal**:
+  1. El sistema solicita confirmación: "¿Mover a la papelera? Podrás restaurarlo en 30 días."
+  2. Al confirmar, el archivo cambia a estado `EN_PAPELERA` con `deleted_at = NOW()`.
+  3. El archivo desaparece de Mi Nube pero es visible en la sección Papelera.
+  4. Un cronjob diario purga archivos con `deleted_at < NOW() - 30 días`, eliminándolos de S3 y la BD.
+- **Flujos alternativos**:
+  - **A1 – Restaurar desde papelera**: El usuario entra a Papelera, selecciona el archivo y hace clic en "Restaurar". El archivo vuelve a estado `ACTIVO` en su ubicación original.
+  - **A2 – Archivo en buzón cerrado**: Los archivos en SimonDrops cerrados no pueden ser eliminados por el estudiante (solo por Admin).
+- **Postcondiciones**:
+  1. El archivo no es eliminado físicamente durante 30 días.
+  2. Transcurridos 30 días, el sistema lo purga irreversiblemente.
+- **Criterios de aceptación**:
+```gherkin
+Escenario: Archivo movido a papelera y restaurado
+  Dado un estudiante con el archivo "tesis-draft.docx" en Mi Nube
+  Cuando selecciona "Eliminar" y confirma
+  Entonces el archivo desaparece de Mi Nube
+  Y aparece en la sección Papelera con un contador de "30 días restantes"
+  Cuando el estudiante selecciona "Restaurar"
+  Entonces el archivo vuelve a Mi Nube en su ubicación original
+
+Escenario: Purga automática a los 30 días
+  Dado un archivo en la papelera con deleted_at hace 30 días
+  Cuando el cronjob nocturno se ejecuta
+  Entonces el archivo es eliminado de S3 y de la base de datos
+  Y no puede ser recuperado
+```
+
+### 4.10 FSD-UC-010 – Panel de Administrador (Métricas Globales)
+- **Trazabilidad**: PRD-US-020, PRD-US-011 → BRD: BR-006 (RBAC Admin)
+- **Actor principal**: Administrador del Sistema
+- **Precondiciones**: Usuario autenticado con rol `Admin`.
+- **Disparador**: El administrador accede a la sección "Panel de Control" desde el sidebar.
+- **Flujo principal**:
+  1. El sistema calcula en tiempo real: almacenamiento total usado, usuarios activos en las últimas 24h, subidas en las últimas 24h, y top 5 de archivos más pesados.
+  2. El panel muestra tarjetas con métricas clave y un gráfico de uso histórico (últimos 30 días).
+  3. El administrador puede ajustar la cuota individual de un usuario desde el panel de gestión de usuarios.
+  4. Al cambiar la cuota, el sistema actualiza `quota_limit_mb` y notifica al usuario afectado.
+- **Flujos alternativos**:
+  - **A1 – Servidor por encima del 80% de capacidad**: El panel muestra alerta visual roja "Almacenamiento crítico" y envía email automático al administrador.
+  - **A2 – Exportar reporte**: El administrador puede exportar el reporte de uso como CSV o PDF.
+- **Postcondiciones**:
+  1. El administrador tiene visibilidad completa del estado del sistema.
+  2. Cambios de cuota quedan en audit_log con usuario responsable.
+- **Criterios de aceptación**:
+```gherkin
+Escenario: Administrador ajusta cuota de un usuario
+  Dado un administrador en el Panel de Control
+  Cuando localiza al usuario "jperez@umss.edu.bo" y cambia su cuota a 100GB
+  Entonces el sistema actualiza quota_limit_mb a 102400
+  Y notifica al usuario del cambio
+  Y registra la acción en el log de auditoría con el nombre del admin
+
+Escenario: Alerta de almacenamiento crítico
+  Dado que el uso global supera el 80% de la capacidad total
+  Cuando el panel se actualiza
+  Entonces muestra una alerta visual roja "Almacenamiento crítico"
+  Y envía un email automático al administrador del sistema
+```
+
 ## 5. Reglas de negocio ⚡🔧
 
 | ID (BRD_v2) | Regla | Tipo | Origen | Casos de uso afectados |
@@ -241,7 +477,143 @@ erDiagram
 | `NOTA_ALUMNO` | `nota_homologada_100` | float | sí | 0.0 ≤ x ≤ 100.0 | sistema (algoritmo) |
 | `NOTA_ALUMNO` | `lms_origen` | enum | sí | Moodle / Classroom | sistema |
 
-## 7. Prompt como Contrato Funcional ⚡🔧
+### 6.10 Diagrama de Secuencia: UC-001 Homologación de Calificaciones
+```mermaid
+sequenceDiagram
+    participant D as Docente
+    participant S as SimonCloud
+    participant M as Moodle API
+    participant C as Classroom API
+    D->>S: Selecciona materia y presiona "Sincronizar"
+    S->>M: GET /grades (token LTI)
+    S->>C: GET /courses/:id/courseWork (OAuth2)
+    M-->>S: [{email, score/50}]
+    C-->>S: [{email, letter}]
+    S->>S: Cruza por email (Map<string, ConsolidatedGrade>)
+    S->>S: Convierte Moodle ×2 / Letras a números
+    S-->>D: Vista previa consolidada (columnas por LMS)
+    D->>S: Confirma y guarda acta
+    S->>S: Persiste con lms_origen por fila
+    S-->>D: Acta en estado BORRADOR guardada
+```
+
+### 6.11 Diagrama de Secuencia: UC-002 Subida Segura y Hash
+```mermaid
+sequenceDiagram
+    participant E as Estudiante
+    participant S as SimonCloud
+    participant S3 as AWS S3 / MinIO
+    participant BD as PostgreSQL
+    E->>S: Selecciona archivo (hasta 2GB)
+    S->>S3: Solicita presigned URL (PUT, TTL=15min)
+    S3-->>S: Presigned URL
+    S-->>E: URL + instrucciones de carga en chunks
+    loop Por cada chunk
+        E->>S3: PUT chunk (bytes parciales)
+        S3-->>E: 200 OK
+    end
+    S3->>S: Evento: upload.completed (multipart ID)
+    S->>S: Calcula SHA-256 del stream final
+    S->>BD: INSERT archivo {hash, solo_lectura=true, subido_en}
+    S->>S: Genera recibo PDF con hash y timestamp
+    S-->>E: Recibo PDF disponible para descarga
+```
+
+## 7. Prompt como Contrato Funcional
+
+### 6.3 Diagrama de Estado: Ciclo de vida de Archivo
+```mermaid
+stateDiagram-v2
+    [*] --> Subiendo
+    Subiendo --> Activo: Hash Generado
+    Activo --> SoloLectura: SimonDrop Cerrado
+    Activo --> EnPapelera: Borrado por Usuario
+    SoloLectura --> EnPapelera: Borrado por Admin
+    EnPapelera --> Activo: Restaurado
+    EnPapelera --> [*]: Purgado (30 días)
+```
+
+### 6.4 Diagrama de Secuencia: Upgrade de Cuota QR Simple
+```mermaid
+sequenceDiagram
+    participant E as Estudiante
+    participant S as SimonCloud
+    participant Q as QR Simple
+    E->>S: Solicita Upgrade 50GB
+    S->>Q: POST /generate_qr (Bs. 50)
+    Q-->>S: Retorna Imagen QR
+    S-->>E: Muestra QR en Interfaz
+    E->>Q: Paga desde App Bancaria
+    Q->>S: Webhook (payment.confirmed)
+    S->>S: Valida HMAC
+    S->>S: Actualiza quota_limit_mb = 51200
+    S-->>E: Notificación Éxito
+```
+
+### 6.5 Diagrama Gantt: Release v1.0
+```mermaid
+gantt
+    title Roadmap de Implementación (MVP)
+    dateFormat  YYYY-MM-DD
+    section Backend
+    Autenticación SSO      :done,    des1, 2026-06-01, 7d
+    Generación de Hash     :active,  des2, after des1, 5d
+    Integración Moodle     :         des3, after des2, 10d
+    section Frontend
+    Dashboard UI           :done,    des4, 2026-06-01, 10d
+    Uploader Component     :active,  des5, after des4, 7d
+```
+
+### 6.6 Diagrama de Componentes C4
+```mermaid
+graph TD
+    UI[Frontend React] --> API[Backend NestJS]
+    API --> DB[(PostgreSQL)]
+    API --> S3[(AWS S3 / MinIO)]
+    API --> Redis[(Redis Cache)]
+    API --> Moodle[Moodle UMSS]
+```
+
+### 6.7 Diagrama de Estado: Trámite Administrativo
+```mermaid
+stateDiagram-v2
+    [*] --> Pendiente
+    Pendiente --> EnRevision: Asignado a Administrativo
+    EnRevision --> Aprobado: Cumple requisitos
+    EnRevision --> Rechazado: Faltan firmas
+    Aprobado --> [*]
+    Rechazado --> [*]
+```
+
+### 6.8 Diagrama de Secuencia: Migración Google Drive
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant S as SimonCloud
+    participant G as Google Drive API
+    U->>S: Conecta cuenta Google
+    S->>G: OAuth2 Consent
+    G-->>S: Access Token
+    S->>G: GET /files
+    G-->>S: Lista de Archivos
+    S->>G: Stream File Content
+    S->>S: Guarda en S3
+    S-->>U: Migración Completada
+```
+
+### 6.9 Diagrama ER: Logs de Auditoría
+```mermaid
+erDiagram
+    AUDIT_LOG ||--o{ USUARIO : trigger
+    AUDIT_LOG {
+        uuid log_id
+        uuid user_id
+        string accion
+        string ip_address
+        datetime timestamp
+    }
+```
+ ⚡🔧
 
 ### 7.1 Prompt-contrato para FSD-UC-001 (Homologación)
 *(Ver archivo `PROMPT_MAPPINGS.md` para detalle completo)*
@@ -286,7 +658,87 @@ erDiagram
 | NFR-001 | Tiempo de homologación | p95 | < 5 s | Test de carga k6 |
 | NFR-002 | Integridad de entrega | Inmutabilidad | 100% | Auditoría BD |
 
+| NFR-003 | Seguridad | Acceso bloqueado a archivos no públicos sin JWT válido. | 100% | Pentest / Token fuzzing |
+| NFR-004 | Usabilidad | La interfaz de 'Mi Nube' debe ser responsive (móvil y escritorio). | 100% | Test en 4 breakpoints |
+| NFR-005 | Escalabilidad | Soportar 10,000 subidas simultáneas en periodo de exámenes. | 10k ops | Pruebas JMeter |
+| NFR-006 | Disponibilidad | Uptime garantizado para el servicio de validación de Hash. | 99.9% | Monitoreo externo |
+| NFR-007 | Retención | Archivos en papelera se purgan automáticamente tras 30 días exactos. | 30 días | Test de cronjob |
+| NFR-008 | Mantenibilidad | Cobertura de código unitario para el algoritmo de homologación. | > 90% | SonarQube / Jest |
+
+
 ## 15. Registro de cambios ⚡🔧
 | Versión | Fecha | Autor | Cambio |
 |---------|-------|-------|--------|
 | v1.0 | 11/05/2026 | Equipo | Versión inicial FSD |
+
+## 11. Glosario de Términos
+
+| Término | Definición |
+|---------|------------|
+| **SimonDrop** | Buzón de recepción de archivos creado por un docente con fecha límite y restricciones de formato. |
+| **Hash SHA-256** | Identificador criptográfico de 64 caracteres hexadecimales que garantiza la integridad de un archivo. Si el archivo cambia un solo byte, el hash cambia. |
+| **SSO WebSISS** | Sistema de autenticación única (Single Sign-On) de la UMSS. Permite ingresar con las mismas credenciales del sistema académico sin crear cuentas adicionales. |
+| **Homologación** | Proceso de convertir calificaciones de distintas escalas (0-50 Moodle, letras Classroom) a una escala unificada de 0-100. |
+| **lms_origen** | Atributo de trazabilidad que indica si una nota proviene de Moodle, Classroom o de ambas fuentes. |
+| **Cuota** | Límite de almacenamiento asignado a un usuario. Plan Gratuito: 15 GB. Plan Pro: 50 GB. |
+| **Solo Lectura** | Estado de un archivo que impide su modificación o eliminación. Se aplica automáticamente al cerrar un SimonDrop o al aprobar un documento. |
+| **RBAC** | Role-Based Access Control. Sistema de permisos basado en roles (Estudiante, Docente, Administrativo, Admin). |
+| **Presigned URL** | URL temporal generada por S3/MinIO que permite subir o descargar un archivo directamente sin pasar por el servidor de SimonCloud. |
+| **Audit Log** | Registro inmutable de todas las acciones realizadas en el sistema (quién, qué, cuándo, desde qué IP). |
+
+## 12. Contratos de API (Endpoints Críticos)
+
+### 12.1 POST /homologate — Consolidar Calificaciones (FSD-UC-001)
+
+**Request:**
+```json
+{
+  "materiaId": "MAT-2026-FCyT-001",
+  "docenteToken": "eyJhbGciOiJIUzI1NiJ9...",
+  "moodleToken": "token_moodle_opcional",
+  "classroomToken": "token_classroom_opcional"
+}
+```
+
+**Response 200 OK:**
+```json
+{
+  "acta_id": "ACT-2026-001",
+  "estado": "BORRADOR",
+  "estudiantes": [
+    {
+      "email": "jperez@umss.edu.bo",
+      "nombre": "Juan Pérez",
+      "moodleGrade": 90,
+      "classroomGrade": 85,
+      "lms_origen": "Ambos"
+    }
+  ],
+  "generado_en": "2026-05-17T14:00:00-04:00"
+}
+```
+
+**Error 503:** `{ "error": "MOODLE_UNAVAILABLE", "retry_after": 30 }`
+
+### 12.2 POST /simondrop/:id/upload — Subir Archivo (FSD-UC-002)
+
+**Request (multipart/form-data):**
+```
+file: [binary]
+estudianteId: "20220001"
+```
+
+**Response 201 Created:**
+```json
+{
+  "fileId": "uuid-v4",
+  "nombre": "proyecto_final.pdf",
+  "hash_sha256": "e3b0c44298fc1c149afb...64 chars",
+  "solo_lectura": true,
+  "recibo_url": "https://simoncloud.umss.edu.bo/recibos/uuid.pdf",
+  "subido_en": "2026-05-17T14:00:00-04:00"
+}
+```
+
+**Error 403:** `{ "error": "SIMONDROP_CLOSED", "cerrado_en": "2026-05-10T23:59:00-04:00" }`
+**Error 413:** `{ "error": "QUOTA_EXCEEDED", "usado_mb": 15360, "limite_mb": 15360 }`
