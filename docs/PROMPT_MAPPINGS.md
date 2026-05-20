@@ -15,6 +15,8 @@
 | `PM-20260517-002` | 2026-05-17 | docs | applied |
 | `PM-20260517-003` | 2026-05-17 | docs | applied |
 | `PM-20260517-004` | 2026-05-17 | docs | applied |
+| `PM-20260518-001` | 2026-05-18 | docs | applied |
+| `PM-20260520-001` | 2026-05-20 | docs | applied |
 
 ### Entradas (Append-only)
 
@@ -48,6 +50,22 @@
 - **Archivos afectados**: `docs/PROMPT_MAPPINGS.md`
 - **Verificación**: applied
 - **Notas**: Los 10 contratos ahora tienen estructura homogénea con los 6 elementos exigidos por la rúbrica.
+
+#### PM-20260518-001
+- **Timestamp**: 2026-05-18T16:36:17-04:00
+- **Intent**: docs
+- **Prompt original**: *Corregir las citas §3.5 para referenciar correctamente al Capítulo 3 del libro, limpiar la Parte B con justificaciones reales en lugar de placeholders, y arreglar el typo Ch.1 Ch.1 en DTI_v2.md.*
+- **Archivos afectados**: `docs/dti/DTI_v2.md`
+- **Verificación**: applied
+- **Notas**: Corrección de alucinaciones bibliográficas del DTI.
+
+#### PM-20260520-001
+- **Timestamp**: 2026-05-20T17:53:18-04:00
+- **Intent**: docs
+- **Prompt original**: *Lectura sobre Saga pattern, Outbox pattern y CQRS. Identificar 3 flujos asíncronos candidatos en su producto SimonCloud.*
+- **Archivos afectados**: `docs/dti/patrones_asincronos.md`
+- **Verificación**: applied
+- **Notas**: Documento de flujos asíncronos creadores y mapeados. Incluye orquestación de saga, transactional outbox y CQRS read models.
 
 
 
