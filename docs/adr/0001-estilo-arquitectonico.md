@@ -12,15 +12,15 @@
 
 ## Contexto
 
-SimonCloud es una plataforma SaaS multi-tenant con 5 dominios de negocio independientes: almacenamiento de archivos, identidad/autenticación, homologación de calificaciones, gestión de cuotas/pagos y notificaciones. Cada dominio tiene patrones de carga radicalmente distintos: el `file-service` recibe picos de 10,000 uploads simultáneos en periodos de exámenes, mientras que el `grade-service` tiene carga constante baja. Además, se requiere integración con 3 sistemas externos (WebSISS, Moodle, Classroom) que pueden fallar independientemente.
+SimonCloud es una plataforma SaaS multi-tenant con 4 dominios de negocio independientes: almacenamiento de archivos, identidad/autenticación, gestión de cuotas/pagos y notificaciones. Cada dominio tiene patrones de carga radicalmente distintos: el `file-service` recibe picos de 10,000 uploads simultáneos en periodos de exámenes, mientras que el `quota-service` tiene carga constante baja. Además, se requiere integración con 2 sistemas externos (WebSISS, QR Simple Bolivia) que pueden fallar independientemente.
 
 ## Decisión
 
 Adoptar una arquitectura **híbrida: Microservicios + Hexagonal dentro de cada servicio + Event-Driven para comunicación asíncrona**.
 
-- **Microservicios**: 8 servicios con base de datos propia (Richardson §1.4, *database per service*).
+- **Microservicios**: 7 servicios con base de datos propia (Richardson §1.4, *database per service*).
 - **Hexagonal**: Cada servicio usa puertos/adaptadores para desacoplar el dominio de la infraestructura.
-- **Event-Driven**: Comunicación asíncrona via SQS + Outbox Pattern para flujos que cruzan bounded contexts.
+- **Event-Driven**: Comunicación asíncrona via RabbitMQ + Outbox Pattern para flujos que cruzan bounded contexts.
 
 ## Alternativas consideradas
 
@@ -34,15 +34,15 @@ Adoptar una arquitectura **híbrida: Microservicios + Hexagonal dentro de cada s
 
 **Positivas**:
 - Escalado independiente de `file-service` en periodos de exámenes.
-- Fallos en `grade-service` (Moodle caído) no afectan el servicio de uploads.
+- Fallos en `quota-service` (QR Simple Bolivia caído) no afectan el servicio de uploads.
 - Domain logic testeable sin BD ni framework.
 
 **Negativas**:
-- Mayor complejidad operacional (8 contenedores vs 1).
+- Mayor complejidad operacional (7 contenedores vs 1).
 - Consistencia eventual en flujos cross-service (aceptada explícitamente).
-- Requiere madurez en observabilidad distribuida (OpenTelemetry + X-Ray).
+- Requiere madurez en observabilidad distribuida (OpenTelemetry + Jaeger).
 
 ## Cumplimiento
 
 - ADR-0004 documenta la decisión de Saga orquestada para compensar la consistencia eventual.
-- ADR-0005 documenta el mapping a AWS ECS Fargate para el despliegue.
+- ADR-0005 documenta el despliegue on-premise DTIC-UMSS con Docker Swarm.

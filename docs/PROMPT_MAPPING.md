@@ -9,7 +9,7 @@
 | ID Prompt | Artefacto generado | FSD-UC | Modelo | Estado |
 |-----------|-------------------|--------|--------|--------|
 | `PR-BRD-001` | Auditoría de coherencia BRD | — | Claude Sonnet 4 | applied |
-| `PR-UC-001` | `homologateGrades()` TypeScript | FSD-UC-001 | Claude Sonnet 4 | applied |
+| `PR-UC-001` | `createLtiDeepLink()` TypeScript | FSD-UC-001 | Claude Sonnet 4 | applied |
 | `PR-UC-002` | `generateFileHash()` SHA-256 | FSD-UC-002 | Claude Sonnet 4 | applied |
 | `PR-UC-003` | Stream Google Drive → S3 | FSD-UC-008 | Claude Sonnet 4 | applied |
 | `PR-UC-004` | Cronjob purga papelera 30 días | FSD-UC-009 | Claude Sonnet 4 | applied |
@@ -25,7 +25,7 @@
 
 | Símbolo | Archivo fuente | Sección | Antes (sin AI) | Después (con AI) |
 |---------|---------------|---------|----------------|------------------|
-| `homologateGrades` | `apps/grade-service/src/domain/services/homologation.service.ts` | FSD-UC-001 | Implementación manual estimada: 4h | Generado + revisado: 45min |
+| `createLtiDeepLink` | `apps/lms-connector/src/deeplink/lti-deeplink.service.ts` | FSD-UC-001 | Implementación manual estimada: 4h | Generado + revisado: 45min |
 | `generateFileHash` | `libs/shared/src/crypto/sha256.service.ts` | FSD-UC-002, BR-007 | Implementación manual: 30min | Generado + revisado: 5min |
 | `QrSimpleWebhookGuard` | `apps/quota-service/src/guards/qr-webhook.guard.ts` | FSD-UC-003, BR-010 | Implementación manual: 2h | Generado + revisado: 20min |
 | `processNotification` | `apps/notification-service/src/workers/notification.worker.ts` | FSD-UC-007 | Implementación manual: 3h | Generado + revisado: 30min |
@@ -97,7 +97,7 @@ spec_fidelity = 100%   ✅ (umbral ≥ 95%)
 MRD → PRD: 100%
 PRD → FSD UCs: 100%
 FSD UCs → DTI §§: 100%
-DTI → ADRs: 5 ADRs para 5 decisiones principales
+DTI → ADRs: 6 ADRs para 6 decisiones principales
 Trazabilidad global = 100%   ✅
 ```
 

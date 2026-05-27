@@ -181,7 +181,7 @@ docker compose up -d postgres redis
 npx ts-node pocs/POC-01/sha256-incremental.ts
 
 # Ejecutar POC-02 (Circuit Breaker)
-npx ts-node pocs/POC-02/circuit-breaker.factory.ts
+npx ts-node pocs/POC-02/qr-simple.mock.ts
 ```
 
 ---
@@ -229,7 +229,8 @@ npx ts-node pocs/POC-02/circuit-breaker.factory.ts
 | [0002](docs/adr/0002-autenticacion-sso-websiss.md) | Autenticación SSO | OAuth2 Code Flow → JWT HS256, 8h, HttpOnly |
 | [0003](docs/adr/0003-subida-reanudable-s3-multipart-vs-tus.md) | Subida reanudable | S3 Multipart Upload (presigned URLs) |
 | [0004](docs/adr/0004-saga-orquestada-quota-upgrade.md) | Saga quota upgrade | Orquestada con AWS Step Functions |
-| [0005](docs/adr/0005-cloud-provider-y-estilo-de-despliegue.md) | Cloud provider | AWS sa-east-1 + ECS Fargate |
+| [0005](docs/adr/0005-cloud-provider-y-estilo-de-despliegue.md) | Cloud provider | On-premise DTIC-UMSS: MinIO + Docker Swarm + stack open source |
+| [0006](docs/adr/0006-integracion-lms-lti.md) | Integración LMS | LTI 1.3 (Moodle) + OAuth2 (Google Classroom) |
 
 ---
 

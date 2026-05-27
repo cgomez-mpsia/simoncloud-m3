@@ -383,7 +383,7 @@ El `admin-service` mantiene un `dashboard_metrics` materializado, actualizado as
 | Frontend SPA | **Nginx** (archivos estáticos) | Servidor web estándar, cero costo, control total |
 | Reverse proxy / Load balancer | **Nginx** upstream balancing | Path-based routing sin vendor lock-in |
 | TLS / HTTPS | **Certbot + Let's Encrypt** o CA interna UMSS | Certificados gratuitos o bajo control institucional |
-| Microservicios (8 servicios) | **Docker Swarm** (réplicas configurables) | Orquestación simple; DTIC puede operarlo sin expertise K8s |
+| Microservicios (7 servicios) | **Docker Swarm** (réplicas configurables) | Orquestación simple; DTIC puede operarlo sin expertise K8s |
 | Object Storage (binarios, WORM) | **MinIO** (API S3-compatible + Object Lock) | Drop-in replacement de S3; el código no cambia |
 | Base de datos | **PostgreSQL 16** (primary + hot-standby) | Control total; sin costo de licencia |
 | Cache y sesiones upload | **Redis 7 Cluster** (3 nodos) | Consistent Hashing; mismo que en cloud |
@@ -532,9 +532,9 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 | NFR-003 | Seguridad | 0 accesos sin JWT válido a rutas protegidas | Pentest / Token fuzzing |
 | NFR-004 | Usabilidad | Interfaz responsive en ≥ 4 breakpoints | Test manual |
 | NFR-005 | Escalabilidad | 10,000 uploads simultáneos en periodo exámenes | JMeter stress test |
-| NFR-006 | Disponibilidad | Uptime ≥ 99.9% | CloudWatch alertas |
+| NFR-006 | Disponibilidad | Uptime ≥ 99.9% | Prometheus + Grafana alertas |
 | NFR-007 | Retención | Archivos en papelera purgados exactamente a los 30 días | Test cronjob |
-| NFR-009 | Cumplimiento | Datos en región sa-east-1 (Bolivia); Ley 164 | Auditoría AWS Config |
+| NFR-009 | Cumplimiento | Datos en servidores DTIC-UMSS on-premise; Ley 164 Bolivia | Auditoría accesos + revisión DTIC |
 | NFR-010 | Seguridad Webhook | Validación HMAC-SHA256 en 100% de webhooks QR Simple | Test unitario Guard |
 
 ---
@@ -595,10 +595,10 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 
 ## §14. Observabilidad
 
-- **Logs estructurados**: JSON con campos `correlationId`, `traceId`, `userId`, `service`, `level`, `timestamp`. Centralizados en CloudWatch Logs.
-- **Métricas**: Prometheus (en ECS) + CloudWatch Metrics. Alertas en: error rate > 1%, p95 latencia > 500ms, almacenamiento S3 > 80%.
-- **Trazas distribuidas**: OpenTelemetry SDK en todos los servicios NestJS. Exporta a AWS X-Ray. `traceId` propagado en headers HTTP.
-- **Dashboards**: CloudWatch Dashboard con: uploads/minuto, errores CB, latencia p50/p95/p99 por servicio, cuota global usada.
+- **Logs estructurados**: JSON con campos `correlationId`, `traceId`, `userId`, `service`, `level`, `timestamp`. Centralizados con Grafana Loki (on-premise DTIC).
+- **Métricas**: Prometheus (Docker Swarm scrape) + Grafana. Alertas en: error rate > 1%, p95 latencia > 500ms, uso MinIO > 80%.
+- **Trazas distribuidas**: OpenTelemetry SDK en todos los servicios NestJS. Exporta a Jaeger (self-hosted). `traceId` propagado en headers HTTP.
+- **Dashboards**: Grafana Dashboard con: uploads/minuto, errores CB, latencia p50/p95/p99 por servicio, cuota global usada.
 - **Observabilidad IA**: Tokens usados por modelo, latencia de generación, `hallucination_rate` registrados en `docs/PROMPT_MAPPING.md`.
 
 ---
@@ -606,10 +606,10 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 ## §15. DevOps y Ciclo de Vida
 
 - **Branching**: `main` → `release/X.Y.Z` (entrega evaluada) → `feat/*`, `fix/*` (desarrollo).
-- **CI/CD**: GitHub Actions. Pipeline: `lint → test unitarios → test integración → build Docker → push ECR → deploy ECS (blue-green)`.
+- **CI/CD**: GitHub Actions. Pipeline: `lint → test unitarios → test integración → build Docker → push Registry DTIC → deploy Docker Swarm (rolling update)`.
 - **Pirámide de testing**: 70% unitarios (Jest) / 20% integración (Supertest + TestContainers PostgreSQL) / 10% E2E (Playwright).
 - **Contract Tests**: Los prompt-contratos en `prompts/PR-*.md` son contratos de comportamiento; se verifica contra los criterios Gherkin del FSD.
-- **Rollback**: Blue-green deployment en ECS; en caso de fallo de healthcheck, tráfico revierte al task anterior en < 60s.
+- **Rollback**: Rolling update con Docker Swarm; en caso de fallo de healthcheck, tráfico revierte al servicio anterior en < 60s.
 - **Release Strategy**: Tags semánticos `vX.Y.Z`; release branches evaluadas por el docente.
 
 ---
@@ -624,8 +624,8 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 | **Chatty Services** | No | `quota-service` usa CB para QR Simple; admin usa CQRS Read Model |
 | **Dual Write Problem** | Resuelto | Patrón Outbox para `FileUploadedEvent` — escritura BD + evento en misma transacción PostgreSQL |
 | **Anemic Domain Model** | No | Aggregates `File`, `SimonDrop`, `Quota` encapsulan reglas de negocio (no solo getters/setters) |
-| **Synchronous Chain** | Resuelto | Flujos de notificación y saga desacoplados via SQS; CB en llamadas síncronas a LMS externos |
-| **Mega-monolith por falta de límites** | No | 8 servicios con 1 BD por servicio (Richardson §1.4 database per service) |
+| **Synchronous Chain** | Resuelto | Flujos de notificación y saga desacoplados via RabbitMQ; CB en llamadas síncronas a QR Simple Bolivia |
+| **Mega-monolith por falta de límites** | No | 7 servicios con 1 BD por servicio (Richardson §1.4 database per service) |
 
 ---
 
@@ -634,12 +634,12 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 | Decisión | Opción elegida | Alternativas descartadas | Razones | Consecuencias |
 |----------|----------------|--------------------------|---------|---------------|
 | Estilo arquitectónico | Microservicios + Hexagonal | Monolito modular | Escalado independiente file-service en exámenes; equipos pueden evolucionar independientemente | Mayor complejidad operacional; requiere madurez en DevOps |
-| Subida de archivos grandes | S3 Multipart Upload (presigned URL) | TUS protocol | Control total sin intermediario; integración directa con S3; no requiere librería externa de servidor | Cliente debe implementar lógica de chunking; mayor código frontend |
+| Subida de archivos grandes | MinIO Multipart Upload (presigned URL) | TUS protocol | Control total sin intermediario; API S3-compatible on-premise; no requiere librería externa de servidor | Cliente debe implementar lógica de chunking; mayor código frontend |
 | SSO Integration | OAuth2 (WebSISS) | SAML 2.0 | Más moderno; mejor soporte en NestJS Passport; tokens JWT nativos | WebSISS puede requerir configuración adicional si solo soporta SAML |
 | Persistencia | PostgreSQL | DynamoDB | Transacciones ACID necesarias para cuotas y auditoría; queries relacionales complejas | Escalar lectura vía réplicas; DynamoDB no apto para queries complejas |
 | Consistent Hashing | Redis Cluster (ioredis) | Redis Sentinel | Distribución horizontal real; N nodos activos; mayor throughput | Mayor complejidad de configuración; necesita ≥ 3 nodos |
-| Saga type | Orquestada (Step Functions) | Coreografía | Estado global trazable; compensaciones explícitas; mejor observabilidad | Acoplamiento al orquestador; punto de fallo potencial |
-| Cloud provider | AWS (sa-east-1) | GCP, Azure | Región sa-east-1 más cercana a Bolivia; mejor soporte para instituciones educativas en LatAm | Vendor lock-in parcial; mitigado por uso de S3-compatible MinIO en local |
+| Saga type | Orquestada (Temporal.io) | Coreografía | Estado global trazable; compensaciones explícitas; mejor observabilidad | Acoplamiento al orquestador; punto de fallo potencial |
+| Despliegue | On-premise DTIC-UMSS | AWS / GCP / Azure | Soberanía de datos (Ley 164); $0/mes en infraestructura; sin vendor lock-in | Requiere operaciones DTIC; sin auto-scaling cloud; DR manual |
 
 > Cada trade-off con ADR asociado en `docs/adr/`. Ver especialmente `docs/adr/0005-cloud-provider-y-estilo-de-despliegue.md`.
 
@@ -686,7 +686,8 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 | 0002 | Autenticación SSO WebSISS via OAuth2 | Aceptada | 2026-05-18 |
 | 0003 | Subidas reanudables: S3 Multipart Upload vs TUS | Aceptada | 2026-05-18 |
 | 0004 | Saga orquestada para upgrade de cuota (QR Simple) | Aceptada | 2026-05-20 |
-| 0005 | Cloud provider AWS + región sa-east-1 + estilo de despliegue ECS Fargate | Aceptada | 2026-05-27 |
+| 0005 | Despliegue on-premise DTIC-UMSS: MinIO + Docker Swarm + stack open source | Aceptada | 2026-05-27 |
+| 0006 | Integración LMS: LTI 1.3 (Moodle) + OAuth2 (Google Classroom) | Aceptada | 2026-05-27 |
 
 ---
 
@@ -698,7 +699,7 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 - [x] Modelo de dominio con Aggregates, Entities, VOs, DTOs (§4).
 - [x] Arquitectura hexagonal documentada — puertos y adaptadores (§5).
 - [x] Catálogo de microservicios, eventos, Saga, Outbox, CQRS (§6, §7).
-- [x] Mapeo a AWS con justificación por servicio y costo (§8).
+- [x] Despliegue on-premise con justificación por componente (§8).
 - [x] Capa de IA / agentes descrita (§9).
 - [x] NFRs con umbrales y mecanismo de verificación (§11).
 - [x] 2 POCs críticas definidas con criterio de éxito medible (§12).
@@ -707,6 +708,6 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 - [x] DevOps y ciclo de vida (§15).
 - [x] Antipatrones auditados (§16).
 - [x] Trade-offs arquitectónicos (§17).
-- [x] Al menos 3 ADRs registrados (§21) — se registran 5.
+- [x] Al menos 3 ADRs registrados (§21) — se registran 6.
 - [x] `AGENTS.md` sincronizado.
 - [x] `PROMPT_MAPPING.md` sincronizado.

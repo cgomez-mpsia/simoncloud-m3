@@ -21,7 +21,7 @@
 | ID Tarea | Descripción | Integrante | Artefacto resultante | Horas estimadas | Estado |
 |----------|-------------|-----------|---------------------|-----------------|--------|
 | T-M4-001 | Arquitectura de microservicios (descomposición por business capability) | Carlos | `docs/DTI.md §2-§6` | 8h | ✅ |
-| T-M4-002 | Circuit Breaker pattern (grade-service → Moodle/Classroom) | Carlos | `docs/DTI.md §6.2`, `docs/dti/DTI_v2.md §2.2` | 4h | ✅ |
+| T-M4-002 | Circuit Breaker pattern (quota-service → QR Simple Bolivia) | Carlos | `docs/DTI.md §6.2`, `docs/dti/DTI_v2.md §2.2` | 4h | ✅ |
 | T-M4-003 | Consistent Hashing en Redis Cluster (file-service sessions) | Carlos | `docs/DTI.md §6.2`, `docs/dti/DTI_v2.md §2.3` | 3h | ✅ |
 | T-M4-004 | Arquitectura Hexagonal (puertos y adaptadores del file-service) | Carlos | `docs/DTI.md §5`, `docs/diagrams/03-hexagonal-file-service.mmd` | 4h | ✅ |
 | T-M4-005 | Saga Orquestada — upgrade de cuota QR Simple | Carlos | `docs/dti/patrones_asincronos.md §1`, `docs/adr/0004-saga-orquestada.md` | 5h | ✅ |
@@ -30,13 +30,13 @@
 | T-M4-008 | POC-01: SHA-256 incremental (validación con archivo 2GB) | Carlos | `pocs/POC-01/README.md` | 2h | ✅ |
 | T-M4-009 | POC-02: Circuit Breaker Opossum.js en NestJS | Carlos | `pocs/POC-02/README.md` | 2h | ✅ |
 | T-M4-010 | DTI vFinal completo (§1-§21, checklist, todos los ADRs) | Carlos | `docs/DTI.md` | 6h | ✅ |
-| T-M4-011 | 5 ADRs formales (0001-0005) | Carlos | `docs/adr/0001` a `0005` | 3h | ✅ |
+| T-M4-011 | 6 ADRs formales (0001-0006) | Carlos | `docs/adr/0001` a `0006` | 3h | ✅ |
 | T-M4-012 | 8 diagramas Mermaid (.mmd) en docs/diagrams/ | Carlos | `docs/diagrams/*.mmd` | 2h | ✅ |
 | T-M4-013 | FSD vFinal — 10 UCs con Gherkin, ER, APIs, contratos | Carlos | `docs/fsd/FSD_vFinal.md` | 8h | ✅ |
 | T-M4-014 | PROMPT_MAPPING.md con métricas AI-SDLC | Carlos | `docs/PROMPT_MAPPING.md` | 2h | ✅ |
 | T-M4-015 | 3 archivos prompts/PR-*.md (PR-UC-001, 002, 006) | Carlos | `prompts/PR-*.md` | 1h | ✅ |
 | T-M4-016 | Roadmap técnico (módulos 5, 6 y v2.0) | Carlos | `docs/roadmap.md` | 1h | ✅ |
-| T-M4-017 | Despliegue AWS: mapeo de componentes a servicios + DR | Carlos | `docs/DTI.md §8`, `docs/adr/0005` | 3h | ✅ |
+| T-M4-017 | Despliegue on-premise DTIC-UMSS: mapeo de componentes + soberanía de datos | Carlos | `docs/DTI.md §8`, `docs/adr/0005` | 3h | ✅ |
 | T-M4-018 | Seguridad: STRIDE, AuthN/AuthZ, guardrails IA | Carlos | `docs/DTI.md §13` | 2h | ✅ |
 | T-M4-019 | MRD, PRD, BRD vFinal reorganizados a rutas correctas | Carlos | `docs/mrd/`, `docs/prd/`, `docs/brd/` | 1h | ✅ |
 
@@ -64,12 +64,12 @@ Nota_individual_carlos = Nota_grupal × 1.0
 
 | Área | Contribución de Carlos |
 |------|----------------------|
-| **Documentación técnica** | DTI vFinal completo (§1-§21), 5 ADRs, 8 diagramas .mmd, roadmap |
+| **Documentación técnica** | DTI vFinal completo (§1-§21), 6 ADRs, 8 diagramas .mmd, roadmap |
 | **Especificación funcional** | FSD vFinal (10 UCs, Gherkin, ER, contratos API), MRD, PRD, BRD |
 | **Patrones arquitectónicos** | Circuit Breaker, Consistent Hashing, Saga, Outbox, CQRS |
 | **Pruebas de concepto** | POC-01 (SHA-256 incremental), POC-02 (Circuit Breaker Opossum.js) |
 | **AI-SDLC** | PROMPT_MAPPING.md (100% coverage), 3 prompt-contratos formales |
-| **Infraestructura** | Mapeo AWS completo, ADR cloud provider, estrategia DR |
+| **Infraestructura** | Despliegue on-premise DTIC-UMSS, ADR soberanía de datos, estrategia DR |
 | **Release management** | Creación de rama `release/2.0.0`, estructura de entregables |
 
 ---
