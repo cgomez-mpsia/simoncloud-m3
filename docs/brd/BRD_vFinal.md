@@ -18,7 +18,7 @@
 | Revisores | Docente + 1 grupo par |
 | Estado | Borrador |
 | Insumo del Módulo Anterior (M2 UI/UX) | `old-docs/Trabajo de Campo_ Investigación UX - Proyecto SimonCloud.txt`, `old-docs/Auditoría y Rediseño Estructural del Ecosistema de Archivos UMSS.txt` |
-| Prompts utilizados | `PR-BRD-001` (ver `docs/PROMPT_MAPPINGS.md`) |
+| Prompts utilizados | `PR-BRD-001` (ver `docs/PROMPT_MAPPING.md`) |
 
 ---
 

@@ -77,7 +77,7 @@ SimonCloud es una plataforma que proporciona soberanía digital a la UMSS. Funci
   1. El acta consolidada queda guardada en estado BORRADOR.
   2. Cada nota tiene el atributo `lms_origen` registrado (BR-004 — trazabilidad de fuente).
 - **Datos de entrada**: `{ materiaId, docenteToken, moodleToken?, classroomToken? }`
-- **Datos de salida**: `ConsolidatedGrade[]` (ver `PROMPT_MAPPINGS.md` PR-UC-001)
+- **Datos de salida**: `ConsolidatedGrade[]` (ver `docs/PROMPT_MAPPING.md` PR-UC-001)
 - **Criterios de aceptación**:
 ```gherkin
 Escenario: Alumno con notas en ambas plataformas
@@ -616,7 +616,7 @@ erDiagram
  ⚡🔧
 
 ### 7.1 Prompt-contrato para FSD-UC-001 (Homologación)
-*(Ver archivo `PROMPT_MAPPINGS.md` para detalle completo)*
+*(Ver archivo `docs/PROMPT_MAPPING.md` para detalle completo)*
 
 ## 8. Integraciones externas 🔧
 
