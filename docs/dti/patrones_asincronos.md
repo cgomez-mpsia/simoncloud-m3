@@ -40,11 +40,11 @@ Basado en la lectura de *Microservices Patterns* (Richardson): Cap. 3 §3.3 (Tra
 ## 3. Patrón CQRS (Command Query Responsibility Segregation)
 **Candidato:** Flujo de *Panel de Administrador y Métricas Globales* (FSD-UC-010)
 
-- **Contexto:** El FSD-UC-010 describe que el panel "calcula en tiempo real" métricas globales (almacenamiento, usuarios activos, actas). En la implementación síncrona actual, esto implicaría hacer *joins* costosos o múltiples llamadas HTTP a `file-service`, `auth-service`, `grade-service` y `quota-service` en cada carga del panel.
+- **Contexto:** El FSD-UC-010 describe que el panel "calcula en tiempo real" métricas globales (almacenamiento, usuarios activos, actas). En la implementación síncrona actual, esto implicaría hacer *joins* costosos o múltiples llamadas HTTP a `file-service`, `auth-service`, `simondrop-service` y `quota-service` en cada carga del panel.
 - **Problema que resuelve (Richardson §7.2):** API Composition síncrona crea acoplamiento temporal, reduce disponibilidad (si un servicio falla, el panel completo falla) y escala mal ante alta concurrencia de administradores. CQRS materializa el resultado de esas queries en un *Read Model* dedicado, actualizado asíncronamente.
 - **Propuesta de mejora con CQRS:**
   1. **Separación C/Q:** Las escrituras (Commands) siguen ocurriendo en cada microservicio individual (cada uno con su propia BD). Las lecturas de métricas se dirigen al nuevo Read Model.
   2. **Read Model:** El `admin-service` mantiene una tabla materializada `dashboard_metrics` (en PostgreSQL) optimizada para las consultas del panel: un registro por tenant con contadores desnormalizados.
-  3. **Actualización Asíncrona:** El `admin-service` se suscribe al Message Broker y reacciona a los eventos de dominio: `FileUploaded` → incrementa contador de almacenamiento; `GradeHomologated` → incrementa actas; `UserRegistered` → incrementa usuarios activos.
+  3. **Actualización Asíncrona:** El `admin-service` se suscribe al Message Broker y reacciona a los eventos de dominio: `FileUploaded` → incrementa contador de almacenamiento; `QuotaUpgraded` → incrementa upgrades de cuota; `UserRegistered` → incrementa usuarios activos.
   4. **Query Eficiente:** `GET /admin/metrics` lee directamente `dashboard_metrics` en O(1) — sin impactar a los servicios transaccionales y sin acoplamiento temporal.
   5. **Trade-off aceptado:** Las métricas son *eventualmente consistentes* (pueden tener latencia de segundos). Dado que el panel de administrador no requiere precisión de milisegundos, este trade-off es apropiado (Richardson §7.2: "CQRS is well-suited for queries that join data from multiple services").

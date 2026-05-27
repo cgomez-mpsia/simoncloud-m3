@@ -6,11 +6,11 @@ sequenceDiagram
     participant SPA as React SPA
     participant GW as API Gateway
     participant FS as file-service
-    participant CB as CB[S3]
-    participant S3 as MinIO/S3
+    participant CB as CB[MinIO]
+    participant S3 as MinIO
     participant BD as PostgreSQL
     participant OB as Outbox Table
-    participant SQS as AWS SQS
+    participant RMQ as RabbitMQ
     participant NS as notification-service
 
     E->>SPA: Arrastra archivo (2GB)
@@ -25,7 +25,7 @@ sequenceDiagram
         S3-->>SPA: 200 OK
         SPA->>GW: PATCH /upload/:id/progress
         GW->>FS: Actualiza progreso
-        FS->>CB: Check CircuitBreaker[S3]
+        FS->>CB: Check CircuitBreaker[MinIO]
         CB-->>FS: CLOSED
         FS->>BD: UPDATE upload_session progress%
         FS-->>SPA: {progress: N%, speed: "X MB/s"}
@@ -45,7 +45,7 @@ sequenceDiagram
     FS-->>SPA: {fileId, hash_sha256, recibo_url}
     SPA-->>E: ✅ Entrega confirmada + Recibo PDF
 
-    Note over OB,NS: Async — Message Relay
-    OB->>SQS: Publica FileUploadedEvent
-    SQS->>NS: Consume evento
+    Note over OB,NS: Async — Message Relay (Outbox Pattern)
+    OB->>RMQ: Publica FileUploadedEvent (AMQP)
+    RMQ->>NS: Consume evento
     NS-->>E: Email/Push al docente "Nueva entrega"

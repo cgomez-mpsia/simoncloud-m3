@@ -109,14 +109,14 @@ Container(auth, "auth-service", "NestJS + WebSISS OAuth2", "Federación SSO, emi
 Container(files, "file-service", "NestJS + TUS/S3 Multipart", "Subida chunked, SHA-256, gestión de archivos.")
 Container(drops, "simondrop-service", "NestJS", "Buzones, fechas de cierre, comprobantes.")
 Container(quota, "quota-service", "NestJS", "Gestión de cuotas, saga de pago QR Simple.")
-Container(notif, "notification-service", "NestJS + SQS Consumer", "Emails push; DLQ con reintentos.")
+Container(notif, "notification-service", "NestJS + RabbitMQ Consumer", "Emails push; DLQ con reintentos.")
 Container(admin, "admin-service", "NestJS + CQRS Read Model", "Panel global, métricas, audit log.")
 
-ContainerDb(pg_main, "PostgreSQL Primary", "PostgreSQL 16", "Usuarios, archivos, buzones, cuotas, actas.")
-ContainerDb(pg_replica, "PostgreSQL Replica", "PostgreSQL 16", "Réplica de lectura para queries pesadas.")
-ContainerDb(redis, "Redis Cluster", "Redis 7 (3 nodos)", "Sesiones de upload; consistent hashing.")
-ContainerDb(s3, "MinIO / S3", "Object Storage", "Archivos binarios; políticas WORM post-cierre.")
-ContainerDb(sqs, "SQS + DLQ", "AWS SQS", "Cola de notificaciones; Dead Letter Queue.")
+ContainerDb(pg_main, "PostgreSQL Primary", "PostgreSQL 16 on-premise", "Usuarios, archivos, buzones, cuotas, actas.")
+ContainerDb(pg_replica, "PostgreSQL Replica", "PostgreSQL 16 on-premise", "Réplica de lectura para queries pesadas.")
+ContainerDb(redis, "Redis Cluster", "Redis 7 on-premise (3 nodos)", "Sesiones de upload; consistent hashing.")
+ContainerDb(s3, "MinIO Object Storage", "on-premise + Object Lock WORM", "Archivos binarios; políticas WORM post-cierre.")
+ContainerDb(rabbit, "RabbitMQ + DLQ", "on-premise", "Cola de notificaciones; Dead Letter Queue.")
 
 Rel(usuario, spa, "Usa", "HTTPS")
 Rel(externo, spa, "Accede a SimonDrop público", "HTTPS")
@@ -128,10 +128,10 @@ Rel(gateway, quota, "Rutas /quota/*", "REST")
 Rel(gateway, admin, "Rutas /admin/*", "REST")
 Rel(files, pg_main, "CRUD archivos", "PostgreSQL")
 Rel(files, redis, "Sesiones upload chunked", "Redis")
-Rel(files, s3, "PUT/GET objetos binarios", "S3 API")
-Rel(files, sqs, "Publica FileUploaded via Outbox", "SQS")
+Rel(files, s3, "PUT/GET objetos binarios", "S3 API (MinIO)")
+Rel(files, rabbit, "Publica FileUploaded via Outbox", "AMQP")
 Rel(quota, pg_main, "CRUD cuotas", "PostgreSQL")
-Rel(notif, sqs, "Consume FileUploaded, QuotaUpgraded", "SQS")
+Rel(notif, rabbit, "Consume FileUploaded, QuotaUpgraded", "AMQP")
 Rel(admin, pg_replica, "Queries de métricas (CQRS Read Model)", "PostgreSQL")
 ```
 
@@ -141,7 +141,7 @@ Rel(admin, pg_replica, "Queries de métricas (CQRS Read Model)", "PostgreSQL")
 flowchart LR
   subgraph in[Adapters In]
     REST["REST Controller\n(NestJS)"]
-    SQS_IN["SQS Consumer\n(Outbox Relay)"]
+    RMQ_IN["RabbitMQ Consumer\n(Outbox Relay)"]
   end
   subgraph core[Domain Core — Hexagonal]
     UC_UPLOAD["UseCase: UploadFile\n(Application Service)"]
@@ -205,7 +205,7 @@ sequenceDiagram
 | `Storage` | Almacenamiento de archivos | `File`, `UploadSession` | asíncrona (FileUploaded) |
 | `SimonDrop` | Buzones de entrega | `SimonDrop`, `Submission` | síncrona + asíncrona |
 | `Billing` | Cuotas y pagos | `Quota`, `Payment` | asíncrona (saga) |
-| `Notification` | Alertas y emails | `Notification`, `AuditLog` | event-driven (SQS) |
+| `Notification` | Alertas y emails | `Notification`, `AuditLog` | event-driven (RabbitMQ) |
 
 ### 4.2 Entidades, Value Objects y Aggregates
 
@@ -256,7 +256,7 @@ sequenceDiagram
 flowchart LR
   subgraph in[Adapters In]
     A[REST Controller\n/files/upload]
-    B[SQS Outbox Relay\nMessage Consumer]
+    B[RabbitMQ Outbox Relay\nMessage Consumer]
   end
   subgraph core[Domain Core]
     C((UploadFile\nUseCase))
@@ -293,7 +293,7 @@ flowchart LR
 | `file-service` | Subida chunked, SHA-256, gestión | PostgreSQL + S3 | REST /files |
 | `simondrop-service` | Buzones, cierres, comprobantes | PostgreSQL | REST /drops |
 | `quota-service` | Cuotas, saga QR Simple | PostgreSQL (quotas) | REST /quota |
-| `notification-service` | Emails, push, DLQ | Redis (colas) | SQS Consumer |
+| `notification-service` | Emails, push, DLQ | Redis (colas) | RabbitMQ Consumer |
 | `admin-service` | Panel global, CQRS Read Model | PostgreSQL (audit_log) | REST /admin |
 
 ### 6.2 Patrones de resiliencia aplicados
@@ -303,7 +303,7 @@ flowchart LR
 | Circuit Breaker | `quota-service` → QR Simple Bolivia | `timeout: 3s, failureRate: 50%, resetTimeout: 30s` |
 | Circuit Breaker | `file-service` → S3/MinIO | `timeout: 5s, failureRate: 50%, resetTimeout: 60s` |
 | Retry + Exponential Backoff | Notificaciones push | `3 reintentos, delays: 1s, 2s, 4s` |
-| Dead Letter Queue | `notification-service` | SQS DLQ tras 3 fallos |
+| Dead Letter Queue | `notification-service` | RabbitMQ DLQ tras 3 fallos |
 | Rate Limiting | `api-gateway` | `100 req/s por usuario` |
 | Consistent Hashing | Redis Cluster `file-service` | `150 vnodes/nodo; 3 nodos` |
 | Horizontal Pod Autoscaler | `file-service` Kubernetes | `CPU > 70% → escalar de 3 a 9 réplicas` |
@@ -316,7 +316,7 @@ graph LR
     GW[API Gateway] -->|REST| FS[file-service]
     GW -->|REST| QS[quota-service]
     GW -->|gRPC| AS[auth-service]
-    FS -->|SQS Outbox| NS[notification-service]
+    FS -->|RabbitMQ Outbox| NS[notification-service]
     QS -->|Saga Events| NS
     QS -.->|Circuit Breaker| QRSIMPLE[QR Simple API]
 ```
@@ -362,9 +362,9 @@ stateDiagram-v2
 
 ### 7.3 Outbox: Subida de Archivo → Notificación al Docente (FSD-UC-002/007)
 
-**Problema resuelto**: Doble escritura (dual write) — si el `file-service` guarda en PostgreSQL pero falla al publicar en SQS, el docente nunca es notificado.
+**Problema resuelto**: Doble escritura (dual write) — si el `file-service` guarda en PostgreSQL pero falla al publicar en RabbitMQ, el docente nunca es notificado.
 
-**Solución**: En la misma transacción PostgreSQL que guarda el archivo, se inserta `FileUploadedEvent` en la tabla `outbox`. Un Message Relay (Debezium CDC o Polling Publisher) lee la tabla y publica en SQS con garantía at-least-once.
+**Solución**: En la misma transacción PostgreSQL que guarda el archivo, se inserta `FileUploadedEvent` en la tabla `outbox`. Un Message Relay (Debezium CDC o Polling Publisher) lee la tabla y publica en RabbitMQ con garantía at-least-once.
 
 ### 7.4 CQRS: Panel de Administrador (FSD-UC-010)
 
@@ -581,9 +581,9 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 ### 13.3 Protección de datos
 
 - **Cifrado en tránsito**: TLS 1.3 en todos los endpoints.
-- **Cifrado en reposo**: S3 SSE-S3; RDS encrypted at rest (AES-256).
+- **Cifrado en reposo**: MinIO Server-Side Encryption; PostgreSQL encrypted at rest (AES-256); secretos en HashiCorp Vault.
 - **PII**: Solo email institucional y nombre completo; no se almacenan datos sensibles adicionales.
-- **Cumplimiento**: Ley 164 Bolivia (datos en territorio boliviano / sa-east-1 más cercana); sin transferencia de datos académicos a terceros.
+- **Cumplimiento**: Ley 164 Bolivia (datos en servidores DTIC-UMSS on-premise, territorio boliviano); sin transferencia de datos académicos a terceros.
 
 ### 13.4 Seguridad IA
 

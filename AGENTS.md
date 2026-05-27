@@ -55,7 +55,7 @@ Al comenzar cualquier tarea, el agente **MUST** leer en orden:
 │   ├── file-service/            ← hexagonal, S3 Multipart, SHA-256
 │   ├── simondrop-service/       ← buzones ciegos, cierres, integridad
 │   ├── quota-service/           ← gestión cuotas, Saga QR Simple, Circuit Breaker QR Simple
-│   ├── notification-service/    ← worker SQS, push/email
+│   ├── notification-service/    ← worker RabbitMQ, push/email
 │   └── admin-service/           ← CQRS Read Model, auditoría PDF
 ├── libs/
 │   └── shared/src/crypto/       ← sha256.service.ts (generateFileHash)
@@ -230,7 +230,7 @@ npx ts-node pocs/POC-02/qr-simple.mock.ts
 | [0001](docs/adr/0001-estilo-arquitectonico.md) | Estilo arquitectónico | Microservicios + Hexagonal + Event-Driven |
 | [0002](docs/adr/0002-autenticacion-sso-websiss.md) | Autenticación SSO | OAuth2 Code Flow → JWT HS256, 8h, HttpOnly |
 | [0003](docs/adr/0003-subida-reanudable-s3-multipart-vs-tus.md) | Subida reanudable | S3 Multipart Upload (presigned URLs) |
-| [0004](docs/adr/0004-saga-orquestada-quota-upgrade.md) | Saga quota upgrade | Orquestada con AWS Step Functions |
+| [0004](docs/adr/0004-saga-orquestada-quota-upgrade.md) | Saga quota upgrade | Orquestada con Temporal.io (self-hosted on-premise) |
 | [0005](docs/adr/0005-cloud-provider-y-estilo-de-despliegue.md) | Cloud provider | On-premise DTIC-UMSS: MinIO + Docker Swarm + stack open source |
 | [0006](docs/adr/0006-integracion-lms-lti.md) | Integración LMS | LTI 1.3 (Moodle) + OAuth2 (Google Classroom) |
 

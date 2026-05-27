@@ -32,18 +32,18 @@ Usar una **Saga Orquestada** con **Temporal.io (self-hosted on-premise)** como o
 ## Consecuencias
 
 **Positivas**:
-- Estado de la saga trazable en Step Functions (dashboard visual).
+- Estado de la saga trazable en Temporal.io (dashboard de workflows visual).
 - Compensaciones explícitas y documentadas.
 - QR puede tardar 5 minutos sin bloquear ningún hilo.
 
 **Negativas**:
-- Acoplamiento al orquestador (Step Functions); mitigado por ser un servicio gestionado de AWS.
+- Acoplamiento al orquestador (Temporal.io); mitigado por ser open source y self-hosted en DTIC.
 - Latencia adicional por la coordinación del orquestador (aceptable para flujo de pago).
 
 ## Flujo de compensación
 
 Si el QR expira (> 5 min sin webhook):
-1. Step Functions dispara timeout.
+1. Temporal.io dispara timeout.
 2. Orquestador ejecuta `CancelUpgradeRequest` en `quota-service`.
 3. Estado del upgrade pasa a `CANCELLED`.
 4. Usuario recibe notificación "QR expirado, genera uno nuevo".

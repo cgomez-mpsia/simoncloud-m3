@@ -4,7 +4,7 @@ title: "Arquitectura Hexagonal — file-service (núcleo crítico)"
 flowchart LR
   subgraph AdaptersIn["Adapters IN (Driving)"]
     REST["REST Controller\nPOST /drops/:id/upload\nGET /files/:id"]
-    SQS_IN["SQS Consumer\nSimonDropClosedEvent"]
+    RMQ_IN["RabbitMQ Consumer\nSimonDropClosedEvent"]
   end
 
   subgraph DomainCore["Domain Core (Hexagonal)"]
@@ -16,14 +16,14 @@ flowchart LR
   end
 
   subgraph AdaptersOut["Adapters OUT (Driven)"]
-    PG["PgFileRepository\nimplements FileRepositoryPort\n(TypeORM)"]
-    S3["S3FileStorage\nimplements FileStoragePort\n(AWS SDK v3)"]
+    PG["PgFileRepository\nimplements FileRepositoryPort\n(Prisma)"]
+    S3["S3FileStorage\nimplements FileStoragePort\n(MinIO SDK)"]
     OB["OutboxPublisher\nimplements EventPublisherPort\n(PostgreSQL outbox table)"]
-    CB["CircuitBreaker Wrapper\n(Opossum.js)\nprotege llamadas a S3"]
+    CB["CircuitBreaker Wrapper\n(Opossum.js)\nprotege llamadas a MinIO"]
   end
 
   REST -->|"uploadFile(dto)"| UC1
-  SQS_IN -->|"lockFile(dropId)"| UC3
+  RMQ_IN -->|"lockFile(dropId)"| UC3
   UC1 --> UC2
   UC1 --> UC3
   UC2 --> AGG
