@@ -44,9 +44,9 @@
 
 3. **SHA-256 incremental es viable y eficiente**: El módulo nativo `crypto` de Node.js procesa 2GB en 18s con solo 12MB de RAM pico. No se necesita ninguna librería externa.
 
-4. **Orquestación > Coreografía para la saga de pagos**: El flujo de QR Simple involucra un webhook asíncrono externo; la coreografía no puede detectar "QR expirado" sin que todos los servicios conozcan el estado global. Step Functions fue la decisión correcta.
+4. **Orquestación > Coreografía para la saga de pagos**: El flujo de QR Simple involucra un webhook asíncrono externo; la coreografía no puede detectar "QR expirado" sin que todos los servicios conozcan el estado global. Temporal.io (self-hosted on-premise) es el orquestador correcto — reemplaza Step Functions con soberanía de datos total.
 
-5. **`sa-east-1` es la región correcta**: La latencia desde Bolivia es ~80ms vs ~180ms a `us-east-1`. Para una plataforma universitaria, la diferencia en UX es significativa.
+5. **On-premise LAN < 5ms, cloud como último recurso**: Para el despliegue UMSS on-premise la latencia es < 5ms (LAN). Para el SCaaS Tier 3 (cloud), `sa-east-1` (São Paulo) ofrece ~80ms desde Bolivia vs ~180ms de `us-east-1` — la región más cercana si se necesita cloud.
 
 ---
 
@@ -81,10 +81,10 @@
 | Tarea | Prioridad | Notas |
 |-------|-----------|-------|
 | Integración real con QR Simple Bolivia | P1 | Cuenta merchant QR Simple |
-| Deploy staging en AWS sa-east-1 | P1 | Budget DTIC |
+| Deploy staging en servidores DTIC-UMSS (Docker Swarm) | P1 | Coordinación DTIC |
 | Panel de administrador con CQRS Read Model | P2 | admin-service |
-| Saga completa en AWS Step Functions | P2 | quota-service |
-| Monitoreo CloudWatch + X-Ray (observabilidad completa) | P2 | DevOps |
+| Saga completa en Temporal.io (self-hosted) | P2 | quota-service |
+| Monitoreo Prometheus + Grafana + Jaeger (on-premise) | P2 | DevOps |
 | Pruebas de carga JMeter (NFR-005: 10k uploads) | P1 | NFR validación |
 
 ---
@@ -101,7 +101,8 @@
 | Firma digital de documentos (PKI institucional) | Resoluciones rectorales firmadas digitalmente | Muy Alta |
 | Editor PDF básico en navegador | Ver/anotar PDFs sin descargar | Alta |
 | SDK móvil (PWA → app nativa) | 70% usuarios UMSS acceden desde móvil | Media |
-| Multi-tenant para otras universidades bolivianas | Modelo SCaaS escalable a UMSA, UPSA, etc. | Alta |
+| Multi-tenant SCaaS — Tier 2 (universidades con SSO propio) | UCB, UPSA, UMSA se federan vía su IdP; tenant aislado en infra UMSS; licencia anual | Alta |
+| Multi-tenant SCaaS — Tier 3 (institutos sin infra) | Supabase/cloud como backend; datos en región LatAm; aceptación explícita del cliente | Alta |
 | Integración ORCID para investigadores | Portafolio académico vinculado a identidad global | Media |
 
 ---

@@ -34,9 +34,11 @@ Para los estudiantes y personal de la UMSS que sufren por la desorganización do
 ### 4.1 Segmentos de clientes
 | Segmento | Tamaño | Necesidad principal | Disposición a pagar |
 |----------|--------|----------------------|---------------------|
-| Estudiante Pregrado | 65,000 | Trámite rápido, sin filas físicas | Incluido en matrícula |
-| Personal Administrativo | 5,000 | Trazabilidad y organización | N/A |
-| Docentes | 4,000 | Carga y gestión de actas | N/A |
+| Estudiante Pregrado UMSS | 65,000 | Trámite rápido, sin filas físicas | Incluido en matrícula |
+| Personal Administrativo UMSS | 5,000 | Trazabilidad y organización | N/A |
+| Docentes UMSS | 4,000 | SimonDrop integrado al LMS (Moodle/Classroom) | N/A |
+| Universidades bolivianas (UCB, UPSA, UMSA, etc.) | ~200,000 usuarios potenciales | Plataforma documental con soberanía de datos | Licencia SCaaS anual por institución |
+| Institutos sin infraestructura propia | ~20,000 usuarios potenciales | Plataforma sin inversión en servidores | Suscripción mensual cloud |
 
 ### 4.2 Personas
 #### Persona 1 – Universitario promedio
@@ -67,7 +69,7 @@ Para los estudiantes y personal de la UMSS que sufren por la desorganización do
 | Inmutabilidad legal | Hash SHA-256 (Ley 164 Bolivia) | Ninguna garantía | Ninguna garantía |
 
 ### 6.2 *Positioning statement*
-> Para **estudiantes y docentes de la UMSS** que hoy pierden tiempo en filas presenciales y no tienen garantía de integridad en sus documentos, **SimonCloud** es el **ecosistema documental universitario** que proporciona trazabilidad legal inmutable y homologación automática de notas, a diferencia del sistema actual (papel y email) que no ofrece ni auditoría ni automatización.
+> Para **estudiantes y docentes de la UMSS** que hoy pierden tiempo en filas presenciales y no tienen garantía de integridad en sus documentos, **SimonCloud** es el **ecosistema documental universitario** que proporciona trazabilidad legal inmutable mediante certificados SHA-256 y entregas verificadas vía SimonDrop integrado al LMS, a diferencia del sistema actual (papel y email) que no ofrece ni auditoría ni automatización.
 
 ### 6.3 Ventaja competitiva sostenible
 - **Integración nativa con WebSISS SSO**: ningún competidor externo puede ofrecer autenticación institucional sin acuerdo formal con la UMSS.
@@ -78,7 +80,38 @@ Para los estudiantes y personal de la UMSS que sufren por la desorganización do
 - **Para la UMSS**: Transparencia, menor uso de papel y reducción de carga operativa.
 
 ## 8. Pricing y modelo de negocio
-- El ecosistema es un SaaS institucional (financiado por la universidad). El servicio al estudiante se apalanca en el presupuesto de infraestructura tecnológica ya existente.
+
+### 8.1 Modelo de cuotas de usuario (transversal a todos los tiers)
+
+| Plan | Almacenamiento | Precio | Método de pago |
+|------|---------------|--------|----------------|
+| **Freemium** | 15 GB | $0 | Incluido con cuenta institucional |
+| **Pro** | 50 GB | Bs. 20/mes (~$3) | QR Simple Bolivia |
+
+El plan Freemium se activa automáticamente al autenticarse con el SSO de la institución. El upgrade a Pro es individual y voluntario.
+
+### 8.2 Tiers institucionales (modelo SCaaS)
+
+SimonCloud opera bajo tres modelos de despliegue según la capacidad de la institución cliente:
+
+| Tier | Cliente tipo | Modelo | Infraestructura | Soberanía de datos |
+|------|-------------|--------|-----------------|-------------------|
+| **Tier 1 — On-Premise** | UMSS y universidades grandes con DTIC propio | Licencia + soporte | Servidores propios de la institución | Total — datos nunca salen de la universidad |
+| **Tier 2 — SCaaS Federado** | Universidades medianas sin DTIC (UCB, UPSA, etc.) | SaaS anual | Servidores UMSS / SimonCloud | Alta — datos en Bolivia, custodia compartida |
+| **Tier 3 — SCaaS Cloud** | Institutos pequeños, sin infraestructura | SaaS mensual | Cloud (Supabase / AWS sa-east-1) | Media — datos en región latinoamericana |
+
+**Nota sobre Tier 2**: la institución cliente aporta su propio SSO para autenticación. SimonCloud consume ese IdP y crea un tenant aislado. Los datos del tenant nunca se mezclan con los de UMSS.
+
+**Nota sobre Tier 3**: aplica para instituciones que no pueden mantener servidores y aceptan explícitamente que sus datos residan en infraestructura cloud de terceros. Se recomienda comunicar esta diferencia al cliente durante el contrato.
+
+### 8.3 Revenue model resumido
+
+```
+UMSS (Tier 1):         Contrato institucional + soporte técnico anual
+Otras Universidades:   Licencia SCaaS/año por número de usuarios activos
+Institutos (Tier 3):   Suscripción mensual por GB almacenado
+Usuarios Pro:          Bs. 20/mes via QR Simple Bolivia
+```
 
 ## 9. *Go-to-market*
 - **Canal de adquisición**: Portales web de la universidad, centros de estudiantes.

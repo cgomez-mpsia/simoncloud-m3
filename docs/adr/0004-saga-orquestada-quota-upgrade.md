@@ -15,7 +15,7 @@ El upgrade de cuota (FSD-UC-003) involucra 3 microservicios (quota-service, paym
 
 ## Decisión
 
-Usar una **Saga Orquestada** con **AWS Step Functions** como orquestador.
+Usar una **Saga Orquestada** con **Temporal.io (self-hosted on-premise)** como orquestador.
 
 - **Transacción Compensable**: `quota-service` reserva el upgrade en estado `PENDING`. Si falla, se cancela con `CancelUpgradeRequest`.
 - **Transacción Pivote**: Validación del webhook `payment.confirmed` con HMAC. Punto de no retorno.
