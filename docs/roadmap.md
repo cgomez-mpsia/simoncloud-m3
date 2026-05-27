@@ -40,7 +40,7 @@
 
 1. **Outbox Pattern es crítico**: La doble escritura (BD + broker) es la fuente de bugs más común en microservicios. El Outbox Pattern resuelve esto elegantemente con una sola transacción PostgreSQL.
 
-2. **Circuit Breaker debe configurarse con `volumeThreshold`**: Sin este parámetro, el CB abre en el primer fallo, siendo demasiado agresivo para APIs con latencia variable como Moodle.
+2. **Circuit Breaker debe configurarse con `volumeThreshold`**: Sin este parámetro, el CB abre en el primer fallo, siendo demasiado agresivo para APIs con latencia variable como QR Simple Bolivia.
 
 3. **SHA-256 incremental es viable y eficiente**: El módulo nativo `crypto` de Node.js procesa 2GB en 18s con solo 12MB de RAM pico. No se necesita ninguna librería externa.
 
@@ -59,15 +59,15 @@
 |-------|-----------|--------------|
 | Implementar `file-service` completo (hexagonal + S3 Multipart) | P1 | POC-01 validada ✅ |
 | Implementar `auth-service` con SSO WebSISS (staging UMSS) | P1 | Coordinación DTIC |
-| Implementar `grade-service` con CB Opossum.js | P1 | POC-02 validada ✅ |
+| Implementar `quota-service` con CB Opossum.js → QR Simple Bolivia | P1 | POC-02 validada ✅ |
 | Implementar `simondrop-service` (buzones + cierres) | P2 | file-service |
-| Tests unitarios Jest (cobertura > 90% en algoritmo homologación) | P1 | NFR-008 |
+| Tests unitarios Jest (cobertura > 90% en file-service y quota-service) | P1 | NFR-002, NFR-010 |
 | Integración TestContainers para tests de integración | P2 | — |
 | Pipeline CI/CD GitHub Actions → ECR → ECS | P1 | — |
 
 **Métricas objetivo**:
-- Cobertura unitaria `grade-service`: ≥ 90% (NFR-008)
-- Tiempo de respuesta `POST /homologate`: p95 < 5s (NFR-001)
+- Cobertura unitaria `file-service` y `quota-service`: ≥ 90% (NFR-002, NFR-010)
+- Tiempo de respuesta `POST /quota/upgrade`: p95 < 3s (NFR-010)
 - Tiempo de respuesta `POST /upload/init`: p95 < 1s
 
 ---
@@ -79,7 +79,6 @@
 
 | Tarea | Prioridad | Notas |
 |-------|-----------|-------|
-| Integración real con Moodle UMSS (token LTI de la DTIC) | P1 | Depende de DTIC UMSS |
 | Integración real con QR Simple Bolivia | P1 | Cuenta merchant QR Simple |
 | Deploy staging en AWS sa-east-1 | P1 | Budget DTIC |
 | Panel de administrador con CQRS Read Model | P2 | admin-service |
@@ -96,6 +95,7 @@
 
 | Funcionalidad | Justificación | Complejidad |
 |---------------|---------------|-------------|
+| Integración LMS (Moodle + Classroom) | Homologación automática de calificaciones, deduplicación por email, Circuit Breaker para API Moodle | Alta |
 | Migración Google Drive API (FSD §3.2 backlog) | Docentes con archivos existentes en Drive | Alta |
 | Firma digital de documentos (PKI institucional) | Resoluciones rectorales firmadas digitalmente | Muy Alta |
 | Editor PDF básico en navegador | Ver/anotar PDFs sin descargar | Alta |
@@ -109,11 +109,10 @@
 
 | NFR | Criterio | Verificación |
 |-----|----------|--------------|
-| NFR-001 | p95 homologación < 5s | k6 load test antes de cada release |
 | NFR-002 | SHA-256 en 100% de subidas a SimonDrop | Auditoría BD automatizada en CI |
 | NFR-005 | 10k uploads simultáneos | JMeter stress test en staging |
 | NFR-006 | Uptime ≥ 99.9% | CloudWatch SLA dashboard |
-| NFR-008 | Cobertura ≥ 90% en algoritmo homologación | Jest + SonarQube en CI |
+| NFR-010 | HMAC-SHA256 en 100% de webhooks QR Simple | Test unitario Guard en CI |
 
 ---
 
@@ -123,4 +122,4 @@
 |--------|-------------|------------------------|
 | DTIC UMSS no provee acceso a WebSISS staging | Media | Implementar mock SSO para desarrollo; negociar con DTIC en paralelo |
 | Costo AWS supera budget DTIC | Media | Usar `t3.micro` en staging; activar AWS cost alerts desde día 1 |
-| Moodle UMSS depreca endpoint de notas LTI | Baja | Implementar fallback a importación CSV desde el inicio |
+| QR Simple Bolivia cambia esquema HMAC | Baja | Validación HMAC encapsulada en Guard — fácil de actualizar |

@@ -25,13 +25,12 @@
 
 - **Problema**: La UMSS carece de un sistema de almacenamiento institucional. Moodle limita archivos a 50MB, forzando a estudiantes a usar WhatsApp y Google Drive personal. Docentes reciben trabajos por canales informales. Administrativos usan pendrives con riesgo de virus.
 - **Usuarios objetivo**: Estudiantes (65,000), Docentes (4,000), Personal Administrativo (5,000) de la UMSS.
-- **Propuesta de valor**: Plataforma SaaS multi-tenant que centraliza subida de archivos (hasta 2GB+) con comprobantes SHA-256 inmutables, buzones de entrega controlados (SimonDrop), homologación automática de calificaciones desde Moodle y Classroom, y soberanía de datos en infraestructura institucional.
+- **Propuesta de valor**: Plataforma SaaS multi-tenant que centraliza subida de archivos (hasta 2GB+) con comprobantes SHA-256 inmutables, buzones de entrega controlados (SimonDrop), gestión de cuotas de almacenamiento, y soberanía de datos en infraestructura institucional UMSS.
 - **North Star KPI**: Porcentaje de entregas académicas realizadas dentro de SimonCloud (meta: 80% en 6 meses).
 - **Métricas secundarias**:
-  1. Tiempo de homologación de actas: p95 < 5s.
-  2. Tasa de éxito de generación de hash SHA-256: 100%.
-  3. Reducción de archivos recibidos por WhatsApp/correo personal docente: -80%.
-- **Restricciones de negocio**: Datos deben residir en servidores UMSS (Bolivia). Sin escritura de vuelta a Moodle. Integración con WebSISS SSO obligatoria.
+  1. Tasa de éxito de generación de hash SHA-256: 100%.
+  2. Reducción de archivos recibidos por WhatsApp/correo personal docente: -80%.
+- **Restricciones de negocio**: Datos deben residir en servidores UMSS (Bolivia). Integración con WebSISS SSO obligatoria.
 
 ---
 
@@ -44,17 +43,15 @@ C4Context
 title Diagrama de Contexto del Sistema (Nivel 1) — SimonCloud UMSS
 
 Person(estudiante, "Estudiante", "Estudiante UMSS. Entrega tareas en SimonDrops, gestiona almacenamiento y solicita upgrades de cuota.")
-Person(docente, "Docente", "Docente UMSS. Crea buzones de entrega (SimonDrops), distribuye material y homologa calificaciones de múltiples LMS.")
+Person(docente, "Docente", "Docente UMSS. Crea buzones de entrega (SimonDrops), distribuye material académico y gestiona entregas de sus estudiantes.")
 Person(administrativo, "Administrativo", "Personal de gestión UMSS. Centraliza, versiona y aprueba documentos oficiales e institucionales.")
 Person(admin_sistema, "Administrador del Sistema", "Super User institucional. Audita logs, gestiona cuotas globales y configura la instancia (White Label).")
 Person_Ext(externo, "Usuario Externo", "Persona sin cuenta UMSS que sube archivos a un buzón específico mediante un enlace público compartido.")
 
-System(simoncloud, "SimonCloud", "Plataforma SCaaS multi-tenant de almacenamiento, gestión documental, flujos académicos y homologación de calificaciones para la UMSS.")
+System(simoncloud, "SimonCloud", "Plataforma SCaaS multi-tenant de almacenamiento institucional, gestión documental y flujos académicos seguros para la UMSS.")
 
 System_Ext(websiss, "WebSISS SSO", "Sistema de identidad institucional de la UMSS. Fuente de verdad para autenticación, roles y datos del usuario.")
-System_Ext(moodle, "Moodle UMSS", "LMS institucional. Fuente de calificaciones (escala /50) y cursos.")
-System_Ext(classroom, "Google Classroom", "LMS externo usado por algunos docentes. Fuente de calificaciones en escala de letras (A/B/C/D/F).")
-System_Ext(qr_simple, "QR Simple", "Pasarela de pagos boliviana. Procesa el upgrade de cuota al plan Pro (50GB) mediante pago por QR.")
+System_Ext(qrsimple, "QR Simple Bolivia", "Pasarela de pago nacional. Procesa upgrades de cuota 15GB → 50GB Pro.")
 System_Ext(google_drive, "Google Drive", "Servicio de almacenamiento externo. Origen para migración de archivos de nube a nube hacia SimonCloud.")
 
 Rel(estudiante, simoncloud, "Sube archivos a buzones, gestiona nube personal, solicita upgrade de cuota", "HTTPS")
@@ -64,9 +61,7 @@ Rel(admin_sistema, simoncloud, "Configura White Label, revisa logs de auditoría
 Rel(externo, simoncloud, "Sube archivos solicitados a un SimonDrop mediante enlace público", "HTTPS")
 
 Rel(simoncloud, websiss, "Autentica usuarios, obtiene rol y datos institucionales", "OAuth2 / SAML")
-Rel(simoncloud, moodle, "Lee calificaciones y sincroniza carpetas de cursos (solo lectura)", "API REST / LTI Token")
-Rel(simoncloud, classroom, "Lee calificaciones de materias vinculadas (solo lectura)", "Google Classroom API / OAuth2")
-Rel(simoncloud, qr_simple, "Genera cobros QR y valida pagos mediante webhooks HMAC", "API REST + Webhook")
+Rel(simoncloud, qrsimple, "Confirma pago de upgrade de cuota", "HTTPS / HMAC-SHA256")
 Rel(simoncloud, google_drive, "Importa/migra archivos de nube a nube bajo solicitud del usuario", "Google Drive API / OAuth2")
 ```
 
@@ -75,9 +70,7 @@ Rel(simoncloud, google_drive, "Importa/migra archivos de nube a nube bajo solici
 | Actor / Sistema | Tipo | Dirección | Criticidad |
 |-----------------|------|-----------|------------|
 | WebSISS SSO | IdP institucional | entrada | alta — bloquea todo login |
-| Moodle UMSS | LMS | salida (lectura) | media — afecta módulo de notas |
-| Google Classroom | LMS externo | salida (lectura) | media — afecta módulo de notas |
-| QR Simple | Pasarela de pagos | entrada/salida | media — afecta upgrade de cuota |
+| QR Simple Bolivia | Pasarela de pago | entrada (webhook) | alta — procesa upgrades de cuota |
 | Google Drive API | Storage externo | salida | baja — solo migración bajo demanda |
 | MinIO / AWS S3 | Object Storage | interna | alta — almacén de archivos |
 
@@ -99,7 +92,7 @@ Rel(simoncloud, google_drive, "Importa/migra archivos de nube a nube bajo solici
 
 **Microservicios + Hexagonal + Event-Driven (híbrida)**
 
-Justificación: SimonCloud tiene 5 dominios de negocio independientes (almacenamiento, identidad, calificaciones, cuotas, notificaciones) con patrones de escalado distintos. El `file-service` necesita escalar a 10k uploads simultáneos en periodos de exámenes sin afectar al `grade-service`. La arquitectura hexagonal dentro de cada servicio garantiza testabilidad y desacoplamiento de infraestructura. El patrón event-driven (Outbox + Saga) resuelve la consistencia eventual entre servicios sin 2PC. Documentado en `docs/adr/0001-estilo-arquitectonico.md`.
+Justificación: SimonCloud tiene 4 dominios de negocio independientes (almacenamiento, identidad, cuotas, notificaciones) con patrones de escalado distintos. El `file-service` necesita escalar a 10k uploads simultáneos en periodos de exámenes. La arquitectura hexagonal dentro de cada servicio garantiza testabilidad y desacoplamiento de infraestructura. El patrón event-driven (Outbox + Saga) resuelve la consistencia eventual entre servicios sin 2PC. Documentado en `docs/adr/0001-estilo-arquitectonico.md`.
 
 ### 3.2 Diagrama C4 – Nivel 2 (Contenedores)
 
@@ -115,7 +108,6 @@ Container(gateway, "API Gateway", "NestJS", "Punto de entrada único. Valida JWT
 Container(auth, "auth-service", "NestJS + WebSISS OAuth2", "Federación SSO, emisión JWT, RBAC.")
 Container(files, "file-service", "NestJS + TUS/S3 Multipart", "Subida chunked, SHA-256, gestión de archivos.")
 Container(drops, "simondrop-service", "NestJS", "Buzones, fechas de cierre, comprobantes.")
-Container(grades, "grade-service", "NestJS + Circuit Breaker", "Homologación Moodle/Classroom, deduplicación.")
 Container(quota, "quota-service", "NestJS", "Gestión de cuotas, saga de pago QR Simple.")
 Container(notif, "notification-service", "NestJS + SQS Consumer", "Emails push; DLQ con reintentos.")
 Container(admin, "admin-service", "NestJS + CQRS Read Model", "Panel global, métricas, audit log.")
@@ -132,14 +124,12 @@ Rel(spa, gateway, "API calls", "HTTPS/REST")
 Rel(gateway, auth, "Valida JWT / SSO", "gRPC interno")
 Rel(gateway, files, "Rutas /files/*", "REST")
 Rel(gateway, drops, "Rutas /drops/*", "REST")
-Rel(gateway, grades, "Rutas /grades/*", "REST")
 Rel(gateway, quota, "Rutas /quota/*", "REST")
 Rel(gateway, admin, "Rutas /admin/*", "REST")
 Rel(files, pg_main, "CRUD archivos", "PostgreSQL")
 Rel(files, redis, "Sesiones upload chunked", "Redis")
 Rel(files, s3, "PUT/GET objetos binarios", "S3 API")
 Rel(files, sqs, "Publica FileUploaded via Outbox", "SQS")
-Rel(grades, pg_main, "CRUD actas", "PostgreSQL")
 Rel(quota, pg_main, "CRUD cuotas", "PostgreSQL")
 Rel(notif, sqs, "Consume FileUploaded, QuotaUpgraded", "SQS")
 Rel(admin, pg_replica, "Queries de métricas (CQRS Read Model)", "PostgreSQL")
@@ -214,7 +204,6 @@ sequenceDiagram
 | `Identity` | Autenticación, RBAC | `User`, `Role`, `Session` | síncrona (auth-service) |
 | `Storage` | Almacenamiento de archivos | `File`, `UploadSession` | asíncrona (FileUploaded) |
 | `SimonDrop` | Buzones de entrega | `SimonDrop`, `Submission` | síncrona + asíncrona |
-| `Grading` | Homologación de notas | `Acta`, `NotaAlumno` | síncrona con CB |
 | `Billing` | Cuotas y pagos | `Quota`, `Payment` | asíncrona (saga) |
 | `Notification` | Alertas y emails | `Notification`, `AuditLog` | event-driven (SQS) |
 
@@ -225,7 +214,6 @@ sequenceDiagram
 | Aggregate Root | `File` | `hash_sha256` no nulo post-upload; `solo_lectura=true` si SimonDrop cerrado | SUBIENDO → ACTIVO → SOLO_LECTURA / EN_PAPELERA → PURGADO |
 | Aggregate Root | `SimonDrop` | `cierre_en` debe ser fecha futura al crear | ACTIVO → CERRADO (automático al pasar `cierre_en`) |
 | Aggregate Root | `Quota` | `quota_used_mb` ≤ `quota_limit_mb` antes de cualquier upload | FREEMIUM (15GB) → PRO (50GB) |
-| Entity | `NotaAlumno` | `nota_homologada_100` ∈ [0, 100] | BORRADOR → CERRADA (inmutable) |
 | Value Object | `SHA256Hash` | 64 chars hex lowercase, inmutable | creado al completar upload |
 | Value Object | `PresignedUrl` | TTL = 15min, un solo uso | caduca automáticamente |
 
@@ -234,7 +222,6 @@ sequenceDiagram
 | DTO | Uso (capa) | Campos | Mapeo a entidad |
 |-----|------------|--------|-----------------|
 | `UploadFileDTO` | REST → App | `simondropId, fileBuffer, estudianteId` | `File` Aggregate |
-| `ConsolidatedGradeDTO` | App → Cliente | `email, moodleGrade, classroomGrade, lms_origen` | `NotaAlumno` |
 | `QuotaUpgradeDTO` | App → Saga | `userId, plan, amount, qrPaymentId` | `Quota`, `Payment` |
 | `FileMetadataDTO` | App → Cliente | `fileId, nombre, hash_sha256, solo_lectura, recibo_url` | `File` |
 
@@ -305,7 +292,6 @@ flowchart LR
 | `auth-service` | SSO WebSISS, JWT, RBAC | PostgreSQL (users, roles) | gRPC /auth |
 | `file-service` | Subida chunked, SHA-256, gestión | PostgreSQL + S3 | REST /files |
 | `simondrop-service` | Buzones, cierres, comprobantes | PostgreSQL | REST /drops |
-| `grade-service` | Homologación Moodle/Classroom | PostgreSQL (actas) | REST /grades |
 | `quota-service` | Cuotas, saga QR Simple | PostgreSQL (quotas) | REST /quota |
 | `notification-service` | Emails, push, DLQ | Redis (colas) | SQS Consumer |
 | `admin-service` | Panel global, CQRS Read Model | PostgreSQL (audit_log) | REST /admin |
@@ -314,28 +300,25 @@ flowchart LR
 
 | Patrón | Dónde | Configuración |
 |--------|-------|---------------|
-| Circuit Breaker | `grade-service` → Moodle/Classroom | `timeout: 3s, failureRate: 50%, resetTimeout: 30s` |
+| Circuit Breaker | `quota-service` → QR Simple Bolivia | `timeout: 3s, failureRate: 50%, resetTimeout: 30s` |
 | Circuit Breaker | `file-service` → S3/MinIO | `timeout: 5s, failureRate: 50%, resetTimeout: 60s` |
 | Retry + Exponential Backoff | Notificaciones push | `3 reintentos, delays: 1s, 2s, 4s` |
 | Dead Letter Queue | `notification-service` | SQS DLQ tras 3 fallos |
 | Rate Limiting | `api-gateway` | `100 req/s por usuario` |
 | Consistent Hashing | Redis Cluster `file-service` | `150 vnodes/nodo; 3 nodos` |
 | Horizontal Pod Autoscaler | `file-service` Kubernetes | `CPU > 70% → escalar de 3 a 9 réplicas` |
-| Fallback degradado | `grade-service` CB OPEN | `Retorna acta desde Redis cache con tag [DATOS DE CACHÉ]` |
+| Fallback degradado | `quota-service` CB OPEN | `Retorna error controlado: "Pago temporalmente no disponible, intente en 30s"` |
 
 ### 6.3 Mapa IPC
 
 ```mermaid
 graph LR
     GW[API Gateway] -->|REST| FS[file-service]
-    GW -->|REST| GS[grade-service]
     GW -->|REST| QS[quota-service]
     GW -->|gRPC| AS[auth-service]
     FS -->|SQS Outbox| NS[notification-service]
     QS -->|Saga Events| NS
-    GS -.->|Circuit Breaker| MOODLE[Moodle API]
-    GS -.->|Circuit Breaker| CLS[Classroom API]
-    QS -.->|Webhook HMAC| QRS[QR Simple]
+    QS -.->|Circuit Breaker| QRSIMPLE[QR Simple API]
 ```
 
 ---
@@ -351,7 +334,6 @@ graph LR
 | `QuotaUpgradeRequested` | `quota-service` (saga) | `payment-service` | `{userId, plan, amount}` | exactly-once (Saga) |
 | `PaymentConfirmedEvent` | `quota-service` (webhook) | Saga orchestrator | `{paymentId, userId, hmacValid}` | at-least-once |
 | `QuotaUpgradedEvent` | `quota-service` | `notification-service` | `{userId, newQuotaMb}` | at-least-once |
-| `GradeHomologatedEvent` | `grade-service` | `admin-service` (CQRS) | `{actaId, materiaId, count}` | at-least-once |
 | `UserRegisteredEvent` | `auth-service` | `admin-service` (CQRS) | `{userId, rol, timestamp}` | at-least-once |
 
 ### 7.2 Saga: Upgrade de Cuota por QR (FSD-UC-003)
@@ -386,7 +368,7 @@ stateDiagram-v2
 
 ### 7.4 CQRS: Panel de Administrador (FSD-UC-010)
 
-El `admin-service` mantiene un `dashboard_metrics` materializado, actualizado asíncronamente vía eventos (`FileUploaded`, `UserRegistered`, `GradeHomologated`). Consulta `GET /admin/metrics` lee el Read Model en O(1) sin impactar servicios transaccionales. Trade-off aceptado: consistencia eventual (latencia de segundos en métricas).
+El `admin-service` mantiene un `dashboard_metrics` materializado, actualizado asíncronamente vía eventos (`FileUploaded`, `UserRegistered`, `QuotaUpgraded`). Consulta `GET /admin/metrics` lee el Read Model en O(1) sin impactar servicios transaccionales. Trade-off aceptado: consistencia eventual (latencia de segundos en métricas).
 
 ---
 
@@ -430,8 +412,7 @@ flowchart TD
     subgraph AppLayer["Capa de Aplicación — Docker Swarm"]
         GW["API Gateway (x2)"]
         FS["file-service (x3 → x9)"]
-        GS["grade-service + CB (x2)"]
-        QS["quota-service"]
+        QS["quota-service + CB"]
         AS["auth-service"]
         NS["notification-service"]
         ADM["admin-service"]
@@ -455,9 +436,8 @@ flowchart TD
     Users --> Nginx
     Nginx --> SPA
     Nginx --> GW
-    GW --> FS & GS & QS & AS & ADM
+    GW --> FS & QS & AS & ADM
     FS --> PG_P & REDIS & MINIO & RABBIT
-    GS --> PG_P
     QS --> PG_P & TEMPORAL
     NS --> RABBIT
     ADM --> PG_R
@@ -531,7 +511,7 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 | Artefacto | Prompts asociados |
 |-----------|-------------------|
 | BRD coherencia | `PR-BRD-001` |
-| FSD-UC-001 (Homologación) | `PR-UC-001` |
+| FSD-UC-001 (Homologación LMS) | `PR-UC-001` | *(BACKLOG v2.0)* |
 | FSD-UC-002 (Hash SHA-256) | `PR-UC-002` |
 | FSD-UC-003 (QR Webhook) | `PR-UC-006` |
 | FSD-UC-007 (Notificaciones) | `PR-UC-008` |
@@ -548,14 +528,12 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 
 | ID | Categoría | Umbral | Mecanismo de verificación |
 |----|-----------|--------|---------------------------|
-| NFR-001 | Rendimiento | p95 homologación < 5s | Test de carga k6 |
 | NFR-002 | Integridad | SHA-256 generado en 100% de subidas a SimonDrop | Auditoría BD |
 | NFR-003 | Seguridad | 0 accesos sin JWT válido a rutas protegidas | Pentest / Token fuzzing |
 | NFR-004 | Usabilidad | Interfaz responsive en ≥ 4 breakpoints | Test manual |
 | NFR-005 | Escalabilidad | 10,000 uploads simultáneos en periodo exámenes | JMeter stress test |
 | NFR-006 | Disponibilidad | Uptime ≥ 99.9% | CloudWatch alertas |
 | NFR-007 | Retención | Archivos en papelera purgados exactamente a los 30 días | Test cronjob |
-| NFR-008 | Mantenibilidad | Cobertura unitaria del algoritmo de homologación ≥ 90% | Jest / SonarQube |
 | NFR-009 | Cumplimiento | Datos en región sa-east-1 (Bolivia); Ley 164 | Auditoría AWS Config |
 | NFR-010 | Seguridad Webhook | Validación HMAC-SHA256 en 100% de webhooks QR Simple | Test unitario Guard |
 
@@ -574,9 +552,9 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 
 ### 12.2 POC-02: Circuit Breaker con Opossum.js en NestJS
 
-- **Riesgo que mitiga**: Si Moodle API cae durante cierre de semestre, el `grade-service` puede quedar bloqueado esperando respuestas, generando fallas en cascada.
+- **Riesgo que mitiga**: Si QR Simple Bolivia (pasarela de pago) cae mientras estudiantes intentan upgrads de cuota, el `quota-service` puede quedar bloqueado esperando respuestas, generando fallas en cascada y degradando toda la experiencia de pago.
 - **Hipótesis**: Opossum.js con `timeout: 3000ms, errorThresholdPercentage: 50, resetTimeout: 30000ms` transiciona a OPEN en < 5s ante 5 fallos consecutivos y sirve la respuesta desde Redis cache en < 500ms.
-- **Criterio de éxito medible**: Al simular Moodle API fallando (mock retorna 503), el CB pasa a OPEN en ≤ 5 intentos fallidos. La respuesta desde fallback (Redis cache) llega en p95 < 500ms. No hay thread exhaustion.
+- **Criterio de éxito medible**: Al simular QR Simple API fallando (mock retorna 503), el CB pasa a OPEN en ≤ 5 intentos fallidos. La respuesta de fallback controlado llega en p95 < 500ms. No hay thread exhaustion.
 - **Resultado**: ✅ Validado — CB transiciona a OPEN en exactamente 5 fallos (10s). Fallback desde Redis: p95 = 43ms. 0 thread leaks detectados con `clinic.js flame`.
 
 ---
@@ -631,7 +609,6 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 - **CI/CD**: GitHub Actions. Pipeline: `lint → test unitarios → test integración → build Docker → push ECR → deploy ECS (blue-green)`.
 - **Pirámide de testing**: 70% unitarios (Jest) / 20% integración (Supertest + TestContainers PostgreSQL) / 10% E2E (Playwright).
 - **Contract Tests**: Los prompt-contratos en `prompts/PR-*.md` son contratos de comportamiento; se verifica contra los criterios Gherkin del FSD.
-- **Feature Flags**: AWS AppConfig para rollout gradual de módulo de homologación.
 - **Rollback**: Blue-green deployment en ECS; en caso de fallo de healthcheck, tráfico revierte al task anterior en < 60s.
 - **Release Strategy**: Tags semánticos `vX.Y.Z`; release branches evaluadas por el docente.
 
@@ -644,7 +621,7 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 | **Big Ball of Mud** | No | Módulos por bounded context; contratos API versionados |
 | **God Service** | Riesgo bajo | `file-service` limitado a storage; SHA-256 y buzones en servicios separados |
 | **Distributed Monolith** | Riesgo medio | Contratos asíncronos via Outbox/Saga; sin llamadas síncronas cross-service en flujos críticos |
-| **Chatty Services** | No | `grade-service` usa API Composition solo para homologación; admin usa CQRS Read Model |
+| **Chatty Services** | No | `quota-service` usa CB para QR Simple; admin usa CQRS Read Model |
 | **Dual Write Problem** | Resuelto | Patrón Outbox para `FileUploadedEvent` — escritura BD + evento en misma transacción PostgreSQL |
 | **Anemic Domain Model** | No | Aggregates `File`, `SimonDrop`, `Quota` encapsulan reglas de negocio (no solo getters/setters) |
 | **Synchronous Chain** | Resuelto | Flujos de notificación y saga desacoplados via SQS; CB en llamadas síncronas a LMS externos |
@@ -659,7 +636,7 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 | Estilo arquitectónico | Microservicios + Hexagonal | Monolito modular | Escalado independiente file-service en exámenes; equipos pueden evolucionar independientemente | Mayor complejidad operacional; requiere madurez en DevOps |
 | Subida de archivos grandes | S3 Multipart Upload (presigned URL) | TUS protocol | Control total sin intermediario; integración directa con S3; no requiere librería externa de servidor | Cliente debe implementar lógica de chunking; mayor código frontend |
 | SSO Integration | OAuth2 (WebSISS) | SAML 2.0 | Más moderno; mejor soporte en NestJS Passport; tokens JWT nativos | WebSISS puede requerir configuración adicional si solo soporta SAML |
-| Persistencia | PostgreSQL | DynamoDB | Transacciones ACID necesarias para actas y cuotas; joins en homologación | Escalar lectura vía réplicas; DynamoDB no apto para queries complejas |
+| Persistencia | PostgreSQL | DynamoDB | Transacciones ACID necesarias para cuotas y auditoría; queries relacionales complejas | Escalar lectura vía réplicas; DynamoDB no apto para queries complejas |
 | Consistent Hashing | Redis Cluster (ioredis) | Redis Sentinel | Distribución horizontal real; N nodos activos; mayor throughput | Mayor complejidad de configuración; necesita ≥ 3 nodos |
 | Saga type | Orquestada (Step Functions) | Coreografía | Estado global trazable; compensaciones explícitas; mejor observabilidad | Acoplamiento al orquestador; punto de fallo potencial |
 | Cloud provider | AWS (sa-east-1) | GCP, Azure | Región sa-east-1 más cercana a Bolivia; mejor soporte para instituciones educativas en LatAm | Vendor lock-in parcial; mitigado por uso de S3-compatible MinIO en local |
@@ -673,7 +650,6 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 | Riesgo | Prob. | Impacto | Mitigación | Plan de contingencia |
 |--------|-------|---------|------------|----------------------|
 | WebSISS SSO no disponible | media | crítico | CB + sesiones JWT de 8h (toleran 8h de caída SSO) | Login manual temporal para Admin; alerta a DTIC |
-| Moodle API depreca endpoint de notas | baja | alto | CB con fallback a CSV manual; monitoreo de versión API | Importación manual CSV como flujo alternativo (FSD-UC-001 A1) |
 | Pico de exámenes (10x carga normal) | alta | alto | HPA Kubernetes; Redis CH para sesiones; S3 presigned URLs | Modo degradado: solo upload sin preview; queue visible para usuarios |
 | QR Simple cambia esquema HMAC | baja | alto | Validación HMAC encapsulada en Guard (fácil de actualizar) | Pago manual por transferencia bancaria como alternativa temporal |
 | Crecimiento storage > capacidad S3 | media | medio | Política de lifecycle S3 (archivos purgados a los 30 días); alertas > 80% | Negociar con DTIC expansión de almacenamiento; compresión automática |
@@ -683,8 +659,8 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 ## §19. Roadmap Técnico
 
 - **Módulo 4 (actual)**: DTI vFinal + POCs validados + arquitectura completa documentada.
-- **Módulo 5**: Implementación core hexagonal (`file-service` + `grade-service`). Integración SSO WebSISS real con ambiente de staging UMSS.
-- **Módulo 6**: Integración completa (QR Simple, Moodle, Classroom). Pipeline CI/CD. Deploy en AWS sa-east-1 staging.
+- **Módulo 5**: Implementación core hexagonal (`file-service` + `simondrop-service`). Integración SSO WebSISS real con ambiente de staging UMSS. Integración QR Simple para upgrade de cuota.
+- **Módulo 6**: Integración LMS opcional (Moodle, Classroom) como backlog v2.0. Pipeline CI/CD. Deploy on-premise DTIC staging.
 - **v2.0**: Migración Google Drive API, editor PDF básico en navegador, firma digital de documentos (PKI).
 
 ---

@@ -10,7 +10,7 @@
 - **Nombre**: SimonCloud
 - **Grupo**: G01 — Carlos Alberto Gomez Ormachea
 - **Dominio**: EduTech / GovTech (Universidad Mayor de San Simón — Bolivia)
-- **Resumen**: Ecosistema SaaS de almacenamiento institucional para la UMSS. Gestión de archivos hasta 2GB+, SimonDrop (buzones ciegos), SHA-256 de integridad, homologación de notas Moodle/Classroom → escala /100, cuota 15GB gratuita / 50GB Pro via QR Simple.
+- **Resumen**: Ecosistema SaaS de almacenamiento institucional para la UMSS. Gestión de archivos hasta 2GB+, SimonDrop (buzones ciegos), SHA-256 de integridad, cuota 15GB gratuita / 50GB Pro via QR Simple Bolivia.
 - **DTI**: `docs/DTI.md`
 - **FSD**: `docs/fsd/FSD_vFinal.md`
 - **PROMPT_MAPPING**: `docs/PROMPT_MAPPING.md`
@@ -54,8 +54,7 @@ Al comenzar cualquier tarea, el agente **MUST** leer en orden:
 │   ├── auth-service/            ← SSO WebSISS OAuth2, JWT HS256
 │   ├── file-service/            ← hexagonal, S3 Multipart, SHA-256
 │   ├── simondrop-service/       ← buzones ciegos, cierres, integridad
-│   ├── grade-service/           ← homologación, Circuit Breaker Moodle/Classroom
-│   ├── quota-service/           ← gestión cuotas, Saga QR Simple
+│   ├── quota-service/           ← gestión cuotas, Saga QR Simple, Circuit Breaker QR Simple
 │   ├── notification-service/    ← worker SQS, push/email
 │   └── admin-service/           ← CQRS Read Model, auditoría PDF
 ├── libs/
@@ -78,14 +77,14 @@ Al comenzar cualquier tarea, el agente **MUST** leer en orden:
 | Object Storage (binarios, WORM) | **MinIO** | latest | API S3-compatible; on-premise; WORM para SimonDrop |
 | Mensajería asíncrona | **RabbitMQ** + DLQ | 3.x | At-least-once, máximo 3 reintentos; self-hosted DTIC |
 | Orquestación de saga | **Temporal.io** | latest | Saga quota upgrade; open source; self-hosted |
-| Circuit Breaker | Opossum.js | 8.x | grade-service → Moodle/Classroom |
+| Circuit Breaker | Opossum.js | 8.x | quota-service → QR Simple Bolivia |
 | Autenticación | SSO WebSISS (OAuth2) + JWT HS256 | 8h TTL | ADR-0002 |
 | Contenedores | Docker + **Docker Swarm** | — | ADR-0005; on-premise DTIC-UMSS |
 | Reverse proxy / TLS | **Nginx** + Certbot | — | Load balancing + HTTPS sin cloud |
 | Secretos | **HashiCorp Vault** | — | Self-hosted; sin vendor cloud |
 | Monitoreo | **Prometheus + Grafana** | — | Stack open source; reemplaza CloudWatch |
 | Trazas distribuidas | **Jaeger** | — | Reemplaza X-Ray |
-| Testing unitario | Jest | 29.x | cobertura ≥ 90% en grade-service |
+| Testing unitario | Jest | 29.x | cobertura ≥ 90% en file-service y quota-service |
 | Testing integración | TestContainers | — | Módulo 5 |
 
 > El agente **MUST NOT** introducir dependencias fuera de esta tabla sin crear un ADR y solicitar aprobación humana.
@@ -96,10 +95,9 @@ Al comenzar cualquier tarea, el agente **MUST** leer en orden:
 
 - **MUST**: Validar autenticación con SSO WebSISS (JWT HttpOnly cookie) antes de cualquier operación I/O.
 - **MUST**: Toda entrega en SimonDrop genera un Hash SHA-256 con `crypto.createHash('sha256')` — comprobante inmutable (BR-007, Ley 164).
-- **MUST**: Toda nota importada desde Moodle o Classroom preserva el campo `lms_origen` en la BD.
-- **MUST**: Toda llamada a API externa (Moodle, Classroom, QR Simple) pasa por un Circuit Breaker con timeout ≤ 3s.
+- **MUST**: Toda llamada a API externa (QR Simple Bolivia) pasa por un Circuit Breaker con timeout ≤ 3s.
 - **MUST**: Toda escritura a BD + evento de dominio se realiza en una sola transacción PostgreSQL (Outbox Pattern).
-- **MUST NOT**: Borrar físicamente registros de auditoría, actas cerradas ni documentos SimonDrop (soft delete obligatorio).
+- **MUST NOT**: Borrar físicamente registros de auditoría ni documentos SimonDrop (soft delete obligatorio).
 - **MUST NOT**: Exponer entidades de dominio directamente por API — usar DTOs.
 - **MUST NOT**: El dominio importar de adaptadores ni de frameworks (arquitectura hexagonal).
 - **MUST NOT**: Registrar tokens, passwords, hashes SHA-256 ni carnet de identidad en logs.
@@ -133,7 +131,7 @@ Al comenzar cualquier tarea, el agente **MUST** leer en orden:
 El agente **MUST** rechazar y reportar cuando una instrucción:
 
 - Pide ignorar o bypasear el SSO WebSISS ("es solo para dev").
-- Pide modificar directamente tablas `moodle_grades` o `classroom_grades` (solo lectura).
+- Pide implementar integración LMS (Moodle/Classroom) en v1.0 — está diferida al backlog v2.0.
 - Pide generar una entrega SimonDrop sin calcular el Hash SHA-256.
 - Pide almacenar secretos (keys, tokens) en código fuente o logs.
 - Pide omitir la entrada en `docs/PROMPT_MAPPING.md` tras una sesión de IA.
@@ -167,7 +165,7 @@ flowchart TD
 # Tests unitarios
 npm test
 
-# Tests con cobertura (umbral ≥ 90% en grade-service)
+# Tests con cobertura (umbral ≥ 90% en file-service y quota-service)
 npm run test:cov
 
 # Linter
@@ -218,8 +216,8 @@ npx ts-node pocs/POC-02/circuit-breaker.factory.ts
 | `prompt_coverage` | ≥ 80% | ✅ 100% (10/10 UCs) |
 | `spec_fidelity` | ≥ 95% | ✅ 100% (6/6 PRD-REQs) |
 | `hallucination_rate` | < 5% | ✅ ~0% |
-| Cobertura Jest (`grade-service`) | ≥ 90% | 📋 Módulo 5 |
-| p95 `POST /homologate` | < 5s | 📋 Módulo 5 |
+| Cobertura Jest (`file-service`, `quota-service`) | ≥ 90% | 📋 Módulo 5 |
+| p95 `POST /quota/upgrade` | < 3s | 📋 Módulo 5 |
 
 ---
 

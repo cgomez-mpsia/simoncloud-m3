@@ -1,28 +1,28 @@
 ---
-title: "Circuit Breaker — grade-service → Moodle API"
+title: "Circuit Breaker — quota-service → QR Simple Bolivia"
 ---
 stateDiagram-v2
-    [*] --> Closed : Sistema inicia (Moodle healthy)
+    [*] --> Closed : Sistema inicia (QR Simple healthy)
 
-    Closed --> Open : ≥ 5 errores consecutivos\no 50% falla en 10s\nllamando a Moodle API
+    Closed --> Open : ≥ 5 errores consecutivos\no 50% falla en 10s\nllamando a QR Simple API
 
     Open --> HalfOpen : Timeout 30s expirado\n(auto-recovery probe)
 
-    HalfOpen --> Closed : Request de prueba exitoso\n(Moodle respondió OK)
+    HalfOpen --> Closed : Request de prueba exitoso\n(QR Simple respondió OK)
 
-    HalfOpen --> Open : Request de prueba falla\n(Moodle aún caído)
+    HalfOpen --> Open : Request de prueba falla\n(QR Simple aún caído)
 
-    Open --> Open : Retorna acta desde\nRedis Cache [DEGRADED]\np95 < 500ms
+    Open --> Open : Retorna error controlado\n"Pago temporalmente no disponible,\nintente en 30s" [DEGRADED]\np95 < 500ms
 
     note right of Closed
         Respuesta normal
-        p95 < 5s (NFR-001)
+        p95 < 3s
     end note
 
     note right of Open
-        Fallback: cache Redis
+        Fallback: error controlado
         0 cascading failures
-        Docente ve [DATOS DE CACHÉ]
+        Estudiante ve mensaje de reintento
     end note
 
     note right of HalfOpen

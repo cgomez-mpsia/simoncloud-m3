@@ -14,8 +14,7 @@ flowchart TD
     subgraph Swarm["Docker Swarm — Capa de Aplicación"]
         GW_T["api-gateway\nx2 réplicas"]
         FS_T["file-service\nx3 → x9\n(periodos exámenes)"]
-        GS_T["grade-service\n+ Circuit Breaker\nx2 réplicas"]
-        QS_T["quota-service\nx1 réplica"]
+        QS_T["quota-service\n+ Circuit Breaker\nx1 réplica"]
         NS_T["notification-service\nRabbitMQ consumer\nx1 réplica"]
         AS_T["auth-service\nSSO WebSISS\nx1 réplica"]
         ADM_T["admin-service\nCQRS Read Model\nx1 réplica"]
@@ -41,7 +40,6 @@ flowchart TD
     Nginx --> SPA
     Nginx --> GW_T
     GW_T --> FS_T
-    GW_T --> GS_T
     GW_T --> QS_T
     GW_T --> AS_T
     GW_T --> ADM_T
@@ -51,7 +49,6 @@ flowchart TD
     FS_T --> MINIO
     FS_T --> RABBIT
     FS_T --> VAULT
-    GS_T --> PG_P
     QS_T --> PG_P
     QS_T --> TEMPORAL
     NS_T --> RABBIT

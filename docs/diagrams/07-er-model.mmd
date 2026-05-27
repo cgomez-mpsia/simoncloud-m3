@@ -8,8 +8,6 @@ erDiagram
     SIMONDROP ||--o{ ARCHIVO : "contiene"
     SIMONDROP ||--o{ SUBMISSION : "recibe"
     SUBMISSION }o--|| ARCHIVO : "referencia"
-    MATERIA ||--o{ ACTA_CONSOLIDADA : "tiene"
-    ACTA_CONSOLIDADA ||--o{ NOTA_ALUMNO : "agrupa"
     ARCHIVO ||--o{ VERSION : "tiene versiones"
     USUARIO ||--o{ AUDIT_LOG : "genera"
 
@@ -53,16 +51,6 @@ erDiagram
         int quota_limit_mb "15360 free | 51200 pro"
         enum plan "FREEMIUM|PRO"
         datetime pro_activado_en
-    }
-
-    NOTA_ALUMNO {
-        uuid id PK
-        uuid acta_id FK
-        string email_alumno
-        float nota_original
-        string escala_origen "50|letras"
-        float nota_homologada_100
-        enum lms_origen "Moodle|Classroom|Ambos"
     }
 
     AUDIT_LOG {

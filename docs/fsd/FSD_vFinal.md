@@ -57,6 +57,9 @@ SimonCloud es una plataforma que proporciona soberanía digital a la UMSS. Funci
 ## 4. Casos de uso funcionales ⚡🔧
 
 ### 4.1 FSD-UC-001 – Homologación de Calificaciones
+
+> **[BACKLOG v2.0]** Este caso de uso se difiere a la versión 2.0. SimonCloud v1.0 gestiona el ciclo de vida de la entrega (upload → SHA-256 → SimonDrop). La homologación de calificaciones LMS es responsabilidad del docente en su LMS. Ver `docs/roadmap.md §v2.0`.
+
 - **Trazabilidad**: PRD-REQ-001, PRD-REQ-003, PRD-REQ-005 → BRD: BR-001, BR-002, BR-003, BR-004
 - **Actor principal**: Docente
 - **Precondiciones**:
