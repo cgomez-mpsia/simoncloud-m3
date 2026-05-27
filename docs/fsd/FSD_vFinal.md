@@ -56,46 +56,63 @@ SimonCloud es una plataforma que proporciona soberanía digital a la UMSS. Funci
 
 ## 4. Casos de uso funcionales ⚡🔧
 
-### 4.1 FSD-UC-001 – Homologación de Calificaciones
+### 4.1 FSD-UC-001 – Creación de SimonDrop desde contexto LMS (LTI)
 
-> **[BACKLOG v2.0]** Este caso de uso se difiere a la versión 2.0. SimonCloud v1.0 gestiona el ciclo de vida de la entrega (upload → SHA-256 → SimonDrop). La homologación de calificaciones LMS es responsabilidad del docente en su LMS. Ver `docs/roadmap.md §v2.0`.
+> **[MÓDULO 5 — Planificado]** Depende de credenciales LTI emitidas por la DTIC-UMSS para Moodle y del programa de Add-ons de Google para Classroom. Ver `docs/adr/0006-integracion-lms-lti.md` y `docs/roadmap.md §Hito 2`.
 
-- **Trazabilidad**: PRD-REQ-001, PRD-REQ-003, PRD-REQ-005 → BRD: BR-001, BR-002, BR-003, BR-004
+- **Trazabilidad**: PRD-REQ-001, PRD-REQ-003 → BRD: BR-001, BR-008
 - **Actor principal**: Docente
 - **Precondiciones**:
-  1. Docente autenticado vía SSO WebSISS.
-  2. Al menos un LMS (Moodle o Classroom) vinculado a la cuenta.
-- **Disparador**: Docente presiona "Consolidar Notas" en la pantalla de la materia.
+  1. Docente autenticado vía SSO WebSISS en SimonCloud.
+  2. SimonCloud registrado como LTI External Tool en el LMS (configuración DTIC, una sola vez).
+  3. Docente tiene al menos un curso activo en Moodle o Google Classroom.
+- **Disparador**: Docente va a SimonCloud → sección "Mis clases LMS" → presiona "Sincronizar cursos".
 - **Flujo principal**:
-  1. Docente selecciona la materia y presiona "Sincronizar".
-  2. Sistema extrae listados de Moodle (escala 50) y Classroom (letras) en paralelo.
-  3. Sistema cruza alumnos por `email` institucional en un Map.
-  4. Sistema aplica conversión: Moodle score × 2; letras (A=90, B=75, C=60, D=50, F=0).
-  5. Sistema genera vista previa con columnas por LMS y columna final homologada.
+  1. Docente autoriza SimonCloud a leer sus cursos vía OAuth2 (Classroom) o token LTI (Moodle).
+  2. SimonCloud recupera lista de cursos y tareas activas del LMS.
+  3. Docente selecciona una tarea y presiona "Crear SimonDrop vinculado".
+  4. SimonCloud crea un SimonDrop con fecha de cierre = fecha límite de la tarea LMS.
+  5. SimonCloud genera un deep link LTI que el LMS usa para mostrar "Entregar en SimonDrop" como opción de entrega.
+  6. Docente copia/pega el deep link en la tarea del LMS (o SimonCloud lo registra vía LTI Assignment and Grade Services).
 - **Flujos alternativos / excepciones**:
-  - **A1 – API Moodle no responde**: el sistema reintenta 3 veces con back-off; si falla, presenta opción de importar desde CSV manual.
-  - **A2 – Alumno solo en Classroom**: `moodleGrade = null`; aparece en acta con nota de Classroom únicamente.
-  - **A3 – Letra desconocida**: el sistema marca la celda en rojo y no permite cerrar el acta hasta resolverla.
+  - **A1 – LMS no accesible**: SimonCloud muestra error y permite crear el SimonDrop manualmente sin vinculación LMS.
+  - **A2 – Tarea ya tiene SimonDrop**: Sistema advierte e impide crear duplicado para el mismo `lms_assignment_id`.
+  - **A3 – Token OAuth2 expirado**: SimonCloud redirige al docente a re-autorizar; el SimonDrop ya creado permanece activo.
 - **Postcondiciones**:
-  1. El acta consolidada queda guardada en estado BORRADOR.
-  2. Cada nota tiene el atributo `lms_origen` registrado (BR-004 — trazabilidad de fuente).
-- **Datos de entrada**: `{ materiaId, docenteToken, moodleToken?, classroomToken? }`
-- **Datos de salida**: `ConsolidatedGrade[]` (ver `docs/PROMPT_MAPPING.md` PR-UC-001)
+  1. SimonDrop creado con `lms_assignment_id` y `lms_course_id` almacenados para trazabilidad.
+  2. Deep link LTI disponible para que el docente lo adjunte en su tarea LMS.
+  3. Estudiantes del curso verán "Entregar en SimonDrop" como opción al abrir la tarea en el LMS.
+- **Flujo del estudiante** (disparado por el deep link):
+  1. Estudiante abre tarea en Moodle/Classroom → selecciona "Entregar en SimonDrop".
+  2. LMS lanza SimonCloud vía LTI con contexto: `user_id`, `course_id`, `assignment_id`.
+  3. SimonCloud autentica al estudiante (SSO WebSISS o token LTI), muestra el SimonDrop.
+  4. Estudiante sube archivo → SHA-256 → recibo de entrega.
+  5. SimonCloud notifica al LMS vía LTI AGS (Assignment and Grade Services): entrega recibida.
+  6. LMS marca la tarea como "entregada" automáticamente.
+- **Datos de entrada**: `{ lms_provider: 'moodle'|'classroom', lms_course_id, lms_assignment_id, fecha_cierre }`
+- **Datos de salida**: `{ simondrop_id, lti_deep_link_url, lms_assignment_id }`
 - **Criterios de aceptación**:
 ```gherkin
-Escenario: Alumno con notas en ambas plataformas
-  Dado un docente con Moodle y Classroom vinculados
-  Cuando importa notas de "jperez@umss.edu" (Moodle: 45/50, Classroom: A)
-  Entonces el sistema presenta una fila única para Juan Pérez
-  Y la columna Moodle muestra 90/100
-  Y la columna Classroom muestra 90/100
-  Y el campo lms_origen tiene valor "Ambos"
+Escenario: Docente vincula tarea Moodle a SimonDrop
+  Dado un docente autenticado con Moodle configurado
+  Cuando sincroniza cursos y selecciona "Proyecto Final - MAT101"
+  Y presiona "Crear SimonDrop vinculado"
+  Entonces SimonCloud crea un SimonDrop con fecha_cierre = fecha_límite de la tarea
+  Y genera un deep link LTI para adjuntar en Moodle
 
-Escenario: API Moodle no disponible
-  Dado que la API de Moodle responde con timeout
-  Cuando el sistema intenta sincronizar
-  Entonces reintenta 3 veces
-  Y presenta la opción "Importar CSV de Moodle manualmente"
+Escenario: Estudiante entrega desde contexto LMS
+  Dado un estudiante que abre "Proyecto Final" en Moodle
+  Cuando selecciona "Entregar en SimonDrop" y sube "proyecto.pdf"
+  Entonces SimonCloud genera el hash SHA-256 del archivo
+  Y emite recibo de entrega al estudiante
+  Y notifica a Moodle que la entrega fue recibida (LTI AGS)
+  Y Moodle marca la tarea como "Entregada"
+
+Escenario: LMS no disponible al crear SimonDrop
+  Dado que la API de Moodle no responde
+  Cuando el docente intenta sincronizar cursos
+  Entonces SimonCloud muestra "LMS no disponible"
+  Y ofrece crear el SimonDrop manualmente sin vinculación LMS
 ```
 
 ### 4.2 FSD-UC-002 – Subida segura y Comprobante Hash

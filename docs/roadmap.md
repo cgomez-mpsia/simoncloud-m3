@@ -61,9 +61,10 @@
 | Implementar `auth-service` con SSO WebSISS (staging UMSS) | P1 | Coordinación DTIC |
 | Implementar `quota-service` con CB Opossum.js → QR Simple Bolivia | P1 | POC-02 validada ✅ |
 | Implementar `simondrop-service` (buzones + cierres) | P2 | file-service |
+| Implementar `lms-connector` — OAuth2 Classroom + LTI 1.3 Moodle (sync cursos/tareas + deep link) | P2 | auth-service, simondrop-service, coordinación DTIC para token LTI |
 | Tests unitarios Jest (cobertura > 90% en file-service y quota-service) | P1 | NFR-002, NFR-010 |
 | Integración TestContainers para tests de integración | P2 | — |
-| Pipeline CI/CD GitHub Actions → ECR → ECS | P1 | — |
+| Pipeline CI/CD GitHub Actions → Docker Registry DTIC | P1 | — |
 
 **Métricas objetivo**:
 - Cobertura unitaria `file-service` y `quota-service`: ≥ 90% (NFR-002, NFR-010)
