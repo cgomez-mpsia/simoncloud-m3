@@ -71,7 +71,9 @@ Al comenzar cualquier tarea, el agente **MUST** leer en orden:
 |------|------------|---------|---------------|
 | Backend (microservicios) | NestJS | 10.x | DI container, módulos, Guards, Interceptors |
 | Lenguaje | TypeScript | 5.x | Tipado estático, compatibilidad NestJS |
-| Frontend | React + Vite | 18.x | SPA, interactividad, SSR opcional |
+| Frontend | React + Vite | 18.x | SPA, interactividad; componentes basados en Figma propio |
+| Frontend UI (POC / prototipo) | shadcn/ui + Tailwind | latest | Solo para POC-03 y prototipado rápido; no en app final |
+| ORM | Prisma | 5.x | Migraciones type-safe, schema declarativo, queries tipadas |
 | Base de datos principal | PostgreSQL | 16.x | Integridad relacional, auditoría, Outbox Pattern |
 | Caché / sesiones chunked | Redis Cluster | 7.x | Consistent Hashing, 3 nodos, 150 vnodes/nodo |
 | Object Storage (binarios, WORM) | **MinIO** | latest | API S3-compatible; on-premise; WORM para SimonDrop |

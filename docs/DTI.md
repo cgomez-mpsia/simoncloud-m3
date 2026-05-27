@@ -245,10 +245,10 @@ sequenceDiagram
 | Adaptador | Implementa | Tecnología | Ubicación |
 |-----------|-----------|------------|-----------|
 | `FileRestController` | `UploadFileUseCase` | NestJS REST | `adapter/in/web` |
-| `SqsOutboxRelay` | Relay de Outbox | NestJS + SQS | `adapter/in/messaging` |
-| `PgFileRepository` | `FileRepositoryPort` | TypeORM + PostgreSQL | `adapter/out/persistence` |
+| `RabbitOutboxRelay` | Relay de Outbox | NestJS + amqplib | `adapter/in/messaging` |
+| `PgFileRepository` | `FileRepositoryPort` | Prisma + PostgreSQL | `adapter/out/persistence` |
 | `S3FileStorage` | `FileStoragePort` | AWS SDK v3 / MinIO | `adapter/out/storage` |
-| `OutboxEventPublisher` | `EventPublisherPort` | TypeORM + SQS | `adapter/out/messaging` |
+| `OutboxEventPublisher` | `EventPublisherPort` | Prisma + amqplib | `adapter/out/messaging` |
 
 ### 5.3 Diagrama de puertos y adaptadores
 
@@ -265,9 +265,9 @@ flowchart LR
     F[File Aggregate]
   end
   subgraph out[Adapters Out]
-    G[(PgFileRepository\nTypeORM)]
-    H[S3FileStorage\nAWS SDK]
-    I[OutboxEventPublisher\nSQS]
+    G[(PgFileRepository\nPrisma)]
+    H[S3FileStorage\nMinIO SDK]
+    I[OutboxEventPublisher\nRabbitMQ]
   end
   A --> C
   B --> C
