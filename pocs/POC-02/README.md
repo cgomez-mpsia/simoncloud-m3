@@ -65,7 +65,7 @@ export function createQRSimpleCB(fn: (...args: any[]) => Promise<any>) {
 ```
 
 ```typescript
-// pocs/POC-02/quota-service.mock.ts — Test de validación
+// pocs/POC-02/qr-simple.mock.ts — Test de validación
 import nock from 'nock';
 
 // Simular QR Simple API cayendo (5 requests fallidos)
