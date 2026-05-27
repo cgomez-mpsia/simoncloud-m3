@@ -1,0 +1,62 @@
+---
+title: "Despliegue On-Premise — SimonCloud (Infraestructura DTIC-UMSS)"
+---
+flowchart TD
+    subgraph Campus["Red UMSS — Campus Cochabamba"]
+        Users["Usuarios UMSS\n(Estudiantes, Docentes, Admins)"]
+    end
+
+    subgraph DMZ["DMZ — Servidor Frontal DTIC"]
+        Nginx["Nginx\nReverse Proxy + TLS\n(Certbot / CA UMSS)"]
+        SPA["SPA React\nArchivos estáticos"]
+    end
+
+    subgraph Swarm["Docker Swarm — Capa de Aplicación"]
+        GW_T["api-gateway\nx2 réplicas"]
+        FS_T["file-service\nx3 → x9\n(periodos exámenes)"]
+        GS_T["grade-service\n+ Circuit Breaker\nx2 réplicas"]
+        QS_T["quota-service\nx1 réplica"]
+        NS_T["notification-service\nRabbitMQ consumer\nx1 réplica"]
+        AS_T["auth-service\nSSO WebSISS\nx1 réplica"]
+        ADM_T["admin-service\nCQRS Read Model\nx1 réplica"]
+    end
+
+    subgraph Data["Capa de Datos — Servidores DTIC"]
+        PG_P["PostgreSQL 16\nPrimary\n(escrituras)"]
+        PG_R["PostgreSQL 16\nHot Standby\n(CQRS reads)"]
+        REDIS["Redis 7 Cluster\n3 nodos\nConsistent Hashing"]
+        MINIO["MinIO\nObject Storage\n+ Object Lock WORM\n(SimonDrop inmutable)"]
+        RABBIT["RabbitMQ\nMensajería\n+ Dead Letter Queue"]
+        TEMPORAL["Temporal.io\nSaga Orchestrator\n(Quota Upgrade)"]
+        VAULT["HashiCorp Vault\nSecretos\n(JWT key, HMAC key)"]
+    end
+
+    subgraph Obs["Observabilidad"]
+        PROM["Prometheus\nMétricas"]
+        GRAFANA["Grafana\nDashboards"]
+        JAEGER["Jaeger\nTrazas distribuidas"]
+    end
+
+    Users --> Nginx
+    Nginx --> SPA
+    Nginx --> GW_T
+    GW_T --> FS_T
+    GW_T --> GS_T
+    GW_T --> QS_T
+    GW_T --> AS_T
+    GW_T --> ADM_T
+    GW_T --> VAULT
+    FS_T --> PG_P
+    FS_T --> REDIS
+    FS_T --> MINIO
+    FS_T --> RABBIT
+    FS_T --> VAULT
+    GS_T --> PG_P
+    QS_T --> PG_P
+    QS_T --> TEMPORAL
+    NS_T --> RABBIT
+    ADM_T --> PG_R
+    PG_P --> PG_R
+    Swarm --> PROM
+    PROM --> GRAFANA
+    Swarm --> JAEGER

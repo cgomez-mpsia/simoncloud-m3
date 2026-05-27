@@ -390,66 +390,98 @@ El `admin-service` mantiene un `dashboard_metrics` materializado, actualizado as
 
 ---
 
-## §8. Despliegue – Cloud Native (AWS)
+## §8. Despliegue – On-Premise (Infraestructura DTIC-UMSS)
 
-### 8.1 Mapeo de componentes a servicios AWS
+> **Driver principal**: Soberanía de datos. Los datos académicos de estudiantes bolivianos (notas, documentos, actas) están protegidos por la **Ley 164** y deben permanecer bajo control exclusivo de la UMSS. Ver `docs/adr/0005-cloud-provider-y-estilo-de-despliegue.md`.
 
-| Componente | Servicio AWS | Justificación |
-|------------|--------------|---------------|
-| Frontend SPA | **S3 + CloudFront** | CDN global, HTTPS automático, costo mínimo |
-| API Gateway | **ECS Fargate** (NestJS) | Control total sobre routing, no cold starts de Lambda |
-| Microservicios (auth, file, grade, quota, notif, admin) | **ECS Fargate** | Contenedores gestionados; autoescaling por CPU/memoria |
-| Object Storage (archivos binarios) | **S3** + política WORM (Object Lock) | Inmutabilidad nativa post-cierre SimonDrop; costos por uso |
-| Base de datos | **RDS PostgreSQL 16 Multi-AZ** | Alta disponibilidad; failover automático; backups PITR |
-| Cache y sesiones upload | **ElastiCache Redis Cluster** | Consistent Hashing nativo; soporte Cluster Mode |
-| Cola de mensajes | **SQS** (Standard + FIFO) + **DLQ** | Desacoplamiento; DLQ automática para notificaciones fallidas |
-| Saga Orchestration | **AWS Step Functions** | Estado de la saga persistido; reintentos y compensaciones gestionados |
-| Monitoreo | **CloudWatch + X-Ray** | Trazas distribuidas; alertas por umbral |
-| Secretos | **AWS Secrets Manager** | JWT secret, QR Simple webhook key, credenciales BD |
-| Load Balancer | **ALB (Application Load Balancer)** | Path-based routing hacia cada microservicio |
+### 8.1 Mapeo de componentes a tecnología on-premise
 
-### 8.2 Diagrama de despliegue AWS
+| Componente | Tecnología on-premise | Justificación |
+|------------|----------------------|---------------|
+| Frontend SPA | **Nginx** (archivos estáticos) | Servidor web estándar, cero costo, control total |
+| Reverse proxy / Load balancer | **Nginx** upstream balancing | Path-based routing sin vendor lock-in |
+| TLS / HTTPS | **Certbot + Let's Encrypt** o CA interna UMSS | Certificados gratuitos o bajo control institucional |
+| Microservicios (8 servicios) | **Docker Swarm** (réplicas configurables) | Orquestación simple; DTIC puede operarlo sin expertise K8s |
+| Object Storage (binarios, WORM) | **MinIO** (API S3-compatible + Object Lock) | Drop-in replacement de S3; el código no cambia |
+| Base de datos | **PostgreSQL 16** (primary + hot-standby) | Control total; sin costo de licencia |
+| Cache y sesiones upload | **Redis 7 Cluster** (3 nodos) | Consistent Hashing; mismo que en cloud |
+| Cola de mensajes | **RabbitMQ** (exchanges + DLQ nativa) | Open source; bien documentado para equipos pequeños |
+| Saga Orchestration | **Temporal.io** (self-hosted) | Orquestador de workflows open source; reemplaza Step Functions |
+| Monitoreo y métricas | **Prometheus + Grafana** | Stack estándar de observabilidad on-premise |
+| Trazas distribuidas | **Jaeger** | Distributed tracing open source |
+| Secretos | **HashiCorp Vault** o Docker Secrets | Gestión segura sin dependencia de cloud |
+| CI/CD | **GitHub Actions** con runner self-hosted DTIC | Pipeline automatizado sobre infraestructura propia |
+
+### 8.2 Diagrama de despliegue on-premise
+
+Ver `docs/diagrams/08-onpremise-deployment.mmd` para el diagrama completo.
 
 ```mermaid
 flowchart TD
-    Users["Usuarios UMSS"] --> CF["CloudFront CDN"]
-    CF --> S3_SPA["S3 — SPA React"]
-    CF --> ALB["ALB — Application Load Balancer"]
-    ALB --> GW["ECS Fargate\nAPI Gateway"]
-    GW --> FS["ECS Fargate\nfile-service (x3)"]
-    GW --> GS["ECS Fargate\ngrade-service (x2)"]
-    GW --> QS["ECS Fargate\nquota-service"]
-    GW --> AS["ECS Fargate\nauth-service"]
-    GW --> ADM["ECS Fargate\nadmin-service"]
-    FS --> S3_OBJ["S3 Object Storage\nWORM Lock post-cierre"]
-    FS --> RDS["RDS PostgreSQL\nMulti-AZ Primary"]
-    FS --> ELAST["ElastiCache\nRedis Cluster"]
-    FS --> SQS_Q["SQS Standard Queue"]
-    SQS_Q --> NS["ECS Fargate\nnotification-service"]
-    SQS_Q --> DLQ["SQS Dead Letter Queue"]
-    QS --> SF["Step Functions\nSaga Orchestrator"]
-    RDS --> RDS_R["RDS Replica\n(lectura CQRS)"]
-    ADM --> RDS_R
-    GW --> SM["Secrets Manager"]
-    FS --> SM
-    GW --> CW["CloudWatch + X-Ray"]
+    subgraph Campus["Red UMSS — Campus Cochabamba"]
+        Users["Usuarios UMSS\n(Estudiantes, Docentes, Admins)"]
+    end
+
+    subgraph DMZ["DMZ — Servidor Frontal DTIC"]
+        Nginx["Nginx\nReverse Proxy + TLS + Balancer"]
+        SPA["SPA React\n(archivos estáticos)"]
+    end
+
+    subgraph AppLayer["Capa de Aplicación — Docker Swarm"]
+        GW["API Gateway (x2)"]
+        FS["file-service (x3 → x9)"]
+        GS["grade-service + CB (x2)"]
+        QS["quota-service"]
+        AS["auth-service"]
+        NS["notification-service"]
+        ADM["admin-service"]
+    end
+
+    subgraph DataLayer["Capa de Datos — Servidores DTIC"]
+        PG_P["PostgreSQL 16\nPrimary"]
+        PG_R["PostgreSQL 16\nHot Standby (CQRS reads)"]
+        REDIS["Redis 7 Cluster\n(3 nodos)"]
+        MINIO["MinIO\nObject Storage WORM"]
+        RABBIT["RabbitMQ\nMensajería + DLQ"]
+        TEMPORAL["Temporal.io\nSaga Orchestrator"]
+    end
+
+    subgraph Ops["Observabilidad"]
+        PROM["Prometheus"]
+        GRAFANA["Grafana"]
+        JAEGER["Jaeger Tracing"]
+    end
+
+    Users --> Nginx
+    Nginx --> SPA
+    Nginx --> GW
+    GW --> FS & GS & QS & AS & ADM
+    FS --> PG_P & REDIS & MINIO & RABBIT
+    GS --> PG_P
+    QS --> PG_P & TEMPORAL
+    NS --> RABBIT
+    ADM --> PG_R
+    PG_P --> PG_R
+    AppLayer --> PROM --> GRAFANA
+    AppLayer --> JAEGER
 ```
 
 ### 8.3 Entornos
 
-| Entorno | Región | Propósito |
-|---------|--------|-----------|
-| dev | us-east-1 | Desarrollo y pruebas unitarias |
-| stg | us-east-1 | QA e integración; espejo de producción a escala reducida |
-| prd | sa-east-1 (São Paulo) | Producción; la región más cercana a Bolivia en AWS |
+| Entorno | Ubicación | Propósito |
+|---------|-----------|-----------|
+| `dev` | Laptop del desarrollador (Docker Compose) | Desarrollo local; MinIO + PostgreSQL en contenedores |
+| `stg` | Servidor de staging DTIC | QA e integración; espejo de producción a escala mínima |
+| `prd` | Servidor de producción DTIC (rack datacenter UMSS) | Producción; Docker Swarm con réplicas configuradas |
 
-**Justificación de región `sa-east-1`**: Es la región AWS más cercana geográficamente a Bolivia, minimizando latencia para usuarios de la UMSS. Cumple con requisito de soberanía de datos (Ley 164 Bolivia).
+**Latencia**: servidores en red local del campus UMSS → < 5ms para usuarios conectados desde el campus; < 50ms para acceso externo vía VPN institucional.
 
 ### 8.4 Estrategia de Disaster Recovery
 
-- **RPO objetivo**: 1 hora (máximo 1h de datos perdibles).
-- **RTO objetivo**: 4 horas (tiempo máximo de recuperación).
-- **Estrategia**: **Warm Standby** — réplica RDS multi-AZ activa siempre, snapshots S3 cada hora, ECS tasks mínimas en standby.
+- **RPO objetivo**: 1 hora (`pg_basebackup` + WAL archiving cada hora; MinIO versioning habilitado).
+- **RTO objetivo**: 4 horas (hot-standby PostgreSQL; imágenes Docker en registry local → redeploy en < 30min).
+- **Estrategia**: servidor primario + servidor standby en rack separado del datacenter DTIC.
+- **Backups**: dump PostgreSQL diario al NAS institucional; MinIO replication a segundo nodo de storage.
 - Documentado en `docs/adr/0005-cloud-provider-y-estilo-de-despliegue.md`.
 
 ---

@@ -75,13 +75,16 @@ Al comenzar cualquier tarea, el agente **MUST** leer en orden:
 | Frontend | React + Vite | 18.x | SPA, interactividad, SSR opcional |
 | Base de datos principal | PostgreSQL | 16.x | Integridad relacional, auditoría, Outbox Pattern |
 | Caché / sesiones chunked | Redis Cluster | 7.x | Consistent Hashing, 3 nodos, 150 vnodes/nodo |
-| Mensajería asíncrona | AWS SQS + DLQ | — | At-least-once, máximo 3 reintentos |
-| Orquestación de saga | AWS Step Functions | — | Saga quota upgrade, compensaciones automáticas |
-| Almacenamiento objetos | AWS S3 + Object Lock | — | WORM para SimonDrop, Multipart para 2GB+ |
+| Object Storage (binarios, WORM) | **MinIO** | latest | API S3-compatible; on-premise; WORM para SimonDrop |
+| Mensajería asíncrona | **RabbitMQ** + DLQ | 3.x | At-least-once, máximo 3 reintentos; self-hosted DTIC |
+| Orquestación de saga | **Temporal.io** | latest | Saga quota upgrade; open source; self-hosted |
 | Circuit Breaker | Opossum.js | 8.x | grade-service → Moodle/Classroom |
 | Autenticación | SSO WebSISS (OAuth2) + JWT HS256 | 8h TTL | ADR-0002 |
-| Contenedores | Docker + AWS ECS Fargate | — | ADR-0005 |
-| Región cloud | AWS sa-east-1 (São Paulo) | — | ~80ms latencia desde Bolivia |
+| Contenedores | Docker + **Docker Swarm** | — | ADR-0005; on-premise DTIC-UMSS |
+| Reverse proxy / TLS | **Nginx** + Certbot | — | Load balancing + HTTPS sin cloud |
+| Secretos | **HashiCorp Vault** | — | Self-hosted; sin vendor cloud |
+| Monitoreo | **Prometheus + Grafana** | — | Stack open source; reemplaza CloudWatch |
+| Trazas distribuidas | **Jaeger** | — | Reemplaza X-Ray |
 | Testing unitario | Jest | 29.x | cobertura ≥ 90% en grade-service |
 | Testing integración | TestContainers | — | Módulo 5 |
 
