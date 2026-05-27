@@ -11,7 +11,7 @@
 
 ## Contexto
 
-El upgrade de cuota (FSD-UC-003) involucra 3 microservicios (quota-service, payment-service, notification-service) y una API externa (QR Simple). El flujo es: reservar upgrade → generar QR → esperar pago via webhook → activar cuota → notificar. Una transacción distribuida (2PC) no es viable con APIs externas que no soportan el protocolo. Se necesita un mecanismo de consistencia eventual con compensaciones explícitas.
+El upgrade de cuota (FSD-UC-003) involucra 2 microservicios (quota-service, notification-service) y una API externa (QR Simple Bolivia). El `quota-service` contiene internamente el adaptador de QR Simple (generación de QR + validación de webhook HMAC); no existe un `payment-service` separado. El flujo es: reservar upgrade → generar QR → esperar pago via webhook → activar cuota → notificar. Una transacción distribuida (2PC) no es viable con APIs externas que no soportan el protocolo. Se necesita un mecanismo de consistencia eventual con compensaciones explícitas.
 
 ## Decisión
 

@@ -331,7 +331,7 @@ graph LR
 |--------|-----------|----------------|---------|----------|
 | `FileUploadedEvent` | `file-service` | `notification-service` | `{fileId, simondropId, docenteId, hash, nombre}` | at-least-once (Outbox) |
 | `SimonDropClosedEvent` | `simondrop-service` | `file-service` (lock) | `{dropId, closedAt}` | at-least-once |
-| `QuotaUpgradeRequested` | `quota-service` (saga) | `payment-service` | `{userId, plan, amount}` | exactly-once (Saga) |
+| `QuotaUpgradeRequested` | `quota-service` (saga) | `quota-service` (QR Simple adapter) | `{userId, plan, amount}` | exactly-once (Saga) |
 | `PaymentConfirmedEvent` | `quota-service` (webhook) | Saga orchestrator | `{paymentId, userId, hmacValid}` | at-least-once |
 | `QuotaUpgradedEvent` | `quota-service` | `notification-service` | `{userId, newQuotaMb}` | at-least-once |
 | `UserRegisteredEvent` | `auth-service` | `admin-service` (CQRS) | `{userId, rol, timestamp}` | at-least-once |
@@ -343,7 +343,7 @@ graph LR
 ```mermaid
 stateDiagram-v2
     [*] --> UpgradePending: Estudiante solicita upgrade
-    UpgradePending --> QRGenerado: GenerateQR enviado a payment-service
+    UpgradePending --> QRGenerado: GenerateQR → QR Simple Bolivia API
     QRGenerado --> QRExpirado: Timeout 5 min sin pago
     QRExpirado --> Compensado: CancelUpgradeRequest
     Compensado --> [*]

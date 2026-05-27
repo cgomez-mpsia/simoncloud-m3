@@ -12,12 +12,12 @@ Basado en la lectura de *Microservices Patterns* (Richardson): Cap. 3 §3.3 (Tra
 - **Tipo elegido: Saga Orquestada** (Richardson §4.2.2). Se elige orquestación sobre coreografía porque el flujo tiene múltiples pasos con compensación explícita y es necesario rastrear el estado global de la saga desde un único lugar. Con coreografía, detectar que "el QR expiró y hay que compensar" requeriría que cada servicio conozca el estado de los demás, aumentando el acoplamiento.
 - **Estructura de la Saga (Richardson §4.1.3 y §4.3):**
   - **Transacción Compensable (Compensatable transaction):** El paso 1 (`quota-service` reservando el upgrade en `PENDING`). Si la saga falla después, esta transacción puede revertirse con una transacción compensatoria.
-  - **Transacción Pivote (Pivot transaction):** El paso 2 (`payment-service` validando el pago vía webhook). Si la transacción pivote se completa con éxito, la saga continuará hasta el final de forma irrevocable. Si falla, se ejecutan las compensaciones de los pasos anteriores.
+  - **Transacción Pivote (Pivot transaction):** El paso 2 (`quota-service` validando el pago vía webhook de QR Simple Bolivia). Si la transacción pivote se completa con éxito, la saga continuará hasta el final de forma irrevocable. Si falla, se ejecutan las compensaciones de los pasos anteriores.
   - **Transacciones Retornables/Reintentables (Retriable transactions):** Los pasos 3 y 4 (`UpgradeQuota` y `SendConfirmationEmail`). Son transacciones que siguen a la transacción pivote y de las cuales se garantiza que eventualmente tendrán éxito (si fallan temporalmente, se reintentan hasta que completen).
 - **Implementación:**
   1. El orquestador de la Saga (en `quota-service`) inicia creando la solicitud en estado `PENDING` (**Transacción Compensable**).
-  2. Envía el comando `GenerateQR` al `payment-service`. Éste genera el QR y espera el Webhook asíncrono de QR Simple.
-  3. Al recibir el Webhook `payment.confirmed` (validado por firma HMAC), el `payment-service` responde al orquestador con `PaymentCompleted` (**Transacción Pivote**).
+  2. Llama directamente a la API de QR Simple Bolivia (adaptador dentro del `quota-service`) para generar el QR y espera el Webhook asíncrono.
+  3. Al recibir el Webhook `payment.confirmed` (validado por firma HMAC con `crypto.timingSafeEqual`), el adaptador de webhook del `quota-service` notifica al orquestador con `PaymentCompleted` (**Transacción Pivote**).
   4. El orquestador envía el comando `UpgradeQuota` al `quota-service`, que actualiza `quota_limit_mb = 51200` (**Transacción Reintentable**).
   5. El orquestador envía el comando `SendConfirmationEmail` al `notification-service` (**Transacción Reintentable**).
   6. **Transacciones compensatorias:** Si el QR expira o el Webhook llega con HMAC inválido antes del pivote, el orquestador ejecuta la transacción compensatoria en `quota-service` cancelando el upgrade (`CancelUpgradeRequest`).

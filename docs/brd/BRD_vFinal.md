@@ -26,19 +26,19 @@
 
 Los docentes de la Universidad Mayor de San Simón (UMSS) gestionan hoy sus calificaciones en múltiples plataformas de aprendizaje (Moodle, Google Classroom) con escalas heterogéneas, y deben consolidar manualmente esos datos en hojas de cálculo para producir las actas finales oficiales. Este proceso consume varias horas por docente por semestre, genera errores de duplicación de alumnos y carece de trazabilidad legal.
 
-**SimonCloud** es una plataforma web multi-tenant de gestión académica y almacenamiento institucional que centraliza, sincroniza y homologa automáticamente las calificaciones provenientes de distintos LMS en una sola libreta unificada, con comprobantes de entrega inmutables (SHA-256) y control de acceso por roles.
+**SimonCloud** es una plataforma web multi-tenant de almacenamiento institucional y entregas académicas que permite a los docentes crear buzones de entrega (SimonDrop) integrados nativamente en Moodle y Google Classroom vía LTI 1.3, con comprobantes de integridad inmutables (SHA-256) y control de acceso por roles.
 
 **Valor esperado:**
-- Reducción de ≥ 80 % en el tiempo que los docentes dedican a cruzar y homologar notas manualmente.
-- 0 % de alumnos duplicados en planillas consolidadas.
-- Eliminación de errores de transcripción en actas finales oficiales.
+- Eliminación del uso de WhatsApp/WeTransfer/correo para recepción de trabajos académicos.
+- 100 % de entregas con comprobante SHA-256 verificable (validez legal bajo Ley 164).
+- Integración nativa en los LMS institucionales: el estudiante entrega sin salir de Moodle o Classroom.
 
 **Métricas clave de éxito:**
-- Tiempo medio de generación de planilla consolidada: de ~4 h → ≤ 5 min.
-- Tasa de error en actas finales: de X % → 0 %.
+- SimonDrops activos vinculados a tareas LMS: ≥ 1 por materia piloto.
+- Tasa de entregas con comprobante SHA-256: 100 %.
 - Adopción en UMSS: ≥ 5 materias piloto en el primer semestre.
 
-**Llamada a la acción:** Se requiere que la DTIC formalice el convenio institucional de uso de SimonCloud, provea acceso a la base de usuarios UMSS y apruebe la tabla de equivalencias de escalas de calificación para habilitar la homologación automática.
+**Llamada a la acción:** Se requiere que la DTIC formalice el convenio institucional de uso de SimonCloud, registre SimonCloud como External Tool en Moodle (coordinación LTI), y provea acceso a la base de usuarios UMSS vía WebSISS SSO.
 
 ---
 
@@ -58,17 +58,17 @@ Los docentes de la Universidad Mayor de San Simón (UMSS) gestionan hoy sus cali
 
 ### 3.1 Problema
 
-Los docentes universitarios de la UMSS dictan materias apoyándose simultáneamente en más de un Sistema de Gestión del Aprendizaje (LMS): Moodle (calificaciones sobre 50 puntos) y Google Classroom (calificaciones con letras A–F). Al cierre de cada semestre, deben exportar manualmente los datos de cada plataforma, convertirlos a la escala oficial (0–100), cruzar las listas de alumnos para evitar duplicados y consolidar todo en una hoja de cálculo propia antes de entregar el acta a la Dirección Académica.
+Los docentes universitarios de la UMSS reciben hoy las entregas académicas de sus estudiantes a través de canales informales: correo personal, WhatsApp y WeTransfer. Moodle —el LMS institucional— impone un límite de 50 MB que bloquea el 100 % de los archivos técnicos pesados (proyectos CAD, datasets, vídeos de presentación). Google Classroom no ofrece soberanía de datos institucional y los archivos quedan en cuentas personales de Google.
 
-Este proceso presenta cuatro síntomas críticos: (1) **alto costo en tiempo** —se estiman entre 2 y 6 horas por docente por semestre solo en cruce y homologación—; (2) **errores de duplicación** —alumnos registrados con formatos de nombre distintos en cada LMS aparecen dos veces en la planilla—; (3) **pérdida de trazabilidad** —una vez trasladada la nota a Excel, se desconoce si proviene de Moodle o Classroom—; (4) **riesgo legal y académico** —un acta entregada con datos incorrectos requiere un proceso administrativo oneroso para su corrección una vez cerrada.
+Este proceso presenta cuatro síntomas críticos: (1) **fragmentación de canales** —cada docente usa una combinación diferente de WhatsApp, Drive personal y correo; sin registro centralizado—; (2) **falta de integridad** —no existe forma de probar que el archivo recibido es el mismo que el estudiante envió; los enlaces de WeTransfer expiran—; (3) **ausencia de trazabilidad legal** —la Ley 164 exige cadena de custodia de datos académicos, que correos y mensajes de WhatsApp no garantizan—; (4) **doble gestión** —si el docente usa Moodle como LMS, debe marcar la entrega allí manualmente después de recibirla por WhatsApp, duplicando el trabajo—.
 
-La consecuencia de no actuar es la perpetuación de un sistema propenso a errores humanos que afecta directamente la confiabilidad de los registros académicos oficiales de la universidad.
+La consecuencia de no actuar es la perpetuación de un sistema propenso a pérdida de archivos, disputas académicas sin evidencia verificable y exposición a sanciones por incumplimiento de la Ley 164.
 
 ### 3.2 Oportunidad
 
-- **Valor operativo**: Liberando al menos 3 horas por docente por semestre en una universidad con 500 docentes activos, SimonCloud representa un ahorro de ~1 500 horas/semestre de trabajo calificado.
-- **Valor estratégico**: Posiciona a la UMSS como pionera en soberanía digital académica en Bolivia, con infraestructura propia frente a soluciones de terceros (Google, Microsoft) que no se alinean al reglamento de datos de instituciones públicas bolivianas.
-- **Ventana de oportunidad**: La creciente adopción de LMS post-pandemia y la ausencia de una solución local de homologación crean una ventana de adopción temprana. Expandirse a otras universidades bolivianas antes de que actores internacionales consoliden su presencia es el horizonte estratégico de los próximos 2 años.
+- **Valor operativo**: Centralizando la recepción de entregas en un buzón institucional (SimonDrop), cada docente elimina la gestión manual de correos y WhatsApp —se estima un ahorro de ≥ 2 horas/semestre por materia activa en seguimiento y validación de entregas—.
+- **Valor estratégico**: Posiciona a la UMSS como pionera en soberanía digital académica en Bolivia, con infraestructura propia on-premise (DTIC-UMSS) frente a soluciones de terceros (Google, Microsoft) que no se alinean al reglamento de datos de instituciones públicas bolivianas.
+- **Ventana de oportunidad**: La creciente adopción de Moodle post-pandemia y el estándar LTI 1.3 (el mismo que usa Turnitin y Khan Academy) crean una ventana de adopción temprana. Integrarse como opción nativa de entrega en Moodle antes de que actores internacionales consoliden su presencia es el horizonte estratégico de los próximos 2 años.
 
 ### 3.3 Evidencia de Continuous Discovery (M2)
 
@@ -85,7 +85,7 @@ La consecuencia de no actuar es la perpetuación de un sistema propenso a errore
 - **Personas validadas en campo**: Sebastián (Estudiante, Ingeniería), Lic. Alejandro (Docente, Humanidades), Silvia (Administrativa, Kardex).
 - **Hipótesis principal validada**: Proveer un buzón institucional unificado reduciría ≥ 80% el uso de canales informales (WhatsApp, WeTransfer).
 - **Artefactos M2**: Wireframes Balsamiq (4 pantallas), 20 Happy Paths en Figma (`https://www.figma.com/board/8b3BCvbLJ0gyO0pyJYXFZd/SimonCloud`), 20 capturas de incidentes en `old-docs/Journeys/`.
-- **Próxima cadencia**: Quincenal durante el desarrollo del MVP, enfocada en flujos de subida y homologación.
+- **Próxima cadencia**: Quincenal durante el desarrollo del MVP, enfocada en flujos de subida, entrega desde LMS y emisión de comprobantes SHA-256.
 
 ---
 
@@ -97,9 +97,9 @@ La consecuencia de no actuar es la perpetuación de un sistema propenso a errore
 |----------|-------|
 | Nombre / rol | Docente universitario UMSS |
 | Contexto | Dicta entre 2 y 4 materias por semestre; usa Moodle y/o Google Classroom como LMS. Al cierre del semestre trabaja con Excel para cruzar notas y entregar actas a la Dirección Académica. |
-| *Jobs-to-be-done* | 1. Centralizar recursos y materiales de sus materias. 2. Importar y homologar calificaciones de múltiples LMS. 3. Comunicar anuncios oficiales a sus estudiantes. 4. Generar y firmar el acta final sin errores. |
-| Dolores principales | Horas perdidas en cruce manual de datos; errores de duplicación de alumnos; falta de trazabilidad de la nota original; riesgo de actas incorrectas. |
-| Ganancia esperada | Generar la planilla consolidada en menos de 5 minutos, con conversión automática de escalas, cero duplicados y trazabilidad completa del origen de cada nota. |
+| *Jobs-to-be-done* | 1. Centralizar recursos y materiales de sus materias. 2. Recibir entregas de tareas de forma organizada, sin correo ni WhatsApp. 3. Tener comprobante de que cada estudiante entregó a tiempo. 4. Comunicar anuncios oficiales a sus estudiantes. |
+| Dolores principales | Recibe 80 archivos por correo/WhatsApp por tarea; sin trazabilidad de quién entregó qué; links de WeTransfer expirados; no puede verificar integridad del archivo recibido. |
+| Ganancia esperada | Un buzón SimonDrop vinculado a la tarea en Moodle/Classroom: los estudiantes entregan desde el LMS, el docente ve todas las entregas con hash SHA-256 y fecha exacta. |
 
 ### 4.2 Persona secundaria — Personal Administrativo (Dirección Académica)
 
@@ -117,10 +117,10 @@ La consecuencia de no actuar es la perpetuación de un sistema propenso a errore
 
 | Eje | Contenido |
 |-----|-----------|
-| **Para quién** | Docentes universitarios de la UMSS (y universidades bolivianas en expansión) que gestionan calificaciones en múltiples LMS |
-| **Que necesita** | Consolidar y homologar calificaciones de distintas plataformas en una sola acta oficial, sin trabajo manual ni riesgo de errores |
-| **Nuestra propuesta es** | SimonCloud: plataforma institucional de gestión académica y almacenamiento en la nube que sincroniza, homologa y centraliza la información de múltiples LMS en un dashboard unificado |
-| **Que le aporta** | • Importación automática de notas desde Moodle y Google Classroom. • Conversión automática de escalas a la escala oficial (0–100). • Deduplicación de alumnos por correo/ID institucional. • Comprobante de entrega con hash SHA-256. • Control de acceso por roles (RBAC). |
+| **Para quién** | Docentes universitarios de la UMSS (y universidades bolivianas en expansión) que reciben trabajos académicos por canales informales (WhatsApp, correo, WeTransfer) |
+| **Que necesita** | Un buzón de entrega institucional integrado en su LMS con garantía de integridad de los archivos recibidos |
+| **Nuestra propuesta es** | SimonCloud: plataforma institucional de almacenamiento y entregas académicas que ofrece SimonDrops integrados en Moodle/Classroom vía LTI 1.3, con comprobantes SHA-256 y soberanía de datos |
+| **Que le aporta** | • SimonDrop como opción nativa de entrega en Moodle y Classroom (LTI 1.3). • Comprobante de entrega inmutable con hash SHA-256. • Notificación automática al LMS cuando el estudiante entrega. • Control de acceso por roles (RBAC). • Almacenamiento hasta 2GB por archivo, sin límites de Moodle. |
 | **A diferencia de** | Hojas de cálculo Excel + exportaciones manuales de Moodle y Classroom; sistemas legacy de la UMSS sin integración LMS |
 | **Nuestro diferencial es** | Es la única plataforma diseñada específicamente para el contexto normativo y académico boliviano, con modelo freemium institucional, multi-tenant y soberanía de datos por universidad |
 
@@ -130,10 +130,10 @@ La consecuencia de no actuar es la perpetuación de un sistema propenso a errore
 
 | Competidor / alternativa | Tipo | Fortaleza percibida | Debilidad percibida |
 |--------------------------|------|---------------------|---------------------|
-| Excel + Drive + exportaciones manuales | *do-nothing* | Familiar para los docentes; sin costo directo | Propenso a errores; sin trazabilidad; alto costo en tiempo |
-| Moodle (standalone) | Indirecto | LMS maduro y open-source | No resuelve multi-LMS; no homologa escalas; no genera actas institucionales |
-| Google Workspace for Education | Indirecto | UX moderna; adopción masiva | No homologa escalas de calificación bolivianas; sin soberanía de datos institucional; no integra Moodle |
-| Sistemas legacy UMSS (SIA, otros) | Indirecto | Ya integrado al proceso administrativo | Sin interfaz de usuario moderna; sin integración LMS; sin homologación automática |
+| WhatsApp + correo personal + WeTransfer | *do-nothing* | Sin fricción; omnipresente | Sin trazabilidad legal; enlaces expiran; no cumple Ley 164; sin comprobante de integridad |
+| Moodle (standalone) | Indirecto | LMS maduro y open-source | Límite 50MB bloquea archivos técnicos; no genera comprobante SHA-256; sin soberanía de datos on-premise |
+| Google Workspace for Education | Indirecto | UX moderna; adopción masiva | Sin soberanía de datos institucional (datos en servidores Google); no cumple normativa pública boliviana |
+| Sistemas legacy UMSS (SIA, otros) | Indirecto | Ya integrado al proceso administrativo | Sin interfaz de usuario moderna; sin integración LMS; sin gestión de entregas ni buzones |
 
 > *Nota: el análisis profundo de competencia se desarrollará en el MRD (`docs/MRD.md`).*
 
@@ -144,12 +144,12 @@ La consecuencia de no actuar es la perpetuación de un sistema propenso a errore
 | Bloque | Mínimo 3 elementos concretos |
 |--------|-------------------------------|
 | **1. Segmentos de clientes** | Universidades bolivianas (instituciones, B2B) / Docentes universitarios (usuarios activos clave) / Estudiantes universitarios / Personal administrativo / Usuarios externos (licencias individuales) |
-| **2. Propuesta de valor** | Homologación automática multi-LMS con trazabilidad / Comprobante de entrega inmutable (SHA-256) / Dashboard académico unificado por rol / Eliminación de trabajo manual en Excel |
+| **2. Propuesta de valor** | SimonDrop integrado en LMS vía LTI 1.3 / Comprobante de entrega inmutable (SHA-256) / Dashboard académico unificado por rol / Soberanía de datos on-premise (Ley 164) |
 | **3. Canales** | Docentes como canal de adopción orgánica (lo aplican en sus clases) / Convenio institucional con UMSS / Correo institucional universitario / Portal web de SimonCloud |
 | **4. Relación con clientes** | Administrador propio por universidad (tenant admin) / Documentación y tutoriales en plataforma / Comunidad/foro por institución / Soporte técnico delegado al admin local |
 | **5. Fuentes de ingresos** | Freemium institucional para universidades (acceso base gratuito) / Licencias Pro para usuarios externos individuales (precio por definir) / Plan Pro 50 GB para usuarios con necesidades ampliadas (precio por definir) |
 | **6. Recursos clave** | Infraestructura cloud / servidores / Base de usuarios UMSS (piloto) / APIs de integración (Moodle API, Google Classroom API) / Equipo de desarrollo / Convenios institucionales |
-| **7. Actividades clave** | Desarrollo y mantenimiento de la plataforma / Integración y sincronización con LMS externos / Homologación automática de calificaciones / Gestión de identidad y RBAC / Generación de actas y comprobantes hash |
+| **7. Actividades clave** | Desarrollo y mantenimiento de la plataforma / Integración LMS vía LTI 1.3 y OAuth2 / Gestión de identidad y RBAC / Generación de comprobantes hash SHA-256 / Operación on-premise DTIC |
 | **8. Socios clave** | UMSS (socio fundador y único piloto actual) / Moodle (integración LMS) / Google Classroom API / QR Simple (pasarela de pagos) / Google Drive API (migración de archivos) |
 | **9. Estructura de costos** | Hosting y servidores cloud (costo dominante) / Soporte técnico y operativo / Equipo de desarrollo (salarios o honorarios) |
 
@@ -159,9 +159,9 @@ La consecuencia de no actuar es la perpetuación de un sistema propenso a errore
 
 | ID | KPI | North Star? | Línea base | Meta | Horizonte | Fuente del dato |
 |----|-----|-------------|------------|------|-----------|-----------------|
-| KPI-01 | Tiempo medio de generación de planilla consolidada por docente | ✅ Sí | ~4 horas (manual) | ≤ 5 minutos | Q4 2026 | Logs del sistema + encuesta docentes |
-| KPI-02 | Tasa de duplicación de alumnos en planillas generadas | No | Por medir antes del lanzamiento | 0 % | Q4 2026 | Auditoría del sistema |
-| KPI-03 | Tasa de error en actas finales emitidas | No | Por medir antes del lanzamiento | 0 % | Q4 2026 | Dirección Académica |
+| KPI-01 | Número de entregas académicas recibidas vía SimonDrop (no por WhatsApp/email) | ✅ Sí | 0 | ≥ 500 entregas/semestre piloto | Q4 2026 | Logs del sistema |
+| KPI-02 | Tasa de entregas con comprobante SHA-256 generado | No | 0 % | 100 % | Q4 2026 | Auditoría BD |
+| KPI-03 | SimonDrops activos vinculados a tareas LMS | No | 0 | ≥ 1 por materia activa | Q4 2026 | Panel de administración |
 | KPI-04 | Número de materias activas en el piloto UMSS | No | 0 | ≥ 5 materias | Q3 2026 | Panel de administración |
 
 ---
@@ -170,8 +170,8 @@ La consecuencia de no actuar es la perpetuación de un sistema propenso a errore
 
 | ID | Objetivo | Métrica | Línea base | Meta | Horizonte |
 |----|----------|---------|------------|------|-----------|
-| BO-01 | Reducir el tiempo de homologación de calificaciones de los docentes UMSS | Minutos por planilla | ~240 min | ≤ 5 min | Q4 2026 |
-| BO-02 | Eliminar la duplicación de alumnos en planillas consolidadas | % de duplicados | Por medir | 0 % | Q4 2026 |
+| BO-01 | Eliminar el uso de canales informales (WhatsApp, WeTransfer) para recepción de tareas académicas | % entregas por canal informal | ~80% | ≤ 20% | Q4 2026 |
+| BO-02 | Garantizar integridad legal de todas las entregas académicas en la UMSS | % entregas con SHA-256 | 0 % | 100 % | Q4 2026 |
 | BO-03 | Lograr adopción piloto en UMSS | Número de materias activas | 0 | ≥ 5 | Q3 2026 |
 | BO-04 | Expandir SimonCloud a 2 universidades bolivianas adicionales | Número de tenants activos | 1 (UMSS) | 3 | Q4 2027 |
 
@@ -194,10 +194,10 @@ La consecuencia de no actuar es la perpetuación de un sistema propenso a errore
 
 | ID | Requerimiento de negocio | Prioridad (MoSCoW) | Justificación | Métrica de aceptación |
 |----|--------------------------|--------------------|---------------|-----------------------|
-| BR-001 | El sistema debe permitir a los docentes importar calificaciones desde Moodle y Google Classroom en una sola operación | Must | Elimina el cruce manual entre plataformas | 100 % de importaciones completan sin intervención manual |
-| BR-002 | El sistema debe homologar automáticamente calificaciones de distintas escalas al formato oficial (0–100) según tabla de equivalencias aprobada | Must | Garantiza estandarización normativa | 0 % de conversiones manuales requeridas post-importación |
-| BR-003 | El sistema debe identificar y deduplicar estudiantes por correo o ID institucional | Must | Evita errores de duplicación en actas | 0 % de alumnos duplicados en planillas generadas |
-| BR-004 | El sistema debe mantener trazabilidad de la fuente original de cada calificación importada | Must | Requisito de auditoría y transparencia | 100 % de notas con campo "fuente" visible en la planilla |
+| BR-001 | El sistema debe permitir a los docentes sincronizar sus cursos y tareas desde Moodle y Google Classroom para crear SimonDrops vinculados | Must | Habilita la integración LMS sin copiar datos manualmente | 100 % de SimonDrops vinculados tienen lms_course_id y lms_assignment_id |
+| BR-002 | El sistema debe aparecer como opción de entrega nativa en Moodle (LTI 1.3) al nivel de "Archivo" o "Enlace" | Must | Es el diferenciador central frente a WeTransfer/Drive | SimonDrop visible en tareas Moodle sin configuración adicional del estudiante |
+| BR-003 | El sistema debe notificar automáticamente al LMS cuando un estudiante completa su entrega (LTI AGS) | Must | Evita que el docente tenga que marcar manualmente la entrega en dos sistemas | 100 % de entregas generan notificación LTI AGS al LMS |
+| BR-004 | El sistema debe mantener trazabilidad de la entrega: lms_assignment_id, lms_course_id, student_id LTI, hash SHA-256 y timestamp | Must | Requisito de auditoría y trazabilidad legal (Ley 164) | 100 % de entregas con los 5 campos registrados |
 | BR-005 | Las actas finales cerradas no pueden ser modificadas sin autorización formal del perfil Administrativo | Must | Restricción normativa / integridad académica | 0 % de modificaciones post-cierre sin registro de autorización |
 | BR-006 | El sistema debe gestionar identidad y control de acceso por roles (Docente, Estudiante, Administrativo, Admin) | Must | Seguridad y separación de responsabilidades | Cada rol accede únicamente a las funciones definidas en la matriz RBAC |
 | BR-007 | El sistema debe generar comprobantes de entrega con hash SHA-256 para archivos enviados en buzones | Should | Garantía legal de integridad de entrega | Hash generado y visible para el estudiante en el 100 % de las entregas |
@@ -211,12 +211,12 @@ La consecuencia de no actuar es la perpetuación de un sistema propenso a errore
 
 | ID | Regla | Tipo | Origen |
 |----|-------|------|--------|
-| RB-01 | Solo los docentes asignados oficialmente a una materia pueden sincronizar calificaciones desde sus LMS | Política | Reglamento académico UMSS |
-| RB-02 | Las notas finales, una vez cerradas en el período académico, no pueden ser alteradas por el docente sin un proceso de autorización del perfil Administrativo | Normativa | Reglamento de evaluación UMSS |
-| RB-03 | Los estudiantes tienen únicamente acceso de lectura a sus propias notas consolidadas | Política | Privacidad de datos académicos |
-| RB-04 | Ningún estudiante puede quedar duplicado en la lista final; el cruce de identidad debe realizarse exactamente mediante correo institucional o ID universitario | Política | Integridad de datos / consistencia de actas |
-| RB-05 | Toda nota importada debe conservar obligatoriamente la trazabilidad de su fuente original (Moodle / Classroom) | Normativa | Auditoría académica |
-| RB-06 | Si la escala de calificación de origen no es numérica, debe existir una tabla de equivalencias oficial aprobada por la administración antes de ejecutar la conversión | Política | Reglamento de evaluación UMSS |
+| RB-01 | Solo el docente propietario del buzón (SimonDrop) puede ver las entregas recibidas; otros docentes no tienen visibilidad cruzada | Política | Privacidad académica / RBAC |
+| RB-02 | Un buzón SimonDrop cerrado no puede recibir nuevas entregas; los archivos ya entregados son de solo lectura (soft-delete obligatorio) | Normativa | Integridad de evidencia / Ley 164 |
+| RB-03 | Cada entrega debe generar y asociar un comprobante con hash SHA-256 en el mismo instante del commit a la base de datos (operación atómica) | Normativa | Ley 164 Bolivia — cadena de custodia de datos académicos |
+| RB-04 | La identidad del estudiante en SimonCloud debe coincidir exactamente con su `lms_user_id` LTI; no se permiten entregas sin autenticación previa vía SSO WebSISS | Política | Integridad de datos / Reglamento académico UMSS |
+| RB-05 | Toda entrega vía LTI debe registrar obligatoriamente los campos: `lms_assignment_id`, `lms_course_id`, `lms_user_id`, `sha256_hash` y `submitted_at` | Normativa | Auditoría académica / trazabilidad Ley 164 |
+| RB-06 | Una notificación LTI AGS (Activity Grade Services) al LMS de origen debe enviarse dentro de los 30 segundos posteriores a la confirmación de entrega | Política | Consistencia entre SimonCloud y Moodle/Classroom |
 
 ---
 
@@ -238,12 +238,12 @@ La consecuencia de no actuar es la perpetuación de un sistema propenso a errore
 - No se prevén integraciones con otros LMS más allá de Moodle y Google Classroom en la fase MVP.
 
 ### Dependencias
-- API de Moodle (integración bidireccional de calificaciones y materias).
-- API de Google Classroom (importación de calificaciones).
-- API de QR Simple (pasarela de pagos para upgrades).
-- API de Google Drive (migración de archivos personales).
-- Convenio institucional firmado con UMSS.
-- Tabla de equivalencias de escalas de calificación aprobada por la Dirección Académica de la UMSS.
+- Moodle LTI 1.3 (registro de SimonCloud como External Tool en la instancia institucional de Moodle UMSS).
+- Google Classroom API + OAuth2 (integración de buzones en la fase 2 del ADR-0006).
+- SSO WebSISS OAuth2 (autenticación institucional UMSS — todos los usuarios).
+- API de QR Simple Bolivia (pasarela de pagos para upgrades a plan Pro).
+- API de Google Drive (migración de archivos personales — módulo opcional).
+- Convenio institucional firmado con UMSS (DTIC y Dirección Académica).
 
 ---
 
@@ -251,15 +251,15 @@ La consecuencia de no actuar es la perpetuación de un sistema propenso a errore
 
 ### 14.1 En alcance
 - Gestión de identidad y control de acceso por roles (RBAC): Docente, Estudiante, Administrativo, Admin.
-- Integración y sincronización con Moodle y Google Classroom.
-- Homologación automática de calificaciones de distintas escalas al formato oficial (0–100).
-- Dashboard unificado para docentes con sus materias y estado de calificaciones.
-- Sistema de seguimiento y consolidación de calificaciones por semestre.
+- Integración LMS vía LTI 1.3: SimonDrop aparece como opción de entrega nativa en Moodle.
+- Notificación automática al LMS vía LTI AGS cuando el estudiante completa su entrega.
+- Dashboard unificado para docentes con sus materias y buzones SimonDrop activos.
+- Almacenamiento de archivos hasta 2GB por entrega (on-premise MinIO, sin límites de Moodle).
+- Comprobante de entrega con hash SHA-256 para cada archivo en buzón SimonDrop.
+- Trazabilidad completa: `lms_assignment_id`, `lms_course_id`, `lms_user_id`, `sha256_hash`, `timestamp`.
 - Herramienta de anuncios para comunicación docente–estudiante.
-- Generación de planillas consolidadas y actas finales con validación administrativa.
-- Comprobante de entrega con hash SHA-256 para buzones de tareas.
 - Modelo multi-tenant con administración independiente por institución.
-- Pasarela de pago QR Simple para plan Pro individual.
+- Pasarela de pago QR Simple para plan Pro individual (50 GB).
 
 ### 14.2 Fuera de alcance
 - App móvil nativa (iOS / Android) en la fase MVP.
@@ -277,11 +277,12 @@ La consecuencia de no actuar es la perpetuación de un sistema propenso a errore
 
 | Tipo | Año 1 (Piloto UMSS) | Año 2 (Expansión Bolivia) | Año 3 (Consolidación) |
 |------|---------------------|--------------------------|----------------------|
-| Ahorro operativo (horas docente) | ~1 500 h/semestre × 2 = 3 000 h/año a $5 USD/h estimado = **$15 000 USD** | ~10 000 h/año = **$50 000 USD** | ~25 000 h/año = **$125 000 USD** |
-| Ingresos por licencias Pro (externos) | Por definir (precio pendiente) | Estimado bajo ($2 000–5 000 USD) | Creciente con base de usuarios |
+| Ahorro operativo (horas docente — gestión de entregas) | ~5 materias piloto × 2 h/semestre × 2 semestres = **20 h/año piloto**; proyectado a 500 docentes: ~2 000 h/año a $5 USD/h = **$10 000 USD** | ~8 000 h/año = **$40 000 USD** | ~20 000 h/año = **$100 000 USD** |
+| Ahorro en riesgo legal (cumplimiento Ley 164) | Evita sanciones AGETIC por manejo informal de datos de estudiantes (costo difícil de cuantificar, alto impacto) | — | — |
+| Ingresos por licencias Pro (usuarios externos) | Por definir (precio pendiente) | Estimado bajo ($2 000–5 000 USD) | Creciente con base de usuarios |
 | Inversión CAPEX (desarrollo MVP) | $8 000–15 000 USD | $5 000 USD (nuevas integraciones) | $5 000 USD |
-| OPEX anual (hosting + soporte) | $3 000–6 000 USD | $8 000 USD | $12 000 USD |
-| **Balance estimado Año 1** | **Positivo si se contabilizan externalidades de productividad** | — | — |
+| OPEX anual (hosting on-premise DTIC + soporte) | $1 000–3 000 USD | $5 000 USD | $8 000 USD |
+| **Balance estimado Año 1** | **Positivo si se contabilizan externalidades de productividad y riesgo legal** | — | — |
 
 ---
 
@@ -301,10 +302,11 @@ La consecuencia de no actuar es la perpetuación de un sistema propenso a errore
 ## 17. Criterios de éxito del proyecto de negocio
 
 - Cumplimiento de ≥ 80 % de los objetivos SMART definidos en la sección 9 al cierre del piloto (Q4 2026).
-- Al menos 5 materias activas en UMSS con planillas generadas por SimonCloud sin intervención manual.
-- Cero actas finales con errores de duplicación o conversión de escala durante el semestre piloto.
+- Al menos 5 materias activas en UMSS con SimonDrops vinculados a tareas Moodle vía LTI 1.3.
+- 100 % de entregas registradas en el piloto cuentan con comprobante SHA-256 almacenado y verificable.
+- Cero entregas perdidas o sin trazabilidad legal durante el semestre piloto.
 - Satisfacción del sponsor (DTIC) ≥ 4/5 en evaluación formal post-piloto.
-- Validación positiva del flujo de homologación por parte de la Dirección Académica (aprobación del acta digital).
+- SimonDrop registrado como External Tool en la instancia Moodle UMSS antes del inicio del piloto.
 
 ---
 
@@ -312,13 +314,16 @@ La consecuencia de no actuar es la perpetuación de un sistema propenso a errore
 
 | BRD ID | MRD relacionado | PRD relacionado | Caso de uso FSD |
 |--------|-----------------|-----------------|-----------------|
-| BR-001 | MRD-N-01 | PRD-REQ-01 | FSD-UC-001 (Importar calificaciones LMS) |
-| BR-002 | MRD-N-01 | PRD-REQ-02 | FSD-UC-002 (Homologar escala de calificaciones) |
-| BR-003 | MRD-N-01 | PRD-REQ-03 | FSD-UC-003 (Deduplicar alumnos por ID) |
-| BR-004 | MRD-N-02 | PRD-REQ-04 | FSD-UC-004 (Trazabilidad de fuente de nota) |
-| BR-005 | MRD-N-03 | PRD-REQ-05 | FSD-UC-005 (Cierre y bloqueo de acta final) |
-| BR-006 | MRD-N-04 | PRD-REQ-06 | FSD-UC-006 (Control de acceso RBAC) |
-| BR-007 | MRD-N-05 | PRD-REQ-07 | FSD-UC-007 (Comprobante SHA-256) |
+| BR-001 | MRD-N-01 | PRD-REQ-001 | FSD-UC-001 (Autenticación SSO WebSISS) |
+| BR-002 | MRD-N-01 | PRD-REQ-001 | FSD-UC-007 (SimonDrop — Entrega LTI 1.3) |
+| BR-003 | MRD-N-01 | PRD-REQ-003 | FSD-UC-007 (Notificación LTI AGS al LMS) |
+| BR-004 | MRD-N-02 | PRD-REQ-001 | FSD-UC-002 (Subida segura + SHA-256) |
+| BR-005 | MRD-N-03 | PRD-REQ-005 | FSD-UC-005 (Cierre y bloqueo de buzón) |
+| BR-006 | MRD-N-04 | PRD-REQ-006 | FSD-UC-006 (Control de acceso RBAC) |
+| BR-007 | MRD-N-05 | PRD-REQ-007 | FSD-UC-002 (Comprobante SHA-256) |
+| BR-008 | MRD-N-06 | PRD-REQ-008 | FSD-UC-008 (Anuncios — Notificación push/email) |
+| BR-009 | MRD-N-07 | PRD-REQ-009 | FSD-UC-010 (Admin multi-tenant) |
+| BR-010 | MRD-N-08 | PRD-REQ-010 | FSD-UC-003 (Upgrade cuota QR Simple) |
 
 ---
 
@@ -338,6 +343,7 @@ La consecuencia de no actuar es la perpetuación de un sistema propenso a errore
 |---------|-------|-------|--------|
 | v0.1 | 08/05/2026 | Carlos Alberto Gomez Ormachea | Versión inicial del BRD |
 | v2.0 | 11/05/2026 | Carlos Alberto Gomez Ormachea | Agregada evidencia Discovery M2 (§3.3), metadatos de prompts y PR-FAQ. |
+| v3.0 | 27/05/2026 | Carlos Alberto Gomez Ormachea | Reenfoque estratégico: propuesta de valor migrada de homologación de calificaciones a integración LMS vía SimonDrop (LTI 1.3) + SHA-256. Alineado con DTI vFinal, ADR-0006 y stack on-premise DTIC-UMSS. |
 
 ---
 
@@ -349,19 +355,20 @@ La consecuencia de no actuar es la perpetuación de un sistema propenso a errore
 Cochabamba, Bolivia — 15 de agosto de 2026
 
 La Universidad Mayor de San Simón anuncia SimonCloud, la primera plataforma
-nativa de gestión académica universitaria de Bolivia. Permite a los docentes
-consolidar calificaciones de Moodle y Classroom en un acta unificada en
-menos de 5 minutos, y a los estudiantes entregar trabajos de más de 2GB
-con un comprobante legal inmutable (Hash SHA-256).
+institucional de entrega de trabajos académicos de Bolivia integrada
+nativamente en Moodle. Los estudiantes entregan archivos de hasta 2GB
+directamente desde la tarea Moodle, sin salir del LMS, y reciben en
+segundos un comprobante legal inmutable (Hash SHA-256).
 
-"SimonCloud le devuelve el tiempo al docente. Antes, el cierre de actas
-tomaba un fin de semana de trabajo manual en Excel. Ahora es un clic.",
-dijo el Director de la DTIC de la UMSS.
+"SimonCloud elimina el caos de los 80 correos y WhatsApps que recibo por
+cada tarea. Ahora todo llega al mismo lugar, con fecha y hash verificable.",
+dijo una docente piloto de la Facultad de Ciencias y Tecnología UMSS.
 
 Actualmente el 100% de los estudiantes de carreras técnicas falla al
-entregar archivos por Moodle (límite de 50MB), y los docentes reciben
-trabajos desordenados por WhatsApp. SimonCloud resuelve esto con buzones
-de entrega seguros (SimonDrop) y homologación automática de escalas.
+entregar archivos por Moodle (límite de 50MB), y los docentes no tienen
+forma legal de probar que los archivos recibidos por WhatsApp no fueron
+alterados. SimonCloud resuelve esto con buzones de entrega seguros
+(SimonDrop), integración LTI 1.3 con Moodle y certificados SHA-256.
 
 SimonCloud estará disponible para la comunidad UMSS en el segundo semestre
 de 2026. Más información: simoncloud.umss.edu.bo
@@ -369,16 +376,17 @@ de 2026. Más información: simoncloud.umss.edu.bo
 
 ### 21.2 External FAQ
 
-- **¿Qué es SimonCloud?** La nube académica oficial de la UMSS: un lugar único para entregar trabajos, recibir comprobantes de entrega y ver notas consolidadas.
-- **¿En qué se diferencia de Google Drive?** Está integrado con el WebSISS (SSO), los buzones tienen cierre automático, y los archivos pertenecen a la UMSS, no a Google.
-- **¿Cómo sé que mi tarea fue recibida?** Recibes un recibo digital con Hash SHA-256, prueba criptográfica de que el contenido no fue alterado post-entrega.
-- **¿Cuánto cuesta?** 15GB gratuitos con credencial institucional. 50GB por Bs. 50/semestre vía QR Simple.
+- **¿Qué es SimonCloud?** La plataforma institucional de entrega de trabajos de la UMSS: buzones seguros (SimonDrop) integrados en Moodle, con comprobante SHA-256 de cada entrega y almacenamiento hasta 2GB por archivo.
+- **¿En qué se diferencia de entregar por Moodle directamente?** Moodle tiene límite de 50MB. SimonCloud admite hasta 2GB, genera un comprobante de integridad (SHA-256) y guarda los archivos on-premise en la DTIC-UMSS, no en servidores externos.
+- **¿Cómo sé que mi tarea fue recibida?** Recibes un recibo digital con Hash SHA-256, prueba criptográfica de que el contenido no fue alterado post-entrega. El docente también recibe notificación automática.
+- **¿Cuánto cuesta?** 15GB gratuitos con credencial institucional UMSS. Plan Pro 50GB por Bs. 50/semestre vía QR Simple.
 
 ### 21.3 Internal FAQ
 
-- **¿Por qué ahora?** Severidad máxima (nivel 4 en escala Nielsen) detectada en campo; cada semestre sin solución genera pérdida de trabajos y conflictos académicos.
-- **¿Cuál es el retorno?** $15,000 USD de ahorro en H/H docentes en Año 1; modelo Freemium proyecta autofinanciamiento en Año 2.
-- **¿Cómo escalamos?** Arquitectura multi-tenant (SCaaS) permite incorporar otras universidades bolivianas sin rediseño del núcleo.
+- **¿Por qué ahora?** Severidad máxima (nivel 4 en escala Nielsen) detectada en campo; 100% de estudiantes técnicos no puede entregar por Moodle y los docentes acumulan disputas sin evidencia verificable.
+- **¿Por qué LTI 1.3 y no una integración propia?** LTI 1.3 es el estándar global (mismo que usa Turnitin, Khan Academy, Coursera). Garantiza interoperabilidad con cualquier LMS compatible sin mantener conectores propietarios frágiles.
+- **¿Cuál es el retorno?** ~$10,000 USD de ahorro en H/H docentes en Año 1; eliminación del riesgo legal de incumplimiento Ley 164; modelo Freemium proyecta autofinanciamiento en Año 2.
+- **¿Cómo escalamos?** Arquitectura multi-tenant (SCaaS) permite incorporar otras universidades bolivianas sin rediseño del núcleo. SCaaS Tier 2 federated o Tier 3 cloud para instituciones sin DTIC propio.
 
 ---
 

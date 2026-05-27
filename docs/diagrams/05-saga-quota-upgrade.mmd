@@ -4,7 +4,7 @@ title: "Saga Orquestada — Upgrade de Cuota por QR Simple (FSD-UC-003)"
 stateDiagram-v2
     [*] --> UpgradePending : Estudiante solicita upgrade 50GB\n[Transacción Compensable]
 
-    UpgradePending --> QRGenerado : GenerateQR → payment-service\nQR válido por 5 minutos
+    UpgradePending --> QRGenerado : GenerateQR → QR Simple Bolivia API\nQR válido por 5 minutos
 
     QRGenerado --> QRExpirado : Timeout 5 min\nsin pago detectado
 

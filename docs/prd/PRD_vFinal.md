@@ -17,13 +17,13 @@
 | Prompts utilizados | `PR-PRD-001` |
 
 ## 1. Resumen del producto
-SimonCloud es un ecosistema universitario unificado que soluciona dos grandes problemas: el almacenamiento y entrega segura de archivos académicos, y la fragmentación de calificaciones. Actúa como un hub central donde los estudiantes pueden subir trabajos pesados obteniendo un comprobante legal (Hash SHA-256), y los docentes pueden homologar automáticamente las notas provenientes de múltiples plataformas (Moodle, Classroom) en una sola escala oficial de 100 puntos, sin duplicación de estudiantes.
+SimonCloud es un ecosistema universitario de almacenamiento institucional y entrega segura de archivos académicos. Actúa como hub central donde los estudiantes suben trabajos obteniendo un comprobante legal (Hash SHA-256), y los docentes crean buzones de entrega (SimonDrop) que aparecen como opción nativa dentro de Moodle y Google Classroom vía integración LTI 1.3 — al nivel de "Archivo" o "Google Doc". El docente califica en su LMS; SimonCloud garantiza la integridad de la entrega.
 
 ## 2. Objetivos del producto
 
 | ID | Objetivo del producto | BRD vinculado | Métrica | Meta |
 |----|------------------------|----------------|---------|------|
-| OP-01 | Consolidar notas de múltiples LMS en 1 clic | BR-001, BR-002 | Tiempo de ejecución | < 5s por materia |
+| OP-01 | Aparecer como opción de entrega nativa en Moodle y Classroom (LTI 1.3) | BR-001, BR-002 | SimonDrops vinculados a tareas LMS creados | ≥ 1 por materia activa |
 | OP-02 | Generar recibos Hash inmutables en subidas | BR-007 | Tasa de éxito | 100% |
 | OP-03 | Ampliar cuotas vía pago QR | BR-010 | Tiempos de activación | < 1 min |
 
@@ -33,7 +33,7 @@ SimonCloud es un ecosistema universitario unificado que soluciona dos grandes pr
 - Autenticación institucional por roles (Docente, Estudiante).
 - Dashboard "Mi Nube" con gestión de cuotas y archivos.
 - Buzones de tareas con bloqueo post-entrega y generación de Hash.
-- Módulo de Sincronización y Homologación de notas (Google Classroom y Moodle).
+- Integración LMS vía LTI 1.3 (Moodle) y OAuth2 (Google Classroom): SimonDrop como opción de entrega nativa dentro del LMS.
 - Integración QR Simple para upgrade de 15GB a 50GB.
 
 ### 3.2 Fuera del alcance (backlog)
@@ -43,30 +43,30 @@ SimonCloud es un ecosistema universitario unificado que soluciona dos grandes pr
 ### 3.3 Roadmap de versiones
 | Versión | Contenido | Fecha objetivo |
 |---------|-----------|----------------|
-| v1.0 | MVP (Buzones Hash + Homologación de Notas + Pago QR) | Q4 2026 |
-| v1.1 | Integración profunda LTI con Moodle | Q1 2027 |
+| v1.0 | MVP (Buzones Hash + Integración LMS LTI 1.3 + Pago QR) | Q4 2026 |
+| v1.1 | Google Classroom Add-on (Phase 2 — aprobación Google Workspace Marketplace) | Q1 2027 |
 | v2.0 | Migración Google Drive API | Q2 2027 |
 
 ## 4. Personas y *user journeys*
 
 ### 4.1 Personas
-- **Docente:** Necesita recolectar tareas sin que colapse su correo y homologar notas rápidamente.
+- **Docente:** Necesita recolectar tareas sin que colapse su correo, con entrega integrada directamente en su LMS (Moodle/Classroom) y comprobante de integridad automático.
 - **Estudiante:** Necesita subir trabajos pesados y tener constancia irrefutable de la entrega.
 
 ### 4.2 *User journeys* principales
 
 ```mermaid
 journey
-  title Journey Docente – Homologación de Notas
+  title Journey Docente – SimonDrop integrado al LMS
   section Configuración
-    Ingresa al módulo de actas: 5: Docente
-    Conecta Moodle y Classroom: 4: Docente
-  section Sincronización
-    Ejecuta "Consolidar Notas": 5: Docente
-    Sistema resuelve duplicados y escalas: 3: Sistema
+    Sincroniza cursos desde Moodle/Classroom: 5: Docente
+    Crea SimonDrop vinculado a una tarea: 5: Docente
+  section Integración LMS
+    LMS registra SimonDrop como opción de entrega: 4: Sistema
+    Estudiantes ven "Entregar en SimonDrop": 5: Estudiante
   section Cierre
-    Revisa acta unificada sobre 100: 5: Docente
-    Exporta/Guarda acta oficial: 5: Docente
+    Docente ve todas las entregas con hash SHA-256: 5: Docente
+    LMS marca tarea como Entregada automáticamente: 5: Sistema
 ```
 
 ```mermaid
@@ -116,21 +116,39 @@ Escenario: Estudiante sube archivo a buzón
    Y genera un recibo digital con el hash SHA-256 del documento
 ```
 
-### 5.2 Épica 2: Homologación de Calificaciones
+### 5.2 Épica 2: Integración LMS vía SimonDrop (LTI 1.3)
 | ID | Historia | Prioridad | Valor | Criterios Gherkin |
 |----|----------|-----------|-------|-------------------|
-| PRD-US-005 | Como docente, quiero importar notas desde Moodle y Classroom simultáneamente. | Must | 10 | Ver §5.2.1 |
-| PRD-US-006 | Como docente, quiero que el sistema convierta notas de letras (A,B,C) a valores numéricos sobre 100. | Must | 9 | ... |
-| PRD-US-007 | Como sistema, quiero fusionar cuentas de alumnos por correo institucional para evitar duplicados en el acta. | Must | 10 | ... |
+| PRD-US-005 | Como docente, quiero sincronizar mis cursos y tareas desde Moodle para crear SimonDrops vinculados sin copiar datos manualmente. | Must | 10 | Ver §5.2.1 |
+| PRD-US-006 | Como docente, quiero que el SimonDrop aparezca como opción de entrega en Moodle al nivel de "Archivo" o "Enlace". | Must | 9 | Ver §5.2.2 |
+| PRD-US-007 | Como estudiante, quiero ver "Entregar en SimonDrop" dentro de la tarea de mi LMS para subir mi trabajo sin salir del entorno académico. | Must | 10 | Ver §5.2.3 |
 
-#### 5.2.1 Criterios PRD-US-005 y PRD-US-007
+#### 5.2.1 Criterios PRD-US-005
 ```gherkin
-Escenario: Homologación de alumno en dos plataformas
-  Dado un docente que importa datos de "jperez@umss.edu" desde Moodle (45/50) y Classroom (A=90/100)
-  Cuando el sistema procesa la sincronización
-  Entonces el sistema identifica que es el mismo estudiante
-   Y convierte la nota de Moodle a 90/100
-   Y presenta una fila única: "Juan Pérez | Tarea 1: 90/100 | Tarea 2: 90/100"
+Escenario: Docente sincroniza cursos desde Moodle
+  Dado un docente autenticado con SSO WebSISS que tiene materias en Moodle
+  Cuando selecciona "Sincronizar LMS" en SimonCloud
+  Entonces el sistema lista sus cursos y tareas activas de Moodle
+   Y permite crear un SimonDrop vinculado a una tarea con un clic
+```
+
+#### 5.2.2 Criterios PRD-US-006
+```gherkin
+Escenario: SimonDrop aparece como opción de entrega en Moodle
+  Dado un SimonDrop vinculado a la tarea "Proyecto Final" de Moodle
+  Cuando el docente guarda la configuración
+  Entonces Moodle registra el deep link de SimonCloud
+   Y los estudiantes ven "Entregar en SimonDrop" junto a "Archivo" y "Enlace"
+```
+
+#### 5.2.3 Criterios PRD-US-007
+```gherkin
+Escenario: Estudiante entrega desde el LMS
+  Dado un estudiante que ve la tarea "Proyecto Final" en Moodle
+  Cuando selecciona "Entregar en SimonDrop" y sube su archivo
+  Entonces SimonCloud genera el hash SHA-256 del archivo
+   Y emite el comprobante de entrega al estudiante
+   Y notifica a Moodle via LTI AGS que la tarea fue entregada
 ```
 
 *(Más historias se detallarán en el backlog ágil)*
@@ -155,20 +173,6 @@ Escenario: Administrativo etiqueta un documento
 ```
 
 
-#### 5.2.2 Criterios PRD-US-006
-```gherkin
-Escenario: Docente convierte nota letra A a numérico
-  Dado un docente que importa la nota "A" de Classroom para "maria@umss.edu.bo"
-  Cuando el sistema aplica la tabla de equivalencias
-  Entonces la nota homologada es 90/100
-  Y el campo lms_origen tiene valor "Classroom"
-
-Escenario: Letra desconocida bloquea el cierre del acta
-  Dado una nota con valor "E+" importada desde Classroom
-  Cuando el sistema intenta homologar
-  Entonces marca la celda en rojo
-  Y el botón "Guardar Acta" queda deshabilitado hasta resolver la discrepancia
-```
 
 ### 5.3 Épica 3: Almacenamiento y Cuotas
 | ID | Historia | Prioridad | Valor | Criterios Gherkin |
@@ -208,7 +212,7 @@ Escenario: Login con credenciales WebSISS
 ```
 
 ## 6. Priorización (MoSCoW + RICE)
-- **Must:** Homologación de notas, Cruce de identidad, Buzones SimonDrop, Generación de Hash, SSO WebSISS, Subida reanudable 2GB.
+- **Must:** Integración LMS LTI 1.3 (SimonDrop como opción de entrega), Buzones SimonDrop, Generación de Hash SHA-256, SSO WebSISS, Subida reanudable 2GB.
 - **Should:** Pasarela de pago QR para cuotas extra, Notificaciones, Permisos automáticos.
 - **Could:** Migración directa de Google Drive, Panel de administrador.
 - **Won't:** Videollamadas integradas, Editor de video en la nube.
@@ -217,8 +221,8 @@ Escenario: Login con credenciales WebSISS
 | ID | Reach | Impact (0.25–3) | Confidence (%) | Effort | RICE |
 |----|-------|-----------------|----------------|--------|------|
 | PRD-US-012 (SSO WebSISS) | 30000 | 3 | 90 | 3 | 27000 |
-| PRD-US-005 (Importar notas LMS) | 5000 | 3 | 85 | 8 | 1594 |
-| PRD-US-007 (Cruce identidad) | 5000 | 3 | 90 | 5 | 2700 |
+| PRD-US-005 (Sincronizar cursos LMS + crear SimonDrop vinculado) | 5000 | 3 | 85 | 6 | 2125 |
+| PRD-US-007 (Entregar en SimonDrop desde el LMS) | 20000 | 3 | 90 | 4 | 13500 |
 | PRD-US-008 (Subida 2GB reanudable) | 20000 | 3 | 80 | 6 | 8000 |
 | PRD-US-009 (SimonDrop con cierre) | 8000 | 2 | 85 | 4 | 3400 |
 | PRD-US-003 (Hash inmutable) | 8000 | 2 | 90 | 3 | 4800 |
@@ -231,11 +235,11 @@ Escenario: Login con credenciales WebSISS
 
 | ID | Requisito | Historia(s) | BRD | Prioridad |
 |----|-----------|-------------|-----|----------|
-| PRD-REQ-001 | Motor de consolidación de IDs por correo institucional (deduplicación). | PRD-US-007 | BR-003 | Must |
+| PRD-REQ-001 | Integración LMS vía LTI 1.3 (Moodle) y OAuth2 (Classroom): sincronización de cursos y creación de SimonDrops vinculados. | PRD-US-005, PRD-US-006 | BR-001 | Must |
 | PRD-REQ-002 | Generador de Hash criptográfico SHA-256 en subida de archivos. | PRD-US-003 | BR-007 | Must |
-| PRD-REQ-003 | Integración con APIs REST de Moodle y Google Classroom + homologación de escalas. | PRD-US-005, PRD-US-006 | BR-001, BR-002 | Must |
+| PRD-REQ-003 | SimonDrop como opción de entrega nativa en LMS (deep link LTI) + notificación LTI AGS al entregar. | PRD-US-006, PRD-US-007 | BR-002 | Must |
 | PRD-REQ-004 | Pasarela de generación y validación de QR Simple para cuota Pro. | PRD-US-004 | BR-010 | Could |
-| PRD-REQ-005 | Trazabilidad de fuente (lms_origen) en cada nota importada. | PRD-US-005 | BR-004 | Must |
+| PRD-REQ-005 | Trazabilidad de entrega: `lms_assignment_id` + `lms_course_id` en cada SimonDrop vinculado. | PRD-US-005 | BR-004 | Must |
 | PRD-REQ-006 | Control de acceso por roles RBAC (Docente, Estudiante, Administrativo, Admin). | PRD-US-012 | BR-006 | Must |
 
 ## 8. Requerimientos no funcionales (alto nivel)
@@ -243,26 +247,26 @@ Escenario: Login con credenciales WebSISS
 | ID | Categoría | Requerimiento | Umbral |
 |----|-----------|---------------|--------|
 | PRD-NFR-001 | Integridad | Los archivos en buzones cerrados no deben poder modificarse (Inmutabilidad). | 100% |
-| PRD-NFR-002 | Rendimiento | La homologación de un curso de 100 alumnos debe tardar menos de 5 segundos. | < 5s |
+| PRD-NFR-002 | Rendimiento | La sincronización de cursos LMS y creación de SimonDrop vinculado deben completarse en menos de 3 segundos. | < 3s |
 | PRD-NFR-003 | Almacenamiento | Soporte de subidas de hasta 500MB en segundo plano (chunking). | 500MB |
 
 ## 9. Dependencias e integraciones
 
 | Sistema | Tipo | Propósito | Riesgo |
 |---------|------|-----------|--------|
-| Moodle API | consumo | Extraer notas de tareas | Medio |
-| Google Classroom API | consumo | Extraer notas de tareas | Medio |
+| Moodle LTI 1.3 | integración | SimonDrop como opción de entrega nativa; LTI AGS para notificación de entrega | Medio |
+| Google Classroom API | consumo | Sincronización de cursos y tareas; deep link de SimonDrop como material | Medio |
 | Gateway QR Simple | consumo | Pagos de cuota Pro | Alto |
 
 ## 10. Trazabilidad
 
 | PRD ID | BRD (BRD_v2.md) | FSD |
 |--------|-----------------|-----|
-| PRD-REQ-001 | BR-003 (deduplicar alumnos) | FSD-UC-001 |
+| PRD-REQ-001 | BR-001 (integración LMS LTI) | FSD-UC-001 |
 | PRD-REQ-002 | BR-007 (hash SHA-256) | FSD-UC-002 |
-| PRD-REQ-003 | BR-001 (importar LMS) + BR-002 (homologar escala) | FSD-UC-001 |
+| PRD-REQ-003 | BR-002 (SimonDrop como opción de entrega LMS) | FSD-UC-001 |
 | PRD-REQ-004 | BR-010 (QR Simple) | FSD-UC-003 |
-| PRD-REQ-005 | BR-004 (trazabilidad fuente) | FSD-UC-001 |
+| PRD-REQ-005 | BR-004 (trazabilidad lms_assignment_id) | FSD-UC-001 |
 | PRD-REQ-006 | BR-006 (RBAC) | FSD-UC-001, FSD-UC-002, FSD-UC-003 |
 
 ## 11. Trazabilidad con M2 (UI/UX)

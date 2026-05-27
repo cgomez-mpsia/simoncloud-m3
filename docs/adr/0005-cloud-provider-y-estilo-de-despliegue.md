@@ -36,7 +36,7 @@ Los requisitos no funcionales que guían esta decisión son:
 | Frontend SPA | **Nginx** (archivos estáticos) | S3 + CloudFront |
 | Reverse proxy / Load balancer | **Nginx** con upstream balancing | ALB |
 | TLS / HTTPS | **Certbot + Let's Encrypt** o CA interna UMSS | ACM |
-| Microservicios (8 servicios) | **Docker Swarm** (replicas por servicio) | ECS Fargate |
+| Microservicios (7 servicios) | **Docker Swarm** (replicas por servicio) | ECS Fargate |
 | Object Storage binarios | **MinIO** (API S3-compatible, WORM vía Object Lock) | S3 + Object Lock |
 | Base de datos | **PostgreSQL 16** (primary + replica en standby) | RDS PostgreSQL Multi-AZ |
 | Cache y sesiones upload | **Redis 7 Cluster** (3 nodos, Consistent Hashing) | ElastiCache Redis |
@@ -74,7 +74,7 @@ El SDK de AWS S3 (`@aws-sdk/client-s3`) funciona sin modificación apuntando a M
 | **AWS sa-east-1 (São Paulo)** | Datos de estudiantes bolivianos en servidores de Brasil bajo jurisdicción de Amazon (EE.UU.). Incompatible con soberanía de datos y autonomía universitaria. Costo recurrente ~$400 USD/mes inaceptable para presupuesto DTIC. |
 | **GCP (Google Cloud)** | Mismas objeciones de soberanía. Región más cercana en Chile (southamerica-east1 São Paulo). Sin ventaja sobre AWS para este caso de uso. |
 | **Azure** | Mismas objeciones de soberanía. Mayor costo en LatAm. AKS más complejo para operar con equipo pequeño. |
-| **Kubernetes (K8s) on-premise** | Mayor complejidad operacional que Docker Swarm para el volumen actual (8 servicios, equipo DTIC reducido). Puede migrarse a K3s en v3.0 si el equipo crece. |
+| **Kubernetes (K8s) on-premise** | Mayor complejidad operacional que Docker Swarm para el volumen actual (7 servicios, equipo DTIC reducido). Puede migrarse a K3s en v3.0 si el equipo crece. |
 | **Serverless (OpenFaaS)** | Límite de payload incompatible con uploads de 2GB. Complejidad operacional alta en on-premise. |
 
 ---
