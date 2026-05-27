@@ -1,0 +1,75 @@
+---
+title: "Despliegue AWS — SimonCloud (Región sa-east-1)"
+---
+flowchart TD
+    subgraph Internet["Internet"]
+        Users["Usuarios UMSS\n(Estudiantes, Docentes, Admins)"]
+    end
+
+    subgraph AWS["AWS sa-east-1 (São Paulo)"]
+        subgraph CDN["Edge / CDN"]
+            CF["CloudFront\nDistribución CDN"]
+            S3_SPA["S3 Bucket\nSPA React (estático)"]
+        end
+
+        subgraph Ingress["Ingress"]
+            ALB["ALB\nApplication Load Balancer\nPath-based routing"]
+            WAF["AWS WAF\nRate limiting / OWASP rules"]
+        end
+
+        subgraph ECS["ECS Fargate Cluster — Microservicios"]
+            GW_T["Task: API Gateway\n(NestJS)\nx2 instancias"]
+            FS_T["Task: file-service\n(NestJS)\nx3 → auto-scale → x9"]
+            GS_T["Task: grade-service\n(NestJS + CB)\nx2 instancias"]
+            QS_T["Task: quota-service\n(NestJS)\nx1 instancia"]
+            NS_T["Task: notification-service\n(NestJS SQS consumer)\nx1 instancia"]
+            AS_T["Task: auth-service\n(NestJS)\nx1 instancia"]
+            ADM_T["Task: admin-service\n(NestJS)\nx1 instancia"]
+        end
+
+        subgraph Storage["Almacenamiento"]
+            RDS_P["RDS PostgreSQL 16\nPrimary (Multi-AZ)"]
+            RDS_R["RDS PostgreSQL 16\nReplica (CQRS reads)"]
+            ELAST["ElastiCache Redis\nCluster Mode (3 nodos)"]
+            S3_OBJ["S3 Bucket\nObject Storage\n+ Object Lock WORM"]
+        end
+
+        subgraph Messaging["Mensajería"]
+            SQS_STD["SQS Standard Queue\nFileUploaded, QuotaUpgraded"]
+            SQS_DLQ["SQS Dead Letter Queue\nFallos tras 3 reintentos"]
+            SF["Step Functions\nSaga Quota Upgrade"]
+        end
+
+        subgraph Ops["Operaciones"]
+            SM["Secrets Manager\nJWT secret, QR HMAC key"]
+            CW["CloudWatch\nLogs + Metrics + Alarms"]
+            XRAY["X-Ray\nTrazas distribuidas"]
+            ECR["ECR\nDocker Images"]
+        end
+    end
+
+    Users --> CF
+    CF --> S3_SPA
+    CF --> ALB
+    ALB --> WAF
+    WAF --> GW_T
+    GW_T --> FS_T
+    GW_T --> GS_T
+    GW_T --> QS_T
+    GW_T --> AS_T
+    GW_T --> ADM_T
+    FS_T --> RDS_P
+    FS_T --> ELAST
+    FS_T --> S3_OBJ
+    FS_T --> SQS_STD
+    GS_T --> RDS_P
+    QS_T --> RDS_P
+    QS_T --> SF
+    NS_T --> SQS_STD
+    NS_T --> SQS_DLQ
+    ADM_T --> RDS_R
+    RDS_P --> RDS_R
+    GW_T --> SM
+    FS_T --> SM
+    ECS --> CW
+    ECS --> XRAY

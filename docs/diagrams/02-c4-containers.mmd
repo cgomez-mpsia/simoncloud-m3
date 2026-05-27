@@ -1,0 +1,38 @@
+---
+title: "C4 Nivel 2 — Contenedores SimonCloud"
+---
+C4Container
+title Diagrama de Contenedores (C4 Nivel 2) — SimonCloud
+
+Person(usuario, "Usuario UMSS", "Cualquier usuario institucional")
+
+Container(spa, "SPA React", "React 18 + TypeScript + Vite", "Interfaz web unificada por rol")
+Container(gateway, "API Gateway", "NestJS 10", "Único punto de entrada: JWT, routing, rate-limit")
+Container(auth, "auth-service", "NestJS + Passport OAuth2", "SSO WebSISS, emisión JWT, RBAC")
+Container(files, "file-service", "NestJS + AWS SDK v3", "Subida chunked, SHA-256, presigned URLs")
+Container(drops, "simondrop-service", "NestJS", "Buzones de entrega, cierres automáticos, comprobantes")
+Container(grades, "grade-service", "NestJS + Opossum CB", "Homologación Moodle/Classroom, deduplicación por email")
+Container(quota, "quota-service", "NestJS + Step Functions", "Cuotas 15GB/50GB, saga de pago QR Simple")
+Container(notif, "notification-service", "NestJS + web-push", "Emails institucionales, push browser, DLQ SQS")
+Container(admin_svc, "admin-service", "NestJS + CQRS Read Model", "Panel admin, métricas globales, audit log exportable PDF")
+
+ContainerDb(pg, "PostgreSQL 16", "RDS Multi-AZ", "Usuarios, archivos, buzones, actas, cuotas, audit_log")
+ContainerDb(redis, "Redis Cluster", "ElastiCache 7", "Sesiones upload chunked; fallback cache grade-service")
+ContainerDb(s3_obj, "S3 Object Storage", "AWS S3 + Object Lock", "Archivos binarios; WORM post-cierre SimonDrop")
+ContainerDb(sqs_q, "SQS + DLQ", "AWS SQS", "Cola FileUploaded, QuotaUpgraded; Dead Letter Queue")
+
+Rel(usuario, spa, "Accede", "HTTPS")
+Rel(spa, gateway, "API Calls", "HTTPS REST")
+Rel(gateway, auth, "Valida JWT", "gRPC")
+Rel(gateway, files, "/files/*", "REST")
+Rel(gateway, drops, "/drops/*", "REST")
+Rel(gateway, grades, "/grades/*", "REST")
+Rel(gateway, quota, "/quota/*", "REST")
+Rel(gateway, admin_svc, "/admin/*", "REST")
+Rel(files, pg, "CRUD archivos", "SQL")
+Rel(files, redis, "Sesiones upload", "Redis Protocol")
+Rel(files, s3_obj, "PUT/GET objetos", "S3 API")
+Rel(files, sqs_q, "Publica FileUploadedEvent (Outbox)", "SQS API")
+Rel(notif, sqs_q, "Consume mensajes", "SQS Long Polling")
+Rel(grades, pg, "CRUD actas", "SQL")
+Rel(admin_svc, pg, "Read Model CQRS", "SQL (Replica)")

@@ -1,0 +1,32 @@
+---
+title: "Circuit Breaker — grade-service → Moodle API"
+---
+stateDiagram-v2
+    [*] --> Closed : Sistema inicia (Moodle healthy)
+
+    Closed --> Open : ≥ 5 errores consecutivos\no 50% falla en 10s\nllamando a Moodle API
+
+    Open --> HalfOpen : Timeout 30s expirado\n(auto-recovery probe)
+
+    HalfOpen --> Closed : Request de prueba exitoso\n(Moodle respondió OK)
+
+    HalfOpen --> Open : Request de prueba falla\n(Moodle aún caído)
+
+    Open --> Open : Retorna acta desde\nRedis Cache [DEGRADED]\np95 < 500ms
+
+    note right of Closed
+        Respuesta normal
+        p95 < 5s (NFR-001)
+    end note
+
+    note right of Open
+        Fallback: cache Redis
+        0 cascading failures
+        Docente ve [DATOS DE CACHÉ]
+    end note
+
+    note right of HalfOpen
+        1 request de prueba
+        Si OK → CLOSED
+        Si falla → OPEN 30s más
+    end note

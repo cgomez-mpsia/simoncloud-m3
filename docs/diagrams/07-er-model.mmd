@@ -1,0 +1,75 @@
+---
+title: "Modelo de Datos — SimonCloud (Entidades principales)"
+---
+erDiagram
+    USUARIO ||--o{ ARCHIVO : "sube"
+    USUARIO ||--o{ SIMONDROP : "crea (Docente)"
+    USUARIO ||--|| QUOTA : "tiene"
+    SIMONDROP ||--o{ ARCHIVO : "contiene"
+    SIMONDROP ||--o{ SUBMISSION : "recibe"
+    SUBMISSION }o--|| ARCHIVO : "referencia"
+    MATERIA ||--o{ ACTA_CONSOLIDADA : "tiene"
+    ACTA_CONSOLIDADA ||--o{ NOTA_ALUMNO : "agrupa"
+    ARCHIVO ||--o{ VERSION : "tiene versiones"
+    USUARIO ||--o{ AUDIT_LOG : "genera"
+
+    USUARIO {
+        uuid id PK
+        string email "dominio @umss.edu.bo"
+        string nombre_completo
+        enum rol "Estudiante|Docente|Administrativo|Admin"
+        string websiss_sub "ID externo WebSISS"
+        datetime created_at
+    }
+
+    ARCHIVO {
+        uuid id PK
+        string nombre
+        bigint tamano_bytes
+        string mime_type
+        string hash_sha256 "64 chars hex"
+        boolean solo_lectura
+        string s3_key
+        uuid simondrop_id FK
+        uuid propietario_id FK
+        datetime subido_en
+        datetime deleted_at "null si activo"
+    }
+
+    SIMONDROP {
+        uuid id PK
+        string nombre
+        string descripcion
+        datetime cierre_en
+        boolean activo
+        uuid docente_id FK
+        string token_publico "UUID para acceso externo"
+    }
+
+    QUOTA {
+        uuid id PK
+        uuid usuario_id FK
+        int quota_used_mb
+        int quota_limit_mb "15360 free | 51200 pro"
+        enum plan "FREEMIUM|PRO"
+        datetime pro_activado_en
+    }
+
+    NOTA_ALUMNO {
+        uuid id PK
+        uuid acta_id FK
+        string email_alumno
+        float nota_original
+        string escala_origen "50|letras"
+        float nota_homologada_100
+        enum lms_origen "Moodle|Classroom|Ambos"
+    }
+
+    AUDIT_LOG {
+        uuid log_id PK
+        uuid user_id FK
+        string accion
+        string ip_address
+        jsonb metadata
+        datetime timestamp
+    }
