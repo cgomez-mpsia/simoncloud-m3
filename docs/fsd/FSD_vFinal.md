@@ -49,10 +49,10 @@ SimonCloud es una plataforma que proporciona soberanía digital a la UMSS. Funci
 ### 2.5 Descomposición en Tasks (Spec Kit) ⚡🔧
 | Task ID | Descripción | Caso de uso (FSD-UC) | Prompt asociado | Estado |
 |---------|-------------|----------------------|-----------------|--------|
-| `T-001` | Implementar LtiDeeplinkService.createLtiDeepLink() — JWT RS256 con claims LTI 1.3 | `FSD-UC-001` | `PR-UC-001` | applied |
+| `T-001` | Implementar LtiDeeplinkService.createLtiDeepLink() — JWT RS256 con claims LTI 1.3 | `FSD-UC-001` | `PR-UC-001` | contrato-listo |
 | `T-002` | Servicio de generación SHA-256 incremental en upload (chunks 8MB, crypto nativo Node.js) | `FSD-UC-002` | `PR-UC-002` | applied |
-| `T-003` | Guard HMAC-SHA256 para webhook QR Simple Bolivia | `FSD-UC-003` | `PR-UC-006` | applied |
-| `T-004` | Endpoint GET /external/drops/:id/archivos con token temporal HMAC | `FSD-UC-011` | — | applied |
+| `T-003` | Guard HMAC-SHA256 para webhook QR Simple Bolivia | `FSD-UC-003` | `PR-UC-006` | contrato-listo |
+| `T-004` | Endpoint GET /external/drops/:id/archivos con token temporal HMAC | `FSD-UC-011` | — | contrato-listo |
 
 ## 3. Actores y roles del sistema ⚡🔧
 

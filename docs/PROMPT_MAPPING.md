@@ -6,18 +6,20 @@
 
 ## Índice de Trazabilidad
 
+> **Leyenda de estados**: `applied` = prompt ejecutado, artefacto revisado y aceptado, **código commiteado en el repo** (POC o implementación). `contrato-listo` = prompt-contrato generado y aceptado; implementación planificada para Módulo 5 (no hay código en `release/2.0.0`).
+
 | ID Prompt | Artefacto generado | FSD-UC | Modelo | Estado |
 |-----------|-------------------|--------|--------|--------|
 | `PR-BRD-001` | Auditoría de coherencia BRD | — | Claude Sonnet 4 | applied |
-| `PR-UC-001` | `createLtiDeepLink()` TypeScript | FSD-UC-001 | Claude Sonnet 4 | applied |
+| `PR-UC-001` | `createLtiDeepLink()` contrato TypeScript | FSD-UC-001 | Claude Sonnet 4 | contrato-listo |
 | `PR-UC-002` | `generateFileHash()` SHA-256 | FSD-UC-002 | Claude Sonnet 4 | applied |
-| `PR-UC-003` | Stream Google Drive → S3 | FSD-UC-008 | Claude Sonnet 4 | applied |
-| `PR-UC-004` | Cronjob purga papelera 30 días | FSD-UC-009 | Claude Sonnet 4 | applied |
-| `PR-UC-005` | Componente React Uploader | FSD-UC-002 (UI) | Claude Sonnet 4 | applied |
-| `PR-UC-006` | NestJS Guard HMAC Webhook QR | FSD-UC-003 | Claude Sonnet 4 | applied |
-| `PR-UC-007` | GET /archivos/:id/versiones | FSD-UC-005 | Claude Sonnet 4 | applied |
-| `PR-UC-008` | Worker RabbitMQ notificaciones push | FSD-UC-007 | Claude Sonnet 4 | applied |
-| `PR-UC-009` | Export PDF audit log streaming | FSD-UC-010 | Claude Sonnet 4 | applied |
+| `PR-UC-003` | Stream Google Drive → S3 contrato | FSD-UC-008 | Claude Sonnet 4 | contrato-listo |
+| `PR-UC-004` | Cronjob purga papelera 30 días contrato | FSD-UC-009 | Claude Sonnet 4 | contrato-listo |
+| `PR-UC-005` | Componente React Uploader contrato | FSD-UC-002 (UI) | Claude Sonnet 4 | contrato-listo |
+| `PR-UC-006` | NestJS Guard HMAC Webhook QR contrato | FSD-UC-003 | Claude Sonnet 4 | contrato-listo |
+| `PR-UC-007` | GET /archivos/:id/versiones contrato | FSD-UC-005 | Claude Sonnet 4 | contrato-listo |
+| `PR-UC-008` | Worker RabbitMQ notificaciones push contrato | FSD-UC-007 | Claude Sonnet 4 | contrato-listo |
+| `PR-UC-009` | Export PDF audit log streaming contrato | FSD-UC-010 | Claude Sonnet 4 | contrato-listo |
 
 ---
 

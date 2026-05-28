@@ -370,6 +370,15 @@ stateDiagram-v2
 
 **Solución**: En la misma transacción PostgreSQL que guarda el archivo, se inserta `ArchivoSubidoIntegrationEvent` en la tabla `outbox`. Un Message Relay (Polling Publisher cada 2s) lee la tabla y publica en el exchange topic `simoncloud.simondrop.events` con routing key `archivo.subido`, garantía at-least-once.
 
+**Idempotencia del consumidor (requerida)**: at-least-once significa que el relay puede publicar el mismo evento más de una vez (ej. si falla el UPDATE a `published=true` tras el publish). Los consumidores **deben** deduplicar por `eventId` antes de procesar:
+```sql
+INSERT INTO processed_events (event_id, processed_at)
+VALUES (:eventId, now())
+ON CONFLICT (event_id) DO NOTHING;
+-- Si 0 rows afectadas → evento ya procesado, ignorar
+```
+El `eventId` UUID v4 en el payload es el idempotency key primario (CLAUDE.md §6). Implementación en `notification-service` — Módulo 5.
+
 ### 7.4 CQRS: Panel de Administrador (FSD-UC-010)
 
 El `admin-service` mantiene un `dashboard_metrics` materializado, actualizado asíncronamente vía eventos (`ArchivoSubidoIntegrationEvent`, `UserRegisteredEvent`, `QuotaUpgradedEvent`). Consulta `GET /admin/metrics` lee el Read Model en O(1) sin impactar servicios transaccionales. Trade-off aceptado: consistencia eventual (latencia de segundos en métricas).
@@ -388,7 +397,7 @@ El `admin-service` mantiene un `dashboard_metrics` materializado, actualizado as
 | Reverse proxy / Load balancer | **Nginx** upstream balancing | Path-based routing sin vendor lock-in |
 | TLS / HTTPS | **Certbot + Let's Encrypt** o CA interna UMSS | Certificados gratuitos o bajo control institucional |
 | Microservicios (7 servicios) | **Docker Swarm** (réplicas configurables) | Orquestación simple; DTIC puede operarlo sin expertise K8s |
-| Object Storage (binarios, WORM) | **MinIO** (API S3-compatible + Object Lock) | Drop-in replacement de S3; el código no cambia |
+| Object Storage (binarios, WORM) | **MinIO** (API S3-compatible + Object Lock) | Drop-in replacement de S3; el código no cambia. **Nota producción**: WORM requiere bucket creado con `mc mb --with-lock minio/simoncloud-drops`; no aplica a POC-03 (bucket estándar para desarrollo) |
 | Base de datos | **PostgreSQL 16** (primary + hot-standby) | Control total; sin costo de licencia |
 | Cache y sesiones upload | **Redis 7 Cluster** (3 nodos) | Consistent Hashing; mismo que en cloud |
 | Cola de mensajes | **RabbitMQ** (exchanges + DLQ nativa) | Open source; bien documentado para equipos pequeños |

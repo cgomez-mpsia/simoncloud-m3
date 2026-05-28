@@ -43,7 +43,8 @@ services:
         mc alias set local http://minio:9000 minioadmin minioadmin123;
         mc mb --ignore-existing local/poc03-uploads;
         mc anonymous set download local/poc03-uploads;
-        echo 'MinIO bucket poc03-uploads listo';
+        echo 'MinIO bucket poc03-uploads listo (desarrollo — sin Object Lock)';
+        echo 'PRODUCCION: usar mc mb --with-lock local/simoncloud-drops para activar WORM';
       "
 
   rabbitmq:
