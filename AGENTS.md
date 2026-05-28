@@ -210,8 +210,8 @@ cd pocs/POC-03/frontend && npm run dev
 
 ## 11. Seguridad y privacidad
 
-- **PII**: `carnet_identidad`, `correo_institucional`, `nombre_completo`. Cifrado en reposo con AWS KMS.
-- **Secretos**: provienen exclusivamente de AWS Secrets Manager o variables de entorno. **MUST NOT** aparecer en código, logs ni prompts.
+- **PII**: `carnet_identidad`, `correo_institucional`, `nombre_completo`. Cifrado en reposo (PostgreSQL `pgcrypto` / MinIO Server-Side Encryption en on-premise DTIC-UMSS).
+- **Secretos**: provienen exclusivamente de Docker Secrets / HashiCorp Vault (on-premise) o variables de entorno. **MUST NOT** aparecer en código, logs ni prompts.
 - **Logs**: **MUST NOT** registrar `password`, `token`, `sha256_hash`, `carnet_identidad`.
 - **Cumplimiento**: Ley 164 Bolivia (protección de datos), Reglamento UMSS de privacidad estudiantil.
 - **HMAC webhooks**: QR Simple webhooks validados con `crypto.timingSafeEqual` (ver `prompts/PR-UC-006.md`).
