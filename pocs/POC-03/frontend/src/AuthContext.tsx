@@ -4,7 +4,7 @@ import { api, AuthUser } from './api';
 interface AuthCtx {
   user: AuthUser | null;
   token: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<AuthUser>;
   logout: () => void;
 }
 
@@ -17,12 +17,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<AuthUser> => {
     const res = await api.login(email, password);
     setUser(res.user);
     setToken(res.token);
     localStorage.setItem('user', JSON.stringify(res.user));
     localStorage.setItem('token', res.token);
+    return res.user;
   };
 
   const logout = () => {

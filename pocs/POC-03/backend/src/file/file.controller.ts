@@ -1,5 +1,5 @@
 import {
-  Controller, Delete, Get, Param, Post,
+  Controller, Delete, Get, Param, Post, Body,
   UploadedFile, UseGuards, UseInterceptors, BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -18,14 +18,17 @@ export class FileController {
     @Param('dropId') dropId: string,
     @UploadedFile() file: Express.Multer.File,
     @CurrentUser() user: JwtPayload,
+    @Body('filePath') filePath?: string,
   ) {
     if (!file) throw new BadRequestException('Campo "file" requerido');
     const result = await this.fileService.upload(
       file.originalname, file.buffer, file.mimetype, file.size, dropId, user.sub,
+      filePath || undefined,
     );
     return {
       id: result.id,
       filename: result.filename,
+      filePath: result.filePath,
       sizeBytes: result.sizeBytes.toString(),
       mimeType: result.mimeType,
       sha256Hash: result.sha256Hash,

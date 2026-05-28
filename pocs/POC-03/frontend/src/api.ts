@@ -13,7 +13,7 @@ async function req<T>(path: string, options: RequestInit = {}, token?: string): 
 
 export interface AuthUser { id: string; name: string; email: string; role: string; }
 export interface Drop { id: string; name: string; description?: string; status: string; docenteId?: string; docente?: { name: string }; createdAt: string; _count: { files: number }; }
-export interface FileRecord { id: string; filename: string; sizeBytes: string; mimeType: string; sha256Hash: string; status: string; publicUrl: string; uploadedAt: string; uploader?: { name: string }; }
+export interface FileRecord { id: string; filename: string; filePath: string | null; sizeBytes: string; mimeType: string; sha256Hash: string; status: string; publicUrl: string; uploadedAt: string; uploader?: { name: string }; }
 
 export const api = {
   login: (email: string, password: string) =>
@@ -37,9 +37,10 @@ export const api = {
   listFiles: (dropId: string, token: string) =>
     req<FileRecord[]>(`/drops/${dropId}/files`, {}, token),
 
-  uploadFile: async (dropId: string, file: File, token: string): Promise<FileRecord> => {
+  uploadFile: async (dropId: string, file: File, token: string, filePath?: string): Promise<FileRecord> => {
     const formData = new FormData();
     formData.append('file', file);
+    if (filePath) formData.append('filePath', filePath);
     const res = await fetch(`${BASE}/drops/${dropId}/upload`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },

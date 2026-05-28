@@ -74,6 +74,20 @@
 - **Artefactos generados**: `docs/DTI.md` (vFinal §1-§21), 5 ADRs, 8 diagramas .mmd, 2 POCs, prompts individuales, PROMPT_MAPPING.md, roadmap.md, release-2.0.0.md
 - **Verificación**: applied — defensa final release/2.0.0
 
+### PM-20260527-002
+- **Timestamp**: 2026-05-27T20:00:00-04:00
+- **Intent**: docs + fix
+- **Artefactos generados**: `docs/brd/BRD_vFinal.md` (v3.0 — reescritura completa homologación → LTI 1.3 SimonDrop), `docs/adr/0005-cloud-provider-y-estilo-de-despliegue.md` (fix 8→7 servicios), `docs/DTI.md` (fix payment-service → quota-service), `docs/adr/0004-saga-orquestada-quota-upgrade.md`, `docs/dti/patrones_asincronos.md`, `docs/diagrams/05-saga-quota-upgrade.mmd`, `pocs/POC-02/README.md`
+- **Verificación**: applied
+
+### PM-20260528-001
+- **Timestamp**: 2026-05-28T00:00:00-04:00
+- **Intent**: poc
+- **Artefactos generados**: `pocs/POC-03/` completo — demo app SimonDrop e2e con auth JWT + roles docente/estudiante + CRUD SimonDrops + upload archivos + folder upload + SHA-256 + MinIO + RabbitMQ (Outbox Pattern) + hexagonal architecture. Stack: React 18 + Vite + Tailwind + React Router v6 + NestJS 10 + Prisma 5 + PostgreSQL 16 + amqplib + @aws-sdk/client-s3 + Docker Compose.
+- **Trazabilidad**: FSD-UC-002 (upload + SHA-256), FSD-UC-007 (notificación RabbitMQ), DTI §5 (hexagonal), DTI §7.1 (Outbox Pattern), ADR-0001, ADR-0005
+- **Bugs resueltos**: BigInt JSON serialization (Prisma sizeBytes), JwtAuthGuard DI container, amqplib ChannelModel typing
+- **Verificación**: applied — demo funcional en http://localhost:5173
+
 ---
 
 ## Métricas AI-SDLC — release/2.0.0

@@ -1,9 +1,13 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class DropsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly config: ConfigService,
+  ) {}
 
   async list(userId: string, role: string) {
     if (role === 'DOCENTE') {
@@ -58,10 +62,13 @@ export class DropsService {
 
   async listFiles(dropId: string, userId: string, role: string) {
     const where = role === 'DOCENTE' ? { dropId } : { dropId, uploaderId: userId };
-    return this.prisma.file.findMany({
+    const files = await this.prisma.file.findMany({
       where,
       include: { uploader: { select: { name: true } } },
       orderBy: { uploadedAt: 'desc' },
     });
+    const endpoint = this.config.get('MINIO_ENDPOINT', 'http://localhost:9000');
+    const bucket = this.config.get('MINIO_BUCKET', 'poc03-uploads');
+    return files.map(f => ({ ...f, publicUrl: `${endpoint}/${bucket}/${f.storageKey}` }));
   }
 }

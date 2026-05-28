@@ -37,6 +37,7 @@ model SimonDrop {
 model File {
   id          String    @id @default(uuid())
   filename    String
+  filePath    String?   // ruta relativa dentro del folder, ej. "src/main.js"
   sizeBytes   BigInt
   mimeType    String
   storageKey  String    @unique

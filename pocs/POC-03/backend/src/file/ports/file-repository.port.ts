@@ -3,6 +3,7 @@ export const FILE_REPOSITORY_PORT = 'FILE_REPOSITORY_PORT';
 export interface PendingFile {
   id: string;
   filename: string;
+  filePath?: string;
   sizeBytes: number;
   mimeType: string;
   storageKey: string;
@@ -13,6 +14,7 @@ export interface PendingFile {
 export interface UploadedFile {
   id: string;
   filename: string;
+  filePath: string | null;
   sizeBytes: bigint;
   mimeType: string;
   storageKey: string;

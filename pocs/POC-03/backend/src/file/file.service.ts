@@ -17,11 +17,14 @@ export class FileService {
     sizeBytes: number,
     dropId: string,
     uploaderId: string,
+    filePath?: string,
   ): Promise<UploadedFile & { publicUrl: string }> {
     const fileId = randomUUID();
-    const storageKey = `drops/${dropId}/${fileId}/${filename}`;
+    // Si viene de un folder upload, preservar la ruta relativa en el storageKey
+    const storagePath = filePath ?? filename;
+    const storageKey = `drops/${dropId}/${uploaderId}/${fileId}/${storagePath}`;
 
-    await this.repo.createPending({ id: fileId, filename, sizeBytes, mimeType, storageKey, dropId, uploaderId });
+    await this.repo.createPending({ id: fileId, filename, filePath, sizeBytes, mimeType, storageKey, dropId, uploaderId });
     const sha256Hash = await this.storage.uploadAndHash(storageKey, buffer, mimeType);
     const file = await this.repo.completeWithHash(fileId, sha256Hash);
 

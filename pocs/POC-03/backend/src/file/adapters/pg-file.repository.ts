@@ -13,6 +13,7 @@ export class PgFileRepository implements FileRepositoryPort {
       data: {
         id: file.id,
         filename: file.filename,
+        filePath: file.filePath ?? null,
         sizeBytes: file.sizeBytes,
         mimeType: file.mimeType,
         storageKey: file.storageKey,
