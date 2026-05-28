@@ -436,6 +436,56 @@ Escenario: Alerta de almacenamiento crítico
   Y envía un email automático al administrador del sistema
 ```
 
+### 4.11 FSD-UC-011 – Acceso de Usuario Externo con Token Temporal
+- **Trazabilidad**: PRD-US-022, PRD-REQ-013 → BRD: BR-006 (RBAC acceso externo)
+- **Actor principal**: Usuario Externo (evaluador, miembro de tribunal; sin cuenta UMSS)
+- **Precondiciones**:
+  1. Un Docente con rol DOCENTE generó un token temporal firmado para un SimonDrop específico.
+  2. El token no ha expirado (TTL configurado por el Docente, máximo 72 horas).
+  3. El SimonDrop tiene al menos un archivo disponible.
+- **Disparador**: El Usuario Externo abre el enlace único recibido (email o comunicación directa) desde cualquier navegador.
+- **Flujo principal**:
+  1. El sistema extrae y valida la firma del token temporal (HMAC-SHA256).
+  2. El sistema verifica que el token no haya expirado y que el `dropId` referenciado esté activo.
+  3. El sistema presenta una página pública de descarga sin requerir autenticación institucional.
+  4. La página muestra: nombre del archivo, hash SHA-256, fecha de subida y nombre del SimonDrop.
+  5. El Usuario Externo hace clic en "Descargar".
+  6. El sistema genera una URL presignada de descarga desde MinIO con TTL de 5 minutos.
+  7. El sistema registra el acceso en `audit_log`: `{tokenId, dropId, archivoId, ip, userAgent, accessedAt}`.
+- **Flujos alternativos / excepciones**:
+  - **A1 – Token expirado**: El sistema muestra "Este enlace ha expirado. Contacta al docente para solicitar un enlace nuevo." Sin redirección ni leak de información del documento.
+  - **A2 – Token inválido o corrupto**: El sistema devuelve 403 sin revelar si el recurso existe.
+  - **A3 – SimonDrop eliminado o sin archivos**: El sistema muestra "El contenido de este enlace ya no está disponible."
+  - **A4 – Descarga falla (MinIO no disponible)**: El sistema muestra error y registra el intento fallido.
+- **Postcondiciones**:
+  1. El Usuario Externo descargó el archivo o recibió un mensaje de error explicativo.
+  2. El acceso (exitoso o fallido) queda registrado en `audit_log` con IP y timestamp.
+  3. El hash SHA-256 fue presentado para verificación de integridad.
+- **Datos de entrada**: `{ token: string (JWT firmado, query param) }`
+- **Datos de salida**: `{ fileName, sha256, uploadedAt, dropTitle, downloadUrl (presigned, TTL 5 min) }`
+- **Criterios de aceptación**:
+```gherkin
+Escenario: Evaluador externo descarga documento con token válido
+  Dado un enlace con token temporal generado por el docente para "tesis_final.pdf"
+  Cuando el evaluador externo abre el enlace desde cualquier navegador
+  Entonces el sistema valida el token y presenta el documento para descarga
+  Y muestra el hash SHA-256 del archivo para verificación de integridad
+  Y registra el acceso en el audit log con IP y timestamp
+
+Escenario: Token expirado no revela información del recurso
+  Dado un token temporal cuya fecha de expiración fue hace 2 horas
+  Cuando el usuario externo intenta acceder al enlace
+  Entonces el sistema muestra "Este enlace ha expirado"
+  Y no revela el nombre del archivo ni el contenido del SimonDrop
+  Y registra el intento de acceso en el log de seguridad
+
+Escenario: Token con firma inválida retorna 403
+  Dado un token con firma HMAC corrupta o manipulada
+  Cuando el usuario externo intenta acceder
+  Entonces el sistema devuelve 403 sin información adicional
+  Y registra el intento como acceso no autorizado en el audit log
+```
+
 ## 5. Reglas de negocio ⚡🔧
 
 | ID (BRD_vFinal) | Regla | Tipo | Origen | Casos de uso afectados |
@@ -446,6 +496,7 @@ Escenario: Alerta de almacenamiento crítico
 | BR-006 | Control de acceso por roles RBAC (Docente / Estudiante / Admin) | seguridad | BRD_vFinal §11 | FSD-UC-001, FSD-UC-002, FSD-UC-003 |
 | BR-007 | Comprobante de entrega con hash SHA-256 para archivos en buzones | seguridad | BRD_vFinal §11 | FSD-UC-002 |
 | BR-010 | Integración con pasarela QR Simple para licencias Pro | negocio | BRD_vFinal §11 | FSD-UC-003 |
+| BR-011 | Token de acceso externo firmado con HMAC-SHA256; TTL máximo 72 horas; no revela recurso si inválido | seguridad | BRD_vFinal §11 | FSD-UC-011 |
 
 ## 6. Modelo de datos funcional ⚡🔧
 
