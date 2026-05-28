@@ -291,7 +291,7 @@ flowchart LR
 
 | Servicio | Responsabilidad | BD propia | API expuesta |
 |----------|-----------------|-----------|--------------|
-| `api-gateway` | Routing, JWT validation, rate-limit | — | REST /\* |
+| `api-gateway` | Routing, JWT validation, rate-limit | — | REST /api/\* y REST /external/\* |
 | `auth-service` | SSO WebSISS, JWT, RBAC, tokens externos HMAC-SHA256 | PostgreSQL (users, roles, tokens_externos) | gRPC /auth |
 | `file-service` | Subida chunked, SHA-256, gestión, Outbox Pattern | PostgreSQL + MinIO | REST /files |
 | `simondrop-service` | Buzones, cierres, comprobantes, deep links LTI | PostgreSQL | REST /drops |
@@ -299,6 +299,13 @@ flowchart LR
 | `expedientes-service` | Aprobación/rechazo documentos, control versiones | PostgreSQL (expedientes) | REST /expedientes |
 | `notification-service` | Emails, push, DLQ con reintentos exponenciales | Redis (colas) | RabbitMQ Consumer |
 | `admin-service` | Panel global, CQRS Read Model, audit log PDF | PostgreSQL (audit_log) | REST /admin |
+
+**Coexistencia JWT + HMAC-SHA256 (FSD-UC-011)**: El API Gateway separa las rutas en dos prefijos con guards independientes:
+
+- **`/api/*`** — todas las rutas requieren `Authorization: Bearer <JWT>` validado contra `auth-service`. El `JwtAuthGuard` aplica aquí.
+- **`/external/*`** — rutas sin cuenta institucional (`security: []` en OpenAPI). Un `ExternalTokenGuard` independiente valida el HMAC-SHA256 del query param `?token=` contra la tabla `tokens_externos` en `auth-service` (TTL ≤ 72h, BR-011). El JWT Auth Guard **no aplica** a este prefijo.
+
+Los dos mecanismos nunca coexisten en la misma ruta. El docente genera el token externo vía `POST /api/drops/:id/external-token` (autenticado con JWT); el usuario externo consume `GET /external/drops/:id/archivos?token=<hmac>` (sin JWT).
 
 ### 6.2 Patrones de resiliencia aplicados
 

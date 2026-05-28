@@ -95,6 +95,14 @@
 - **Bugs resueltos**: BigInt JSON serialization (Prisma sizeBytes), JwtAuthGuard DI container, amqplib ChannelModel typing
 - **Verificación**: applied — demo funcional en http://localhost:5173
 
+### PM-20260528-007
+- **Timestamp**: 2026-05-28T23:00:00-04:00
+- **Intent**: fix + docs
+- **Artefactos generados**:
+  - `docs/DTI.md` — §6.1: nota "Coexistencia JWT + HMAC-SHA256" explicando prefijos `/api/*` (JwtAuthGuard) vs `/external/*` (ExternalTokenGuard, security:[]); tabla api-gateway actualizada
+- **Trazabilidad**: FSD-UC-011, ADR-0001, BR-011, CLAUDE.md §3 (Token externo)
+- **Verificación**: applied
+
 ### PM-20260528-006
 - **Timestamp**: 2026-05-28T22:00:00-04:00
 - **Intent**: fix
