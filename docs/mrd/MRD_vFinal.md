@@ -142,10 +142,29 @@ Usuarios Pro:          Bs. 20/mes via QR Simple Bolivia
 | Resistencia al cambio del personal | Alta | Alto | Talleres de capacitación y diseño centrado en el usuario (UX). |
 
 ## 12. Trazabilidad
-| MRD ID | BRD ID | PRD ID |
-|--------|--------|--------|
-| MRD-01 | BR-01 | PRD-REQ-01 |
-| MRD-02 | BR-02 | PRD-REQ-02 |
+
+### 12.1 Persona / JTBD → PRD → FSD
+
+| Persona (MRD §4.2) | JTBD (MRD §5) | PRD-US | PRD-REQ | FSD-UC | Versión |
+|--------------------|---------------|--------|---------|--------|---------|
+| Estudiante Pregrado | JTBD-01 (certificado QR) | PRD-US-004 | PRD-REQ-004 | FSD-UC-003 | v1.0 |
+| Estudiante Pregrado | JTBD-03 (comprobante SHA-256) | PRD-US-003 | PRD-REQ-002 | FSD-UC-002 | v1.0 |
+| Personal Administrativo | JTBD-02 (rastrear archivo digitalmente) | PRD-US-017, PRD-US-018 | PRD-REQ-011, PRD-REQ-012 | FSD-UC-005, FSD-UC-006 | v1.0 |
+| Docente | JTBD-03 (entrega integrada LMS) | PRD-US-005, PRD-US-006, PRD-US-007 | PRD-REQ-001, PRD-REQ-003 | FSD-UC-001 | v1.0 |
+| Usuario Externo | JTBD-04 (acceso sin cuenta institucional) | PRD-US-022 | PRD-REQ-013 | FSD-UC-001 (flujo token) | v1.0 |
+| Docente Investigador | JTBD-05 (búsqueda avanzada metadatos) | — *(backlog)* | — *(v2.0)* | — *(v2.0)* | **v2.0** |
+
+> **Nota Docente Investigador**: Su funcionalidad principal (JTBD-05, búsqueda avanzada) está explícitamente fuera del MVP v1.0 (PRD §3.2). En v1.0 accede vía FSD-UC-005 (historial de versiones). La búsqueda avanzada por metadatos se planifica para v2.0 junto con LTI AGS grade passback.
+
+### 12.2 Segmento → BRD → PRD
+
+| Segmento (MRD §4.1) | BRD BR | PRD Épica |
+|---------------------|--------|-----------|
+| Estudiante Pregrado UMSS | BR-002, BR-007 | Épica 1 (Buzones + Hash), Épica 3 (Almacenamiento) |
+| Docentes UMSS | BR-001, BR-002, BR-004 | Épica 2 (Integración LMS) |
+| Personal Administrativo UMSS | BR-005, BR-006 | Épica 5 (Gestión Documental) |
+| Usuario Externo | BR-006 | Épica 2b (Acceso token temporal) |
+| Universidades bolivianas (Tier 2/3) | BR-009 (Multi-tenant) | Backlog v2.0 |
 
 ## 12. Supuestos e Hipótesis a Validar
 

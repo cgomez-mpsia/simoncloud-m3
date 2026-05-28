@@ -85,6 +85,20 @@ journey
     Estudiante descarga recibo PDF: 5: Estudiante
 ```
 
+```mermaid
+journey
+  title Journey Usuario Externo – Descarga con Token Temporal
+  section Acceso
+    Recibe enlace del docente por email: 5: UsuarioExterno
+    Abre enlace sin necesidad de login: 5: UsuarioExterno
+  section Verificación
+    Sistema valida token temporal: 4: Sistema
+    Muestra documento y hash SHA-256: 5: Sistema
+  section Descarga
+    Descarga el documento: 5: UsuarioExterno
+    Verifica integridad con hash: 4: UsuarioExterno
+```
+
 ## 5. *User stories* y criterios de aceptación
 
 ### 5.1 Épica 1: Gestión de Archivos y Buzones Seguros
@@ -155,6 +169,27 @@ Escenario: Estudiante entrega desde el LMS
 ```
 
 *(Más historias se detallarán en el backlog ágil)*
+
+### 5.3b Épica 2b: Acceso para Usuario Externo
+| ID | Historia | Prioridad | Valor | Criterios Gherkin |
+|----|----------|-----------|-------|-------------------|
+| PRD-US-022 | Como usuario externo (miembro de tribunal / evaluador invitado), quiero acceder a los documentos de defensa mediante un enlace único y temporal sin crear una cuenta institucional, para revisar y descargar archivos de forma segura. | Must | 9 | Ver §5.3b.1 |
+
+#### 5.3b.1 Criterios PRD-US-022
+```gherkin
+Escenario: Evaluador externo descarga documento con token válido
+  Dado un enlace con token temporal generado por el docente para "tesis_final.pdf"
+  Cuando el evaluador externo abre el enlace desde cualquier navegador
+  Entonces el sistema valida el token y presenta el documento para descarga
+  Y muestra el hash SHA-256 del archivo para verificación de integridad
+  Y registra el acceso en el audit log con IP y timestamp
+
+Escenario: Intento de acceso con token expirado
+  Dado un enlace cuyo token temporal ha superado su fecha de expiración
+  Cuando el evaluador externo intenta acceder al enlace
+  Entonces el sistema rechaza el acceso con mensaje "Enlace expirado"
+  Y no muestra ningún contenido del documento
+```
 
 ### 5.5 Épica 5: Gestión Documental y Administrativa (Basado en old-docs)
 | ID | Historia | Prioridad | Valor | Criterios Gherkin |
@@ -240,10 +275,17 @@ Escenario: Login con credenciales WebSISS
 |----|-----------|-------------|-----|----------|
 | PRD-REQ-001 | Integración LMS vía LTI 1.3 (Moodle) y OAuth2 (Classroom): sincronización de cursos y creación de SimonDrops vinculados. | PRD-US-005, PRD-US-006 | BR-001 | Must |
 | PRD-REQ-002 | Generador de Hash criptográfico SHA-256 en subida de archivos. | PRD-US-003 | BR-007 | Must |
-| PRD-REQ-003 | SimonDrop como opción de entrega nativa en LMS (deep link LTI) + notificación LTI AGS al entregar. | PRD-US-006, PRD-US-007 | BR-002 | Must |
+| PRD-REQ-003 | SimonDrop como opción de entrega nativa en LMS (deep link LTI) + notificación básica de entrega al LMS (v1.0). Grade passback completo vía LTI AGS es v2.0 (ver roadmap §Hito 4). | PRD-US-006, PRD-US-007 | BR-002 | Must |
 | PRD-REQ-004 | Pasarela de generación y validación de QR Simple para cuota Pro. | PRD-US-004 | BR-010 | Could |
 | PRD-REQ-005 | Trazabilidad de entrega: `lms_assignment_id` + `lms_course_id` en cada SimonDrop vinculado. | PRD-US-005 | BR-004 | Must |
 | PRD-REQ-006 | Control de acceso por roles RBAC (Docente, Estudiante, Administrativo, Admin). | PRD-US-012 | BR-006 | Must |
+| PRD-REQ-007 | Subida reanudable multipart hasta 2GB con inmutabilidad post-cierre de buzón. | PRD-US-008, PRD-US-009 | BR-005, BR-007 | Must |
+| PRD-REQ-008 | Autenticación SSO WebSISS con emisión de JWT por rol (Docente / Estudiante / Administrativo). | PRD-US-012 | BR-006 | Must |
+| PRD-REQ-009 | Compartir archivos con destinatario @umss.edu.bo; permisos de solo lectura automáticos post-entrega. | PRD-US-013, PRD-US-014 | BR-005, BR-006 | Must |
+| PRD-REQ-010 | Notificaciones push/email al docente ante nueva entrega en SimonDrop. | PRD-US-015 | BR-008 | Should |
+| PRD-REQ-011 | Control de versiones de archivos + papelera de reciclaje con retención de 30 días antes de purga definitiva. | PRD-US-016, PRD-US-018, PRD-US-019 | BR-005 | Must |
+| PRD-REQ-012 | Panel de aprobación/rechazo documental con audit log por administrativo y métricas globales para admin del sistema. | PRD-US-017, PRD-US-020 | BR-005, BR-006 | Should |
+| PRD-REQ-013 | Acceso para Usuario Externo mediante token temporal firmado (descarga sin cuenta institucional, expiración configurable). | PRD-US-022 | BR-006 | Must |
 
 ## 8. Requerimientos no funcionales (alto nivel)
 
@@ -264,13 +306,20 @@ Escenario: Login con credenciales WebSISS
 ## 10. Trazabilidad
 
 | PRD ID | BRD (BRD_vFinal.md) | FSD |
-|--------|-----------------|-----|
+|--------|---------------------|-----|
 | PRD-REQ-001 | BR-001 (integración LMS LTI) | FSD-UC-001 |
 | PRD-REQ-002 | BR-007 (hash SHA-256) | FSD-UC-002 |
 | PRD-REQ-003 | BR-002 (SimonDrop como opción de entrega LMS) | FSD-UC-001 |
 | PRD-REQ-004 | BR-010 (QR Simple) | FSD-UC-003 |
 | PRD-REQ-005 | BR-004 (trazabilidad lms_assignment_id) | FSD-UC-001 |
 | PRD-REQ-006 | BR-006 (RBAC) | FSD-UC-001, FSD-UC-002, FSD-UC-003 |
+| PRD-REQ-007 | BR-005 (inmutabilidad), BR-007 (SHA-256) | FSD-UC-002, FSD-UC-005 |
+| PRD-REQ-008 | BR-006 (RBAC) | FSD-UC-004 |
+| PRD-REQ-009 | BR-005 (inmutabilidad), BR-006 (RBAC) | FSD-UC-008 |
+| PRD-REQ-010 | BR-008 (notificaciones) | FSD-UC-007 |
+| PRD-REQ-011 | BR-005 (inmutabilidad) | FSD-UC-005, FSD-UC-009 |
+| PRD-REQ-012 | BR-005 (inmutabilidad), BR-006 (RBAC) | FSD-UC-006, FSD-UC-010 |
+| PRD-REQ-013 | BR-006 (RBAC) | FSD-UC-001 (flujo alternativo token) |
 
 ## 11. Trazabilidad con M2 (UI/UX)
 

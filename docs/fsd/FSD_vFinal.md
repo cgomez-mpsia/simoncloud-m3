@@ -28,7 +28,9 @@ SimonCloud es una plataforma que proporciona soberanía digital a la UMSS. Funci
 - Integración de pasarela de pago QR Simple para upgrade de cuotas.
 - Acceso para Usuario Externo mediante token temporal firmado (descarga sin cuenta institucional).
 
-> **v2.0 backlog**: LTI AGS grade passback automático (sincronización de notas desde Moodle/Classroom) y búsqueda avanzada por metadatos. Ver `docs/roadmap.md §Hito 4`.
+> **Distinción de scope v1.0 vs v2.0 para LTI:**
+> - **v1.0 (en alcance)**: SimonDrop como deep link en LMS + notificación básica "entrega recibida" al LMS al completar subida (PRD-REQ-003).
+> - **v2.0 backlog**: LTI AGS grade passback completo (calificación devuelta al gradebook del LMS) + búsqueda avanzada por metadatos. Ver `docs/roadmap.md §Hito 4`.
 
 ### 2.2 Fuera del alcance (explícito)
 - Visualización en línea de documentos complejos (ej. AutoCAD, PSD).
@@ -59,6 +61,7 @@ SimonCloud es una plataforma que proporciona soberanía digital a la UMSS. Funci
 | Usuario Externo | humano | Descargar documentos específicos sin cuenta institucional | Solo lectura via token temporal firmado |
 | Administrativo | humano | Aprobar/rechazar documentos, auditar historial | CRUD etiquetas, lectura audit log |
 | Admin del sistema | humano | Monitorear métricas globales y gestionar usuarios | Acceso completo |
+| Docente Investigador | humano | Gestionar versiones y búsqueda avanzada de documentos (v2.0) | Lectura/escritura con control de versiones; búsqueda por metadatos en v2.0 — ver `docs/roadmap.md §Hito 4` |
 
 ## 4. Casos de uso funcionales ⚡🔧
 
