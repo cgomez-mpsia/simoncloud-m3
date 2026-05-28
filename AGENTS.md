@@ -23,7 +23,7 @@ Al comenzar cualquier tarea, el agente **MUST** leer en orden:
 
 1. `docs/DTI.md` — §1 Visión, §2 Contexto, §3 Arquitectura, §4 Modelo de Dominio, §5 Hexagonal, §6 Distribuido.
 2. El FSD del caso de uso tocado: `docs/fsd/FSD_vFinal.md §4.N FSD-UC-00N`.
-3. `docs/adr/` — decisiones arquitectónicas vigentes (0001–0005).
+3. `docs/adr/` — decisiones arquitectónicas vigentes (0001–0006).
 4. `docs/PROMPT_MAPPING.md` — contratos de prompts existentes (no duplicar).
 
 ---
@@ -37,11 +37,11 @@ Al comenzar cualquier tarea, el agente **MUST** leer en orden:
 │   ├── DTI.md                   ← DTI vFinal §0-§21
 │   ├── PROMPT_MAPPING.md        ← trazabilidad AI-SDLC
 │   ├── roadmap.md
-│   ├── fsd/FSD_vFinal.md        ← 10 UCs con Gherkin, ER, contratos
+│   ├── fsd/FSD_vFinal.md        ← 11 UCs con Gherkin, ER, contratos
 │   ├── mrd/MRD_vFinal.md
 │   ├── prd/PRD_vFinal.md
 │   ├── brd/BRD_vFinal.md
-│   ├── adr/                     ← 0001-0005 (ADRs formales)
+│   ├── adr/                     ← 0001-0006 (ADRs formales)
 │   ├── diagrams/                ← 8 diagramas .mmd (Mermaid)
 │   └── aportes/release-2.0.0.md
 ├── pocs/
@@ -87,7 +87,7 @@ Al comenzar cualquier tarea, el agente **MUST** leer en orden:
 | Secretos | **HashiCorp Vault** | — | Self-hosted; sin vendor cloud |
 | Monitoreo | **Prometheus + Grafana** | — | Stack open source; reemplaza CloudWatch |
 | Trazas distribuidas | **Jaeger** | — | Reemplaza X-Ray |
-| Testing unitario | Jest | 29.x | cobertura ≥ 90% en file-service y quota-service |
+| Testing unitario | Jest | 29.x | cobertura ≥ 80% en file-service y quota-service (NFR-008) |
 | Testing integración | TestContainers | — | Módulo 5 |
 
 > El agente **MUST NOT** introducir dependencias fuera de esta tabla sin crear un ADR y solicitar aprobación humana.
