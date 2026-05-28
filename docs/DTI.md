@@ -130,9 +130,9 @@ Rel(gateway, admin, "Rutas /admin/*", "REST")
 Rel(files, pg_main, "CRUD archivos", "PostgreSQL")
 Rel(files, redis, "Sesiones upload chunked", "Redis")
 Rel(files, s3, "PUT/GET objetos binarios", "S3 API (MinIO)")
-Rel(files, rabbit, "Publica FileUploaded via Outbox", "AMQP")
+Rel(files, rabbit, "Publica ArchivoSubidoIntegrationEvent via Outbox", "AMQP")
 Rel(quota, pg_main, "CRUD cuotas", "PostgreSQL")
-Rel(notif, rabbit, "Consume FileUploaded, QuotaUpgraded", "AMQP")
+Rel(notif, rabbit, "Consume ArchivoSubidoIntegrationEvent, QuotaUpgradedEvent", "AMQP")
 Rel(admin, pg_replica, "Queries de métricas (CQRS Read Model)", "PostgreSQL")
 ```
 
@@ -189,7 +189,7 @@ sequenceDiagram
     FS->>FS: Acumula SHA-256 incremental
     FS->>BD: UPDATE upload_session (progress%)
     Note over BD,OB: Transacción atómica
-    FS->>OB: INSERT FileUploadedEvent (Outbox)
+    FS->>OB: INSERT ArchivoSubidoIntegrationEvent (Outbox)
     FS-->>E: {progress: 45%, speed: "2.1 MB/s"}
     Note over FS,S3: Si S3 falla 5x → CB OPEN → E_STORAGE_UNAVAILABLE
 ```
@@ -241,7 +241,7 @@ sequenceDiagram
 | `LockFileUseCase` | input | `domain/port/in` | Marcar archivo como solo lectura |
 | `FileRepositoryPort` | output | `domain/port/out` | Persistir metadatos de archivo en BD |
 | `FileStoragePort` | output | `domain/port/out` | Subir/descargar binarios a S3/MinIO |
-| `EventPublisherPort` | output | `domain/port/out` | Publicar `FileUploadedEvent` via Outbox |
+| `EventPublisherPort` | output | `domain/port/out` | Publicar `ArchivoSubidoIntegrationEvent` via Outbox |
 
 ### 5.2 Adaptadores (Adapters)
 
@@ -310,7 +310,7 @@ flowchart LR
 | Dead Letter Queue | `notification-service` | RabbitMQ DLQ tras 3 fallos |
 | Rate Limiting | `api-gateway` | `100 req/s por usuario` |
 | Consistent Hashing | Redis Cluster `file-service` | `150 vnodes/nodo; 3 nodos` |
-| Horizontal Pod Autoscaler | `file-service` Kubernetes | `CPU > 70% → escalar de 3 a 9 réplicas` |
+| Escalado horizontal | `file-service` Docker Swarm | `docker service scale file-service=9` (CPU > 70%) |
 | Fallback degradado | `quota-service` CB OPEN | `Retorna error controlado: "Pago temporalmente no disponible, intente en 30s"` |
 
 ### 6.3 Mapa IPC
@@ -333,7 +333,7 @@ graph LR
 
 | Evento | Productor | Consumidor(es) | Payload | Garantía |
 |--------|-----------|----------------|---------|----------|
-| `FileUploadedEvent` | `file-service` | `notification-service` | `{fileId, simondropId, docenteId, hash, nombre}` | at-least-once (Outbox) |
+| `ArchivoSubidoIntegrationEvent` | `file-service` | `notification-service` | `{eventId, eventVersion, archivoId, dropId, estudianteId, docenteId, sha256, tamanoBytes, nombreOriginal, subitoEn}` | at-least-once (Outbox) |
 | `SimonDropClosedEvent` | `simondrop-service` | `file-service` (lock) | `{dropId, closedAt}` | at-least-once |
 | `QuotaUpgradeRequested` | `quota-service` (saga) | `quota-service` (QR Simple adapter) | `{userId, plan, amount}` | exactly-once (Saga) |
 | `PaymentConfirmedEvent` | `quota-service` (webhook) | Saga orchestrator | `{paymentId, userId, hmacValid}` | at-least-once |
@@ -368,11 +368,11 @@ stateDiagram-v2
 
 **Problema resuelto**: Doble escritura (dual write) — si el `file-service` guarda en PostgreSQL pero falla al publicar en RabbitMQ, el docente nunca es notificado.
 
-**Solución**: En la misma transacción PostgreSQL que guarda el archivo, se inserta `FileUploadedEvent` en la tabla `outbox`. Un Message Relay (Debezium CDC o Polling Publisher) lee la tabla y publica en RabbitMQ con garantía at-least-once.
+**Solución**: En la misma transacción PostgreSQL que guarda el archivo, se inserta `ArchivoSubidoIntegrationEvent` en la tabla `outbox`. Un Message Relay (Polling Publisher cada 2s) lee la tabla y publica en el exchange topic `simoncloud.simondrop.events` con routing key `archivo.subido`, garantía at-least-once.
 
 ### 7.4 CQRS: Panel de Administrador (FSD-UC-010)
 
-El `admin-service` mantiene un `dashboard_metrics` materializado, actualizado asíncronamente vía eventos (`FileUploaded`, `UserRegistered`, `QuotaUpgraded`). Consulta `GET /admin/metrics` lee el Read Model en O(1) sin impactar servicios transaccionales. Trade-off aceptado: consistencia eventual (latencia de segundos en métricas).
+El `admin-service` mantiene un `dashboard_metrics` materializado, actualizado asíncronamente vía eventos (`ArchivoSubidoIntegrationEvent`, `UserRegisteredEvent`, `QuotaUpgradedEvent`). Consulta `GET /admin/metrics` lee el Read Model en O(1) sin impactar servicios transaccionales. Trade-off aceptado: consistencia eventual (latencia de segundos en métricas).
 
 ---
 
@@ -566,7 +566,7 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 ### 12.3 POC-03: SimonDrop Demo App e2e — Hexagonal + JWT + MinIO + RabbitMQ (Outbox)
 
 - **Riesgo que mitiga**: ¿La arquitectura hexagonal con Prisma + MinIO + Outbox Pattern funciona de punta a punta sin acoplamiento entre capas, con auth JWT real y roles diferenciados (docente/estudiante)?
-- **Hipótesis**: `FileService` (dominio) puede operar sin importar Prisma, `@aws-sdk` ni `amqplib` directamente — el DI container de NestJS inyecta los adapters en runtime. El Outbox Pattern garantiza entrega del evento `FileUploadedEvent` a RabbitMQ aunque el broker esté caído al momento del upload. Un solo campo `filePath String?` en el schema permite folder upload completo sin modelos adicionales.
+- **Hipótesis**: `FileService` (dominio) puede operar sin importar Prisma, `@aws-sdk` ni `amqplib` directamente — el DI container de NestJS inyecta los adapters en runtime. El Outbox Pattern garantiza entrega del evento `ArchivoSubidoIntegrationEvent` al exchange `simoncloud.simondrop.events` aunque RabbitMQ esté caído al momento del upload. Un solo campo `filePath String?` en el schema permite folder upload completo sin modelos adicionales.
 - **Criterio de éxito medible**:
 
 | Métrica | Umbral | Resultado |
@@ -646,7 +646,7 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 | **God Service** | Riesgo bajo | `file-service` limitado a storage; SHA-256 y buzones en servicios separados |
 | **Distributed Monolith** | Riesgo medio | Contratos asíncronos via Outbox/Saga; sin llamadas síncronas cross-service en flujos críticos |
 | **Chatty Services** | No | `quota-service` usa CB para QR Simple; admin usa CQRS Read Model |
-| **Dual Write Problem** | Resuelto | Patrón Outbox para `FileUploadedEvent` — escritura BD + evento en misma transacción PostgreSQL |
+| **Dual Write Problem** | Resuelto | Patrón Outbox para `ArchivoSubidoIntegrationEvent` — escritura BD + evento en misma transacción PostgreSQL |
 | **Anemic Domain Model** | No | Aggregates `File`, `SimonDrop`, `Quota` encapsulan reglas de negocio (no solo getters/setters) |
 | **Synchronous Chain** | Resuelto | Flujos de notificación y saga desacoplados via RabbitMQ; CB en llamadas síncronas a QR Simple Bolivia |
 | **Mega-monolith por falta de límites** | No | 7 servicios con 1 BD por servicio (Richardson §1.4 database per service) |
@@ -674,7 +674,7 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 | Riesgo | Prob. | Impacto | Mitigación | Plan de contingencia |
 |--------|-------|---------|------------|----------------------|
 | WebSISS SSO no disponible | media | crítico | CB + sesiones JWT de 8h (toleran 8h de caída SSO) | Login manual temporal para Admin; alerta a DTIC |
-| Pico de exámenes (10x carga normal) | alta | alto | HPA Kubernetes; Redis CH para sesiones; S3 presigned URLs | Modo degradado: solo upload sin preview; queue visible para usuarios |
+| Pico de exámenes (10x carga normal) | alta | alto | Docker Swarm scale file-service=9; Redis CH para sesiones; S3 presigned URLs | Modo degradado: solo upload sin preview; queue visible para usuarios |
 | QR Simple cambia esquema HMAC | baja | alto | Validación HMAC encapsulada en Guard (fácil de actualizar) | Pago manual por transferencia bancaria como alternativa temporal |
 | Crecimiento storage > capacidad S3 | media | medio | Política de lifecycle S3 (archivos purgados a los 30 días); alertas > 80% | Negociar con DTIC expansión de almacenamiento; compresión automática |
 
