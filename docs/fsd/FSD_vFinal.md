@@ -6,11 +6,11 @@
 |-------|-------|
 | Producto | SimonCloud |
 | Grupo | G01 |
-| Versión del documento | v1.0 |
-| Fecha | 11/05/2026 |
-| Autores | Equipo SimonCloud |
-| Revisores | Docente + 1 grupo par |
-| Estado | Borrador |
+| Versión del documento | vFinal |
+| Fecha | 28/05/2026 |
+| Autores | Carlos Alberto Gomez Ormachea |
+| Revisores | Docente |
+| Estado | Aprobado |
 | **Modo elegido** | **FSD clásico 🔧** |
 | Trazabilidad a PRD | `PRD_vFinal.md` |
 | Insumos M2 (UI/UX) | `old-docs/definicion_pantallas_simoncloud.md` |
@@ -44,13 +44,15 @@ SimonCloud es una plataforma que proporciona soberanía digital a la UMSS. Funci
 | **Arquitectura prevista** | Arquitectura Hexagonal y basada en Eventos para subidas pesadas. |
 | **Project structure** | `apps/backend`, `apps/frontend`, `packages/shared`. |
 | **Decisiones técnicas anticipadas** | Se usará JWT para autenticación; subidas mediante presigned URLs de S3 o MinIO. |
-| **Restricciones técnicas** | Prohibido modificar datos directamente en Moodle (solo lectura de notas para homologar, no escritura de vuelta a Moodle por seguridad). |
+| **Restricciones técnicas** | Prohibido almacenar credenciales LMS en la BD; tokens LTI son de uso único y expiran. Archivos en SimonDrops cerrados son inmutables (WORM). Tokens externos no revelan el recurso si son inválidos o expirados. |
 
 ### 2.5 Descomposición en Tasks (Spec Kit) ⚡🔧
 | Task ID | Descripción | Caso de uso (FSD-UC) | Prompt asociado | Estado |
 |---------|-------------|----------------------|-----------------|--------|
-| `T-001` | Implementar endpoint POST /homologate | `FSD-UC-001` | `PR-UC-001` | pendiente |
-| `T-002` | Servicio de generación SHA-256 en upload | `FSD-UC-002` | `PR-UC-002` | pendiente |
+| `T-001` | Implementar LtiDeeplinkService.createLtiDeepLink() — JWT RS256 con claims LTI 1.3 | `FSD-UC-001` | `PR-UC-001` | applied |
+| `T-002` | Servicio de generación SHA-256 incremental en upload (chunks 8MB, crypto nativo Node.js) | `FSD-UC-002` | `PR-UC-002` | applied |
+| `T-003` | Guard HMAC-SHA256 para webhook QR Simple Bolivia | `FSD-UC-003` | `PR-UC-006` | applied |
+| `T-004` | Endpoint GET /external/drops/:id/archivos con token temporal HMAC | `FSD-UC-011` | — | applied |
 
 ## 3. Actores y roles del sistema ⚡🔧
 
@@ -490,13 +492,15 @@ Escenario: Token con firma inválida retorna 403
 
 | ID (BRD_vFinal) | Regla | Tipo | Origen | Casos de uso afectados |
 |-------------|-------|------|--------|------------------------|
-| BR-003 | Identificar y deduplicar estudiantes por correo o ID institucional | validación | BRD_vFinal §11 | FSD-UC-001 |
-| BR-004 | Mantener trazabilidad de la fuente original de cada calificación (`lms_origen`) | auditoría | BRD_vFinal §11 | FSD-UC-001 |
-| BR-005 | Actas finales cerradas son inmutables sin autorización Administrativo | normativa | BRD_vFinal §11 | FSD-UC-002 |
-| BR-006 | Control de acceso por roles RBAC (Docente / Estudiante / Admin) | seguridad | BRD_vFinal §11 | FSD-UC-001, FSD-UC-002, FSD-UC-003 |
-| BR-007 | Comprobante de entrega con hash SHA-256 para archivos en buzones | seguridad | BRD_vFinal §11 | FSD-UC-002 |
-| BR-010 | Integración con pasarela QR Simple para licencias Pro | negocio | BRD_vFinal §11 | FSD-UC-003 |
-| BR-011 | Token de acceso externo firmado con HMAC-SHA256; TTL máximo 72 horas; no revela recurso si inválido | seguridad | BRD_vFinal §11 | FSD-UC-011 |
+| BR-001 | Docentes pueden sincronizar cursos Moodle/Google Classroom para crear SimonDrops vinculados | integración | BRD_vFinal §11 | FSD-UC-001 |
+| BR-002 | SimonDrop debe aparecer como opción de entrega nativa en Moodle vía LTI 1.3 | integración | BRD_vFinal §11 | FSD-UC-001 |
+| BR-003 | Notificar al LMS vía LTI AGS cuando un estudiante completa su entrega | integración | BRD_vFinal §11 | FSD-UC-007 |
+| BR-004 | Trazabilidad completa de entrega: `lms_assignment_id`, `lms_course_id`, `student_id` LTI, `hash_sha256` y timestamp | auditoría | BRD_vFinal §11 | FSD-UC-002 |
+| BR-005 | Archivos en SimonDrops cerrados son inmutables (WORM) sin autorización Administrativo | normativa | BRD_vFinal §11 | FSD-UC-002 |
+| BR-006 | Control de acceso por roles RBAC (Docente / Estudiante / Administrativo / Admin) | seguridad | BRD_vFinal §11 | FSD-UC-001, FSD-UC-002, FSD-UC-003 |
+| BR-007 | Comprobante de entrega con hash SHA-256 para archivos en buzones SimonDrop | seguridad | BRD_vFinal §11 | FSD-UC-002 |
+| BR-010 | Integración con pasarela QR Simple Bolivia para upgrade de cuota a plan Pro | negocio | BRD_vFinal §11 | FSD-UC-003 |
+| BR-011 | Token de acceso externo firmado con HMAC-SHA256; TTL máximo 72 horas; no revela recurso si inválido o expirado | seguridad | BRD_vFinal §11 | FSD-UC-011 |
 
 ## 6. Modelo de datos funcional ⚡🔧
 
@@ -506,8 +510,7 @@ erDiagram
     USUARIO ||--o{ ARCHIVO : sube
     USUARIO ||--o{ SIMONDROP : crea
     SIMONDROP ||--o{ ARCHIVO : contiene
-    MATERIA ||--o{ ACTA_CONSOLIDADA : tiene
-    ACTA_CONSOLIDADA ||--o{ NOTA_ALUMNO : agrupa
+    ARCHIVO ||--o| TOKEN_EXTERNO : tiene
     USUARIO {
         uuid id
         string email
@@ -520,7 +523,7 @@ erDiagram
         string nombre
         string hash_sha256
         boolean solo_lectura
-        string lms_origen
+        string lms_assignment_id
         datetime subido_en
     }
     SIMONDROP {
@@ -528,14 +531,13 @@ erDiagram
         string nombre
         datetime cierre_en
         boolean activo
+        string lms_course_id
     }
-    NOTA_ALUMNO {
+    TOKEN_EXTERNO {
         uuid id
-        string email_alumno
-        float nota_original
-        string escala_origen
-        float nota_homologada_100
-        string lms_origen
+        string hmac_signature
+        datetime expires_at
+        boolean revocado
     }
 ```
 
@@ -550,12 +552,13 @@ erDiagram
 | `USUARIO` | `quota_limit_mb` | int | sí | 15360 (free) o 51200 (pro) | sistema / pago |
 | `ARCHIVO` | `hash_sha256` | string(64) | sí | hex lowercase de 64 chars | sistema al subir |
 | `ARCHIVO` | `solo_lectura` | boolean | sí | true si el SimonDrop está cerrado o el periodo académico cerró | sistema |
-| `ARCHIVO` | `lms_origen` | enum / null | no | Moodle / Classroom / null (si es subida directa) | sistema |
+| `ARCHIVO` | `lms_assignment_id` | string / null | no | ID de tarea LMS; null si subida directa | LTI context |
 | `SIMONDROP` | `cierre_en` | datetime | sí | debe ser fecha futura al crear | usuario (Docente) |
 | `SIMONDROP` | `activo` | boolean | sí | false automáticamente al pasar `cierre_en` | sistema (job) |
-| `NOTA_ALUMNO` | `nota_original` | float | sí | 0 ≤ x ≤ escala máxima de origen | API LMS |
-| `NOTA_ALUMNO` | `nota_homologada_100` | float | no *(v2.0)* | 0.0 ≤ x ≤ 100.0 — grade passback LTI AGS, planificado v2.0 | sistema (v2.0) |
-| `NOTA_ALUMNO` | `lms_origen` | enum | sí | Moodle / Classroom | sistema |
+| `SIMONDROP` | `lms_course_id` | string / null | no | ID del curso LMS vinculado; null si creado sin LMS | LTI context |
+| `TOKEN_EXTERNO` | `hmac_signature` | string(64) | sí | HMAC-SHA256 hex; generado con secret por servicio | sistema |
+| `TOKEN_EXTERNO` | `expires_at` | datetime | sí | máximo NOW + 72h | sistema |
+| `TOKEN_EXTERNO` | `revocado` | boolean | sí | false por defecto; true si el docente lo revoca | sistema |
 
 ### 6.10 Diagrama de Secuencia: UC-001 Creación de SimonDrop desde LMS (LTI)
 ```mermaid
@@ -711,7 +714,7 @@ erDiagram
 |----------|----------------------|
 | `/login` — SSO WebSISS | FSD-UC-001, FSD-UC-002, FSD-UC-003 (precondición) |
 | `/dashboard` — Dashboard Unificado por rol | todos los UCs |
-| `/docente/homologador` — Módulo de consolidación | FSD-UC-001 |
+| `/docente/simondrop/nuevo` — Creación de SimonDrop con o sin vínculo LMS | FSD-UC-001 |
 | `/simondrop/:id/upload` — Buzón de entrega | FSD-UC-002 |
 | `/cuenta/cuota` — Panel de almacenamiento | FSD-UC-003 |
 
@@ -735,21 +738,23 @@ erDiagram
 
 | ID | Requisito | Métrica | Umbral | Cómo se verifica |
 |----|-----------|---------|--------|------------------|
-| NFR-001 | Tiempo de homologación | p95 | < 5 s | Test de carga k6 |
-| NFR-002 | Integridad de entrega | Inmutabilidad | 100% | Auditoría BD |
-
-| NFR-003 | Seguridad | Acceso bloqueado a archivos no públicos sin JWT válido. | 100% | Pentest / Token fuzzing |
-| NFR-004 | Usabilidad | La interfaz de 'Mi Nube' debe ser responsive (móvil y escritorio). | 100% | Test en 4 breakpoints |
-| NFR-005 | Escalabilidad | Soportar 10,000 subidas simultáneas en periodo de exámenes. | 10k ops | Pruebas JMeter |
-| NFR-006 | Disponibilidad | Uptime garantizado para el servicio de validación de Hash. | 99.9% | Monitoreo externo |
-| NFR-007 | Retención | Archivos en papelera se purgan automáticamente tras 30 días exactos. | 30 días | Test de cronjob |
-| NFR-008 | Mantenibilidad | Cobertura de código unitario para el algoritmo de homologación. | > 90% | SonarQube / Jest |
+| NFR-001 | Tiempo de subida (p95) | p95 < 30 s para archivos ≤ 100 MB en red campus | < 30 s | Test de carga k6 |
+| NFR-002 | Integridad de entrega | SHA-256 generado en servidor = SHA-256 verificado offline | 100% | Auditoría BD + POC-01 |
+| NFR-003 | Seguridad | Acceso bloqueado a archivos no públicos sin JWT válido | 100% | Pentest / Token fuzzing |
+| NFR-004 | Usabilidad | Interfaz responsive (móvil y escritorio), 4 breakpoints | 100% | Test en 4 breakpoints |
+| NFR-005 | Escalabilidad | Soportar 10,000 subidas simultáneas en periodo de exámenes | 10k ops | Pruebas JMeter |
+| NFR-006 | Disponibilidad | Uptime del servicio de archivo (file-service) | 99.9% | Monitoreo Prometheus |
+| NFR-007 | Retención | Archivos en papelera se purgan automáticamente tras 30 días exactos | 30 días | Test cronjob |
+| NFR-008 | Mantenibilidad | Cobertura de tests unitarios del dominio (file-service, quota-service) | > 80% | Jest coverage |
+| NFR-009 | Seguridad tokens externos | Token externo no revela recurso si es inválido, expirado o revocado | 100% | Pentest / TTL test |
 
 
 ## 15. Registro de cambios ⚡🔧
 | Versión | Fecha | Autor | Cambio |
 |---------|-------|-------|--------|
 | v1.0 | 11/05/2026 | Equipo | Versión inicial FSD |
+| v2.0 | 27/05/2026 | Carlos Gomez | Eliminación homologación de notas; reencuadre en LTI 1.3 SimonDrop; expansión a 10 UCs; corrección BRs |
+| vFinal | 28/05/2026 | Carlos Gomez | Agregado FSD-UC-011 (token externo); ER actualizado (TOKEN_EXTERNO); NFRs corregidos; §12.1 /drops; BRs alineados con BRD_vFinal |
 
 ## 11. Glosario de Términos
 
@@ -758,8 +763,8 @@ erDiagram
 | **SimonDrop** | Buzón de recepción de archivos creado por un docente con fecha límite y restricciones de formato. |
 | **Hash SHA-256** | Identificador criptográfico de 64 caracteres hexadecimales que garantiza la integridad de un archivo. Si el archivo cambia un solo byte, el hash cambia. |
 | **SSO WebSISS** | Sistema de autenticación única (Single Sign-On) de la UMSS. Permite ingresar con las mismas credenciales del sistema académico sin crear cuentas adicionales. |
-| **Homologación** | Proceso de convertir calificaciones de distintas escalas (0-50 Moodle, letras Classroom) a una escala unificada de 0-100. |
-| **lms_origen** | Atributo de trazabilidad que indica si una nota proviene de Moodle, Classroom o de ambas fuentes. |
+| **LTI Deep Link** | URL JWT RS256 generada por SimonCloud que el LMS usa para mostrar el buzón SimonDrop como opción de entrega nativa. |
+| **LTI AGS** | LTI Assignment and Grade Services. Protocolo que permite a SimonCloud notificar al LMS que una entrega fue recibida. |
 | **Cuota** | Límite de almacenamiento asignado a un usuario. Plan Gratuito: 15 GB. Plan Pro: 50 GB. |
 | **Solo Lectura** | Estado de un archivo que impide su modificación o eliminación. Se aplica automáticamente al cerrar un SimonDrop o al aprobar un documento. |
 | **RBAC** | Role-Based Access Control. Sistema de permisos basado en roles (Estudiante, Docente, Administrativo, Admin). |
@@ -768,37 +773,34 @@ erDiagram
 
 ## 12. Contratos de API (Endpoints Críticos)
 
-### 12.1 POST /homologate — Consolidar Calificaciones (FSD-UC-001)
+### 12.1 POST /drops — Crear SimonDrop desde LMS (FSD-UC-001)
 
 **Request:**
 ```json
 {
-  "materiaId": "MAT-2026-FCyT-001",
-  "docenteToken": "eyJhbGciOiJIUzI1NiJ9...",
-  "moodleToken": "token_moodle_opcional",
-  "classroomToken": "token_classroom_opcional"
+  "titulo": "Proyecto Final MAT101",
+  "descripcion": "Entrega del proyecto de cálculo",
+  "cierreEn": "2026-06-15T23:59:59Z",
+  "lmsProvider": "moodle",
+  "lmsCourseId": "MAT-2026-FCyT-001",
+  "lmsAssignmentId": "assign-42"
 }
 ```
 
-**Response 200 OK:**
+**Response 201 Created:**
 ```json
 {
-  "acta_id": "ACT-2026-001",
-  "estado": "BORRADOR",
-  "estudiantes": [
-    {
-      "email": "jperez@umss.edu.bo",
-      "nombre": "Juan Pérez",
-      "moodleGrade": 90,
-      "classroomGrade": 85,
-      "lms_origen": "Ambos"
-    }
-  ],
-  "generado_en": "2026-05-17T14:00:00-04:00"
+  "dropId": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+  "titulo": "Proyecto Final MAT101",
+  "cierreEn": "2026-06-15T23:59:59Z",
+  "ltiDeepLinkUrl": "https://simoncloud.umss.edu.bo/lti/deeplink/6ba7b810",
+  "lmsAssignmentId": "assign-42",
+  "creadoEn": "2026-05-28T10:00:00Z"
 }
 ```
 
-**Error 503:** `{ "error": "MOODLE_UNAVAILABLE", "retry_after": 30 }`
+**Error 409:** `{ "error": "DUPLICATE_LMS_ASSIGNMENT", "dropId": "<uuid-existente>" }`
+**Error 503:** `{ "error": "LMS_UNAVAILABLE", "retry_after": 30 }`
 
 ### 12.2 POST /simondrop/:id/upload — Subir Archivo (FSD-UC-002)
 
