@@ -7,15 +7,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        String      @id @default(uuid())
+  name      String
+  email     String      @unique
+  password  String
+  role      String      // DOCENTE | ESTUDIANTE
+  drops     SimonDrop[]
+  files     File[]
+  createdAt DateTime    @default(now())
+
+  @@map("users")
+}
+
+model SimonDrop {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  status      String    @default("OPEN")
+  docenteId   String
+  docente     User      @relation(fields: [docenteId], references: [id])
+  files       File[]
+  createdAt   DateTime  @default(now())
+  closedAt    DateTime?
+
+  @@map("simon_drops")
+}
+
 model File {
-  id         String   @id @default(uuid())
-  filename   String
-  sizeBytes  BigInt
-  mimeType   String
-  storageKey String   @unique
-  sha256Hash String?
-  status     String   @default("UPLOADING")
-  uploadedAt DateTime @default(now())
+  id          String    @id @default(uuid())
+  filename    String
+  sizeBytes   BigInt
+  mimeType    String
+  storageKey  String    @unique
+  sha256Hash  String?
+  status      String    @default("UPLOADING")
+  dropId      String
+  drop        SimonDrop @relation(fields: [dropId], references: [id])
+  uploaderId  String
+  uploader    User      @relation(fields: [uploaderId], references: [id])
+  uploadedAt  DateTime  @default(now())
 
   @@map("files")
 }

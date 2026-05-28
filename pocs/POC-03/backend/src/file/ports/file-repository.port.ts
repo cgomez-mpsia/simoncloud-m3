@@ -6,6 +6,8 @@ export interface PendingFile {
   sizeBytes: number;
   mimeType: string;
   storageKey: string;
+  dropId: string;
+  uploaderId: string;
 }
 
 export interface UploadedFile {
@@ -14,13 +16,16 @@ export interface UploadedFile {
   sizeBytes: bigint;
   mimeType: string;
   storageKey: string;
-  sha256Hash: string;
+  sha256Hash: string | null;
   status: string;
+  dropId: string;
+  uploaderId: string;
   uploadedAt: Date;
 }
 
 export interface FileRepositoryPort {
   createPending(file: PendingFile): Promise<void>;
-  // Atomic: UPDATE files SET sha256+status + INSERT outbox_events in one $transaction
   completeWithHash(fileId: string, sha256Hash: string): Promise<UploadedFile>;
+  findById(fileId: string): Promise<UploadedFile | null>;
+  delete(fileId: string): Promise<UploadedFile>;
 }

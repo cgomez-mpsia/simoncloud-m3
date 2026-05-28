@@ -6,8 +6,10 @@ import { FILE_STORAGE_PORT } from './ports/file-storage.port';
 import { PgFileRepository } from './adapters/pg-file.repository';
 import { S3FileStorage } from './adapters/s3-file.storage';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
+  imports: [AuthModule],
   controllers: [FileController],
   providers: [
     FileService,

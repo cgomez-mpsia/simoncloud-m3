@@ -9,7 +9,7 @@ const QUEUE = 'simondrop.file.uploaded';
 @Injectable()
 export class MessageRelayService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(MessageRelayService.name);
-  private connection: amqplib.Connection | null = null;
+  private connection: amqplib.ChannelModel | null = null;
   private channel: amqplib.Channel | null = null;
 
   constructor(

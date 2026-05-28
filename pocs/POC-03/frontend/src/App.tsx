@@ -1,34 +1,36 @@
-import { useState } from 'react';
-import { DropZone, type UploadResult } from './components/DropZone';
-import { UploadResult as UploadResultView } from './components/UploadResult';
+import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { AuthProvider, useAuth } from './AuthContext';
+import LoginPage from './pages/LoginPage';
+import DocenteDashboard from './pages/DocenteDashboard';
+import EstudianteDashboard from './pages/EstudianteDashboard';
+import DropDetailPage from './pages/DropDetailPage';
+
+function Guard({ children, role }: { children: React.ReactNode; role?: string }) {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  if (role && user.role !== role) return <Navigate to={user.role === 'DOCENTE' ? '/docente' : '/estudiante'} replace />;
+  return <>{children}</>;
+}
+
+function Root() {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  return <Navigate to={user.role === 'DOCENTE' ? '/docente' : '/estudiante'} replace />;
+}
 
 export default function App() {
-  const [result, setResult] = useState<UploadResult | null>(null);
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center p-6">
-      <div className="w-full max-w-lg space-y-6">
-        {/* Header */}
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">SimonDrop</h1>
-          <p className="text-gray-500 text-sm mt-1">
-            POC-03 — NestJS · Prisma · PostgreSQL · MinIO · RabbitMQ
-          </p>
-        </div>
-
-        {/* Main card */}
-        {result ? (
-          <UploadResultView result={result} onReset={() => setResult(null)} />
-        ) : (
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-            <p className="text-sm text-gray-500 mb-4">
-              Entrega un archivo al buzón. El backend calcula el SHA-256 y registra el evento
-              en RabbitMQ vía Outbox Pattern (transacción atómica PostgreSQL).
-            </p>
-            <DropZone onResult={setResult} />
-          </div>
-        )}
-      </div>
-    </div>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Root />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/docente" element={<Guard role="DOCENTE"><DocenteDashboard /></Guard>} />
+          <Route path="/estudiante" element={<Guard role="ESTUDIANTE"><EstudianteDashboard /></Guard>} />
+          <Route path="/drops/:id" element={<Guard><DropDetailPage /></Guard>} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
