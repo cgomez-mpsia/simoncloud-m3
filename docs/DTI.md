@@ -218,7 +218,7 @@ sequenceDiagram
 | Aggregate Root | `SimonDrop` | `cierre_en` debe ser fecha futura al crear | ACTIVO → CERRADO (automático al pasar `cierre_en`) |
 | Aggregate Root | `Quota` | `quota_used_mb` ≤ `quota_limit_mb` antes de cualquier upload | FREEMIUM (15GB) → PRO (50GB) |
 | Value Object | `SHA256Hash` | 64 chars hex lowercase, inmutable | creado al completar upload |
-| Value Object | `PresignedUrl` | TTL = 15min, un solo uso | caduca automáticamente |
+| Value Object | `PresignedUrl` | TTL = 15min, un solo uso | caduca automáticamente *(producción — no en POC-03; POC-03 usa upload buffer directo a través del servidor, ver DTI §12.3 y ADR-0003)* |
 
 ### 4.3 DTOs principales
 

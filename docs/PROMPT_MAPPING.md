@@ -95,6 +95,16 @@
 - **Bugs resueltos**: BigInt JSON serialization (Prisma sizeBytes), JwtAuthGuard DI container, amqplib ChannelModel typing
 - **Verificación**: applied — demo funcional en http://localhost:5173
 
+### PM-20260528-010
+- **Timestamp**: 2026-05-29T01:00:00-04:00
+- **Intent**: fix
+- **Artefactos generados**:
+  - `docs/events/catalog.md` — Admin bounded context: añadido `ArchivoSubidoIntegrationEvent` (métricas dashboard); `admin-cqrs-worker` queue: documentados bindings a exchanges topic (simondrop + auth + pagos)
+  - `docs/DTI.md` — §4.2 `PresignedUrl` VO: nota explicando que es producción, POC-03 usa buffer directo (ADR-0003)
+  - `pocs/POC-03/backend/src/file/domain/presigned-url.vo.ts` — stub del VO `PresignedUrl` con validación de TTL; marcado como Módulo 5
+- **Trazabilidad**: DTI §7.4 (CQRS admin), events/catalog.md (Single Writer), DTI §4.2 (VOs), ADR-0003
+- **Verificación**: applied — 25/25 tests pasan
+
 ### PM-20260528-009
 - **Timestamp**: 2026-05-29T00:00:00-04:00
 - **Intent**: fix

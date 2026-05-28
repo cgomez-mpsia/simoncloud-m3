@@ -52,7 +52,7 @@
 | **Expedientes** | `DocumentoAprobadoIntegrationEvent`, `DocumentoRechazadoIntegrationEvent` | `ArchivoSubidoIntegrationEvent` |
 | **Pagos** | `QuotaUpgradeSolicitadoEvent`, `PagoConfirmadoIntegrationEvent`, `QuotaActualizadaIntegrationEvent` | — |
 | **Notificaciones** | — (solo consume) | `ArchivoSubidoIntegrationEvent`, `SimonDropCerradoIntegrationEvent`, `PagoConfirmadoIntegrationEvent`, `QuotaActualizadaIntegrationEvent`, `DocumentoAprobadoIntegrationEvent`, `DocumentoRechazadoIntegrationEvent` |
-| **Admin** | — (solo consume / CQRS) | `UsuarioAutenticadoIntegrationEvent`, `QuotaActualizadaIntegrationEvent`, `ArchivoMovidoPapeleraIntegrationEvent`, `TokenExternoAccedidoIntegrationEvent` |
+| **Admin** | — (solo consume / CQRS) | `ArchivoSubidoIntegrationEvent` (métricas dashboard), `UsuarioAutenticadoIntegrationEvent`, `QuotaActualizadaIntegrationEvent`, `ArchivoMovidoPapeleraIntegrationEvent`, `TokenExternoAccedidoIntegrationEvent` |
 
 ### RabbitMQ exchanges y queues
 
@@ -63,7 +63,7 @@
 | `simoncloud.expedientes.events` | topic | `DocumentoAprobadoIntegrationEvent`, `DocumentoRechazadoIntegrationEvent` |
 | `simoncloud.auth.events` | topic | `UsuarioAutenticadoIntegrationEvent`, `TokenExternoAccedidoIntegrationEvent` |
 | `notification-worker` | direct | Consume de todos los exchanges anteriores; fanout interno a email/push |
-| `admin-cqrs-worker` | direct | Consume eventos de audit para actualizar `dashboard_metrics` |
+| `admin-cqrs-worker` | queue (bind a `simoncloud.simondrop.events` + `simoncloud.auth.events` + `simoncloud.pagos.events`) | Consume `ArchivoSubidoIntegrationEvent`, `UsuarioAutenticadoIntegrationEvent`, `QuotaActualizadaIntegrationEvent` para actualizar `dashboard_metrics` (CQRS Read Model) |
 
 ### Política de Outbox
 
