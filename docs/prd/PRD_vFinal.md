@@ -11,7 +11,7 @@
 | Product Manager | Equipo SimonCloud |
 | Revisores | Docente + Tech Lead + QA |
 | Estado | Borrador |
-| BRD de referencia | `BRD_v2.md` |
+| BRD de referencia | `BRD_vFinal.md` |
 | Insumos M2 (UI/UX) | `old-docs/definicion_pantallas_simoncloud.md`, mockups previos |
 | Fase Spec Kit cubierta | Specify ✅ |
 | Prompts utilizados | `PR-PRD-001` |
@@ -33,25 +33,28 @@ SimonCloud es un ecosistema universitario de almacenamiento institucional y entr
 - Autenticación institucional por roles (Docente, Estudiante).
 - Dashboard "Mi Nube" con gestión de cuotas y archivos.
 - Buzones de tareas con bloqueo post-entrega y generación de Hash.
-- Integración LMS vía LTI 1.3 (Moodle) y OAuth2 (Google Classroom): SimonDrop como opción de entrega nativa dentro del LMS.
+- Integración LMS vía LTI 1.3 (Moodle) y OAuth2 (Google Classroom): SimonDrop como opción de entrega nativa dentro del LMS, incluyendo aprobación Google Workspace Marketplace.
 - Integración QR Simple para upgrade de 15GB a 50GB.
+- Acceso para Usuario Externo: descarga de documentos mediante token temporal firmado, sin necesidad de cuenta institucional (ej. miembro de tribunal de tesis).
 
 ### 3.2 Fuera del alcance (backlog)
 - Migración masiva desde Google Drive vía API (v2.0).
 - Chat bidireccional en tiempo real (fuera de foco actual).
+- Búsqueda avanzada y filtrado por metadatos (v2.0).
 
 ### 3.3 Roadmap de versiones
 | Versión | Contenido | Fecha objetivo |
 |---------|-----------|----------------|
-| v1.0 | MVP (Buzones Hash + Integración LMS LTI 1.3 + Pago QR) | Q4 2026 |
-| v1.1 | Google Classroom Add-on (Phase 2 — aprobación Google Workspace Marketplace) | Q1 2027 |
-| v2.0 | Migración Google Drive API | Q2 2027 |
+| v1.0 | MVP completo: Buzones Hash + Integración LMS LTI 1.3 + Google Classroom Marketplace + Pago QR + Acceso Usuario Externo | Q4 2026 |
+| v2.0 | Diferenciadores: LTI AGS grade passback + Búsqueda avanzada + Migración Google Drive API + SDK móvil | Q2 2027 |
 
 ## 4. Personas y *user journeys*
 
 ### 4.1 Personas
 - **Docente:** Necesita recolectar tareas sin que colapse su correo, con entrega integrada directamente en su LMS (Moodle/Classroom) y comprobante de integridad automático.
 - **Estudiante:** Necesita subir trabajos pesados y tener constancia irrefutable de la entrega.
+- **Usuario Externo:** Miembro de tribunal de tesis, investigador visitante u otro evaluador ajeno a la UMSS que necesita descargar documentos específicos mediante un enlace seguro con token temporal, sin crear una cuenta institucional.
+- **Docente Investigador:** Docente que además de gestionar buzones de tareas, necesita localizar versiones históricas de documentos, filtrar por metadatos (autor, fecha, SHA-256) y exportar listados para publicaciones académicas.
 
 ### 4.2 *User journeys* principales
 
@@ -260,7 +263,7 @@ Escenario: Login con credenciales WebSISS
 
 ## 10. Trazabilidad
 
-| PRD ID | BRD (BRD_v2.md) | FSD |
+| PRD ID | BRD (BRD_vFinal.md) | FSD |
 |--------|-----------------|-----|
 | PRD-REQ-001 | BR-001 (integración LMS LTI) | FSD-UC-001 |
 | PRD-REQ-002 | BR-007 (hash SHA-256) | FSD-UC-002 |

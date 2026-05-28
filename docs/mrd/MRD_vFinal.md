@@ -9,7 +9,7 @@
 | Fecha | 2026-05-17 |
 | Product Manager | Carlos Alberto Gomez Ormachea |
 | Estado | Aprobado |
-| Relación con BRD | `BRD_v2.md` |
+| Relación con BRD | `BRD_vFinal.md` |
 
 ## 1. Resumen ejecutivo
 SimonCloud es un ecosistema de gestión documental para la Universidad Mayor de San Simón (UMSS) diseñado para digitalizar trámites, asegurar la trazabilidad de los documentos, y reemplazar el modelo presencial burocrático actual. Con un mercado de miles de estudiantes y administrativos, la plataforma agiliza los procesos, eliminando horas de espera y pérdidas de archivos.
@@ -37,6 +37,7 @@ Para los estudiantes y personal de la UMSS que sufren por la desorganización do
 | Estudiante Pregrado UMSS | 65,000 | Trámite rápido, sin filas físicas | Incluido en matrícula |
 | Personal Administrativo UMSS | 5,000 | Trazabilidad y organización | N/A |
 | Docentes UMSS | 4,000 | SimonDrop integrado al LMS (Moodle/Classroom) | N/A |
+| Usuario Externo (tribunales, evaluadores invitados) | ~500 activos/ciclo | Descargar documentos sin cuenta institucional | N/A (acceso via token) |
 | Universidades bolivianas (UCB, UPSA, UMSA, etc.) | ~200,000 usuarios potenciales | Plataforma documental con soberanía de datos | Licencia SCaaS anual por institución |
 | Institutos sin infraestructura propia | ~20,000 usuarios potenciales | Plataforma sin inversión en servidores | Suscripción mensual cloud |
 
@@ -51,12 +52,24 @@ Para los estudiantes y personal de la UMSS que sufren por la desorganización do
 - **Dolores actuales**: Acumulación de papeles, dificultad para auditar quién tocó el archivo.
 - **Comportamiento**: Usa escritorio, requiere dashboards eficientes.
 
+#### Persona 3 – Usuario Externo (Tribunal / Evaluador Invitado)
+- **Rol**: Miembro de tribunal de defensa de tesis o evaluador externo sin cuenta UMSS.
+- **Dolores actuales**: Recibe archivos por email (sin integridad garantizada); no puede autenticarse en WebSISS.
+- **Comportamiento**: Accede desde un enlace único con token temporal; solo necesita descargar y verificar el hash SHA-256 del documento asignado.
+
+#### Persona 4 – Docente Investigador
+- **Rol**: Docente que además de impartir clases gestiona proyectos de investigación y portafolio académico.
+- **Dolores actuales**: Necesita localizar versiones históricas de documentos entre cientos de archivos; no tiene forma de buscar por metadatos (SHA-256, rango de fechas, etiqueta semántica).
+- **Comportamiento**: Usa búsqueda avanzada, exporta listados a CSV, vincula documentos con ORCID para publicaciones.
+
 ## 5. *Jobs-to-be-Done*
 | JTBD ID | Cuando… | Quiero… | Para poder… |
 |---------|---------|---------|-------------|
 | JTBD-01 | Necesito un certificado de notas | Solicitarlo desde mi celular y pagar por QR | Ahorrar medio día de viaje a la universidad |
 | JTBD-02 | Un archivo se extravía | Rastrear exactamente en qué oficina está digitalmente | Evitar que el trámite se detenga por semanas |
 | JTBD-03 | entrego un trabajo final de alto valor | obtener un comprobante inmutable con hash SHA-256 | tener prueba legal de que entregué a tiempo |
+| JTBD-04 | soy evaluador externo invitado a un tribunal | acceder a los documentos de defensa con un enlace temporal | no tener que crear una cuenta ni pedir que me reenvíen archivos por email |
+| JTBD-05 | busco una versión anterior de un informe de investigación | filtrar por metadatos (fecha, autor, hash) en un buscador | encontrar el documento exacto sin revisar cientos de archivos manualmente |
 
 ## 6. Análisis competitivo
 ### 6.1 Tabla comparativa

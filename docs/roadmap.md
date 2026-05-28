@@ -62,6 +62,7 @@
 | Implementar `quota-service` con CB Opossum.js → QR Simple Bolivia | P1 | POC-02 validada ✅ |
 | Implementar `simondrop-service` (buzones + cierres) | P2 | file-service |
 | Implementar `lms-connector` — OAuth2 Classroom + LTI 1.3 Moodle (sync cursos/tareas + deep link) | P2 | auth-service, simondrop-service, coordinación DTIC para token LTI |
+| Acceso para Usuario Externo (descarga sin cuenta institucional, token temporal firmado) | P2 | auth-service, simondrop-service |
 | Tests unitarios Jest (cobertura > 90% en file-service y quota-service) | P1 | NFR-002, NFR-010 |
 | Integración TestContainers para tests de integración | P2 | — |
 | Pipeline CI/CD GitHub Actions → Docker Registry DTIC | P1 | — |
@@ -96,7 +97,8 @@
 
 | Funcionalidad | Justificación | Complejidad |
 |---------------|---------------|-------------|
-| Integración LMS (Moodle + Classroom) | Homologación automática de calificaciones, deduplicación por email, Circuit Breaker para API Moodle | Alta |
+| LTI AGS grade passback automático (Moodle + Classroom) | Docente califica en su LMS; SimonCloud recibe la nota vía LTI AGS y la refleja en el portafolio del estudiante; Circuit Breaker para API Moodle | Alta |
+| Búsqueda avanzada y filtrado por metadatos | Investigadores y administrativos necesitan localizar documentos por SHA-256, autor, rango de fechas o etiqueta semántica | Alta |
 | Migración Google Drive API (FSD §3.2 backlog) | Docentes con archivos existentes en Drive | Alta |
 | Firma digital de documentos (PKI institucional) | Resoluciones rectorales firmadas digitalmente | Muy Alta |
 | Editor PDF básico en navegador | Ver/anotar PDFs sin descargar | Alta |
