@@ -257,7 +257,7 @@ cd pocs/POC-03/frontend && npm run dev
 |---------|-------|-------|--------|
 | v1.0.0 | 2026-05-17 | Carlos Alberto Gomez Ormachea | Versión inicial |
 | v1.1.0 | 2026-05-17 | Agente IA | Integración estándares ALCOA+ |
-| v2.0.0 | 2026-05-27 | Carlos Alberto Gomez Ormachea | Sincronización completa con DTI vFinal — 8 servicios, ADRs 0001-0005, stack completo, rutas correctas, guardrails extendidos |
+| v2.0.0 | 2026-05-27 | Carlos Alberto Gomez Ormachea | Sincronización completa con DTI vFinal — 7 servicios, ADRs 0001-0006, stack completo, rutas correctas, guardrails extendidos |
 
 ---
 

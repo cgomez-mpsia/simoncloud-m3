@@ -7,6 +7,7 @@ erDiagram
     USUARIO ||--|| QUOTA : "tiene"
     SIMONDROP ||--o{ ARCHIVO : "contiene"
     SIMONDROP ||--o{ SUBMISSION : "recibe"
+    SIMONDROP ||--o{ TOKEN_EXTERNO : "genera (FSD-UC-011)"
     SUBMISSION }o--|| ARCHIVO : "referencia"
     ARCHIVO ||--o{ VERSION : "tiene versiones"
     USUARIO ||--o{ AUDIT_LOG : "genera"
@@ -41,7 +42,19 @@ erDiagram
         datetime cierre_en
         boolean activo
         uuid docente_id FK
-        string token_publico "UUID para acceso externo"
+        string lms_assignment_id "null si creado sin LMS"
+        string lms_course_id "null si creado sin LMS"
+    }
+
+    TOKEN_EXTERNO {
+        uuid id PK
+        uuid simondrop_id FK
+        uuid archivo_id FK
+        string hmac_signature "HMAC-SHA256 hex 64 chars"
+        int ttl_horas "max 72"
+        datetime expires_at
+        boolean revocado
+        datetime created_at
     }
 
     QUOTA {

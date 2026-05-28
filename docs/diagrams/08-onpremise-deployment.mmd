@@ -11,12 +11,14 @@ flowchart TD
         SPA["SPA React\nArchivos estáticos"]
     end
 
-    subgraph Swarm["Docker Swarm — Capa de Aplicación"]
+    subgraph Swarm["Docker Swarm — Capa de Aplicación (7 servicios)"]
         GW_T["api-gateway\nx2 réplicas"]
+        AS_T["auth-service\nSSO WebSISS + tokens HMAC\nx1 réplica"]
         FS_T["file-service\nx3 → x9\n(periodos exámenes)"]
-        QS_T["quota-service\n+ Circuit Breaker\nx1 réplica"]
+        DS_T["simondrop-service\nbuzones + LTI deep links\nx1 réplica"]
+        QS_T["quota-service\n+ Saga + Circuit Breaker\nx1 réplica"]
+        EXP_T["expedientes-service\naprobación/rechazo docs\nx1 réplica"]
         NS_T["notification-service\nRabbitMQ consumer\nx1 réplica"]
-        AS_T["auth-service\nSSO WebSISS\nx1 réplica"]
         ADM_T["admin-service\nCQRS Read Model\nx1 réplica"]
     end
 
@@ -39,9 +41,11 @@ flowchart TD
     Users --> Nginx
     Nginx --> SPA
     Nginx --> GW_T
-    GW_T --> FS_T
-    GW_T --> QS_T
     GW_T --> AS_T
+    GW_T --> FS_T
+    GW_T --> DS_T
+    GW_T --> QS_T
+    GW_T --> EXP_T
     GW_T --> ADM_T
     GW_T --> VAULT
     FS_T --> PG_P

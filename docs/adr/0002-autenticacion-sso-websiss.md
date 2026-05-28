@@ -20,7 +20,7 @@ Integrar con **WebSISS via OAuth2 Authorization Code Flow** con tokens JWT inter
 - WebSISS actúa como Authorization Server.
 - `auth-service` intercambia el código OAuth2 por tokens de WebSISS y emite un JWT propio firmado HS256.
 - El JWT se almacena en cookie HttpOnly (previene XSS).
-- Usuarios externos reciben un token de buzón (UUID firmado, TTL = vida del SimonDrop).
+- Usuarios externos (FSD-UC-011) reciben un token temporal firmado con HMAC-SHA256, TTL máximo 72h configurable por el docente. El endpoint `/external/drops/:id/archivos?token=<hmac>` retorna 403 sin revelar el recurso si el token es inválido o expirado (BR-011).
 
 ## Alternativas consideradas
 
@@ -47,4 +47,4 @@ Integrar con **WebSISS via OAuth2 Authorization Code Flow** con tokens JWT inter
 WebSISS → OAuth2 Code → auth-service → JWT (HS256, 8h) → HttpOnly Cookie
 ```
 
-Secret en AWS Secrets Manager. Rotación semestral.
+Secret almacenado en Docker Secrets / HashiCorp Vault (on-premise DTIC-UMSS, ver ADR-0005). Rotación semestral.

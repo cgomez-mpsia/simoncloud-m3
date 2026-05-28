@@ -16,7 +16,7 @@
 | `PR-UC-005` | Componente React Uploader | FSD-UC-002 (UI) | Claude Sonnet 4 | applied |
 | `PR-UC-006` | NestJS Guard HMAC Webhook QR | FSD-UC-003 | Claude Sonnet 4 | applied |
 | `PR-UC-007` | GET /archivos/:id/versiones | FSD-UC-005 | Claude Sonnet 4 | applied |
-| `PR-UC-008` | Worker SQS notificaciones push | FSD-UC-007 | Claude Sonnet 4 | applied |
+| `PR-UC-008` | Worker RabbitMQ notificaciones push | FSD-UC-007 | Claude Sonnet 4 | applied |
 | `PR-UC-009` | Export PDF audit log streaming | FSD-UC-010 | Claude Sonnet 4 | applied |
 
 ---
