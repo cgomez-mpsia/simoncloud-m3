@@ -25,11 +25,11 @@
 
 | Símbolo | Archivo fuente | Sección | Antes (sin AI) | Después (con AI) |
 |---------|---------------|---------|----------------|------------------|
-| `createLtiDeepLink` | `apps/lms-connector/src/deeplink/lti-deeplink.service.ts` | FSD-UC-001 | Implementación manual estimada: 4h | Generado + revisado: 45min |
-| `generateFileHash` | `libs/shared/src/crypto/sha256.service.ts` | FSD-UC-002, BR-007 | Implementación manual: 30min | Generado + revisado: 5min |
-| `QrSimpleWebhookGuard` | `apps/quota-service/src/guards/qr-webhook.guard.ts` | FSD-UC-003, BR-010 | Implementación manual: 2h | Generado + revisado: 20min |
-| `processNotification` | `apps/notification-service/src/workers/notification.worker.ts` | FSD-UC-007 | Implementación manual: 3h | Generado + revisado: 30min |
-| `exportAuditLogPdf` | `apps/admin-service/src/controllers/audit.controller.ts` | FSD-UC-010 | Implementación manual: 4h | Generado + revisado: 45min |
+| `createLtiDeepLink` (contrato) | `prompts/PR-UC-001.md` | FSD-UC-001 | Diseño manual estimado: 4h | Generado + revisado: 45min |
+| `generateFileHash` (POC) | `pocs/POC-01/sha256-incremental.ts` | FSD-UC-002, BR-007 | Implementación manual: 30min | Generado + revisado: 5min |
+| `QrSimpleWebhookGuard` (contrato) | `prompts/PR-UC-006.md` | FSD-UC-003, BR-010 | Diseño manual estimado: 2h | Generado + revisado: 20min |
+| `processNotification` (contrato) | `prompts/PR-UC-008.md` | FSD-UC-007 | Diseño manual estimado: 3h | Generado + revisado: 30min |
+| `exportAuditLogPdf` (contrato) | `prompts/PR-UC-009.md` | FSD-UC-010 | Diseño manual estimado: 4h | Generado + revisado: 45min |
 | DTI vFinal (§1-§21) | `docs/DTI.md` | Arquitectura completa | Redacción manual: ~20h | Con AI: ~3h + revisión 1h |
 | `FileService.upload` | `pocs/POC-03/backend/src/file/file.service.ts` | FSD-UC-002, DTI §5 | Implementación manual estimada: 6h | Generado + revisado: 40min |
 | `MessageRelayService.relayPendingEvents` | `pocs/POC-03/backend/src/relay/message-relay.service.ts` | DTI §7.1 (Outbox) | Implementación manual estimada: 4h | Generado + revisado: 25min |

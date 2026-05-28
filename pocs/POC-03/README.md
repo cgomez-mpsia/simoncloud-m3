@@ -13,7 +13,7 @@
 
 ## Hipótesis
 
-La arquitectura hexagonal del `file-service` (ports + adapters) permite conectar Prisma, MinIO y RabbitMQ sin que el dominio importe ninguna de esas dependencias. El Outbox Pattern garantiza que si RabbitMQ cae en el momento del upload, el evento `FileUploadedEvent` no se pierde. Sobre esa base hexagonal se puede construir una app completa con auth JWT, múltiples SimonDrops, roles diferenciados y gestión de archivos.
+La arquitectura hexagonal del `file-service` (ports + adapters) permite conectar Prisma, MinIO y RabbitMQ sin que el dominio importe ninguna de esas dependencias. El Outbox Pattern garantiza que si RabbitMQ cae en el momento del upload, el evento `ArchivoSubidoIntegrationEvent` no se pierde. Sobre esa base hexagonal se puede construir una app completa con auth JWT, múltiples SimonDrops, roles diferenciados y gestión de archivos.
 
 ## Criterio de éxito medible
 
@@ -61,7 +61,7 @@ La arquitectura hexagonal del `file-service` (ports + adapters) permite conectar
 | PostgreSQL 16 | BD relacional — tablas `users`, `simon_drops`, `files`, `outbox_events` |
 | MinIO (`@aws-sdk/client-s3`) | Object Storage S3-compatible on-premise |
 | SHA-256 incremental (`crypto`) | Integridad de archivo — reutiliza técnica de POC-01 |
-| RabbitMQ 3 (`amqplib`) | Message broker — cola `simondrop.file.uploaded` |
+| RabbitMQ 3 (`amqplib`) | Message broker — exchange topic `simoncloud.simondrop.events` |
 | Outbox Pattern | Consistencia eventual garantizada entre PostgreSQL y RabbitMQ |
 | Docker Compose | Orquestación local de PostgreSQL + MinIO + RabbitMQ |
 
@@ -180,12 +180,12 @@ cd pocs/POC-03/frontend && npm run dev
 ```
 # Consola NestJS al arrancar:
 POC-03 backend corriendo en http://localhost:3001
-[MessageRelayService] Relay conectado a RabbitMQ → cola "simondrop.file.uploaded"
+[MessageRelayService] Relay conectado a RabbitMQ → exchange "simoncloud.simondrop.events"
 
 # Al subir un archivo como estudiante:
 POST /api/drops/:id/upload 201 143ms
 
-[MessageRelayService] Publicado FileUploadedEvent [a3f1c2e4-...] → RabbitMQ ✅
+[MessageRelayService] Publicado ArchivoSubidoIntegrationEvent [a3f1c2e4-...] → simoncloud.simondrop.events [archivo.subido] ✅
 
 # Respuesta JSON del endpoint de upload:
 {
@@ -204,14 +204,14 @@ openssl sha256 tarea-final.pdf
 # SHA256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 ✅
 
 # RabbitMQ Management UI (http://localhost:15672):
-# Queue: simondrop.file.uploaded — mensajes consumidos ✅
+# Exchange: simoncloud.simondrop.events (topic) — mensajes publicados ✅
 
 # PostgreSQL — transacción atómica confirmada:
 SELECT id, status, sha256_hash FROM files;
 -- a3f1c2e4... | COMPLETED | e3b0c442... ✅
 
 SELECT event_type, published FROM outbox_events;
--- FileUploadedEvent | true ✅
+-- ArchivoSubidoIntegrationEvent | true ✅
 ```
 
 ## Resultado y Lecciones Aprendidas

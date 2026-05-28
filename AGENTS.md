@@ -222,7 +222,7 @@ cd pocs/POC-03/frontend && npm run dev
 
 | Métrica | Umbral | Estado release/2.0.0 |
 |---------|--------|----------------------|
-| `prompt_coverage` | ≥ 80% | ✅ 100% (10/10 UCs) |
+| `prompt_coverage` | ≥ 80% | ✅ 100% (11/11 UCs) |
 | `spec_fidelity` | ≥ 95% | ✅ 100% (6/6 PRD-REQs) |
 | `hallucination_rate` | < 5% | ✅ ~0% |
 | Cobertura Jest (`file-service`, `quota-service`) | ≥ 90% | 📋 Módulo 5 |

@@ -6,11 +6,11 @@
 |-------|-------|
 | Producto | SimonCloud |
 | Grupo | G01 |
-| Versión | v1.0 |
-| Fecha | 11/05/2026 |
+| Versión | vFinal |
+| Fecha | 28/05/2026 |
 | Product Manager | Equipo SimonCloud |
 | Revisores | Docente + Tech Lead + QA |
-| Estado | Borrador |
+| Estado | Aprobado |
 | BRD de referencia | `BRD_vFinal.md` |
 | Insumos M2 (UI/UX) | `old-docs/definicion_pantallas_simoncloud.md`, mockups previos |
 | Fase Spec Kit cubierta | Specify ✅ |
