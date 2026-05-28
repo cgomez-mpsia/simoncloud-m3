@@ -105,12 +105,13 @@ Person_Ext(externo, "Usuario Externo", "Sin cuenta UMSS")
 
 Container(spa, "SPA React", "React 18 + TypeScript", "Interfaz web; todas las pantallas del sistema.")
 Container(gateway, "API Gateway", "NestJS", "Punto de entrada único. Valida JWT, enruta, rate-limit.")
-Container(auth, "auth-service", "NestJS + WebSISS OAuth2", "Federación SSO, emisión JWT, RBAC.")
-Container(files, "file-service", "NestJS + TUS/S3 Multipart", "Subida chunked, SHA-256, gestión de archivos.")
-Container(drops, "simondrop-service", "NestJS", "Buzones, fechas de cierre, comprobantes.")
-Container(quota, "quota-service", "NestJS", "Gestión de cuotas, saga de pago QR Simple.")
-Container(notif, "notification-service", "NestJS + RabbitMQ Consumer", "Emails push; DLQ con reintentos.")
-Container(admin, "admin-service", "NestJS + CQRS Read Model", "Panel global, métricas, audit log.")
+Container(auth, "auth-service", "NestJS + WebSISS OAuth2", "Federación SSO, emisión JWT, RBAC, tokens externos HMAC-SHA256.")
+Container(files, "file-service", "NestJS + MinIO SDK (S3-API)", "Subida chunked, SHA-256 incremental, gestión de archivos.")
+Container(drops, "simondrop-service", "NestJS", "Buzones, fechas de cierre, comprobantes, deep links LTI.")
+Container(quota, "quota-service", "NestJS + Saga + Circuit Breaker", "Gestión de cuotas, saga de pago QR Simple Bolivia.")
+Container(expedientes, "expedientes-service", "NestJS", "Aprobación/rechazo documentos institucionales, control versiones, audit trail.")
+Container(notif, "notification-service", "NestJS + RabbitMQ Consumer", "Emails push; DLQ con reintentos exponenciales.")
+Container(admin, "admin-service", "NestJS + CQRS Read Model", "Panel global, métricas, audit log exportable PDF.")
 
 ContainerDb(pg_main, "PostgreSQL Primary", "PostgreSQL 16 on-premise", "Usuarios, archivos, buzones, cuotas, actas.")
 ContainerDb(pg_replica, "PostgreSQL Replica", "PostgreSQL 16 on-premise", "Réplica de lectura para queries pesadas.")
@@ -201,11 +202,13 @@ sequenceDiagram
 
 | Contexto | Responsabilidad | Entidades principales | Tipo de integración |
 |----------|-----------------|-----------------------|---------------------|
-| `Identity` | Autenticación, RBAC | `User`, `Role`, `Session` | síncrona (auth-service) |
-| `Storage` | Almacenamiento de archivos | `File`, `UploadSession` | asíncrona (FileUploaded) |
-| `SimonDrop` | Buzones de entrega | `SimonDrop`, `Submission` | síncrona + asíncrona |
-| `Billing` | Cuotas y pagos | `Quota`, `Payment` | asíncrona (saga) |
-| `Notification` | Alertas y emails | `Notification`, `AuditLog` | event-driven (RabbitMQ) |
+| `Identity` | Autenticación, RBAC, tokens externos HMAC-SHA256 | `User`, `Role`, `Session`, `TokenExterno` | síncrona (auth-service) |
+| `Storage` | Almacenamiento de archivos, SHA-256 incremental | `File`, `UploadSession` | asíncrona (ArchivoSubidoIntegrationEvent) |
+| `SimonDrop` | Buzones de entrega, deep links LTI, cierres | `SimonDrop`, `Submission` | síncrona + asíncrona |
+| `Billing` | Cuotas y pagos, saga QR Simple Bolivia | `Quota`, `Payment`, `SagaState` | asíncrona (saga orquestada) |
+| `Expedientes` | Aprobación/rechazo de documentos institucionales | `Expediente`, `Documento`, `Version` | síncrona + asíncrona |
+| `Notification` | Alertas, emails, push, DLQ | `Notification`, `AuditLog` | event-driven (RabbitMQ, todos los exchanges) |
+| `Admin` | CQRS read model, métricas globales, audit log | `DashboardMetrics`, `AuditEntry` | CQRS (consume eventos, escribe read model) |
 
 ### 4.2 Entidades, Value Objects y Aggregates
 
@@ -289,12 +292,13 @@ flowchart LR
 | Servicio | Responsabilidad | BD propia | API expuesta |
 |----------|-----------------|-----------|--------------|
 | `api-gateway` | Routing, JWT validation, rate-limit | — | REST /\* |
-| `auth-service` | SSO WebSISS, JWT, RBAC | PostgreSQL (users, roles) | gRPC /auth |
-| `file-service` | Subida chunked, SHA-256, gestión | PostgreSQL + S3 | REST /files |
-| `simondrop-service` | Buzones, cierres, comprobantes | PostgreSQL | REST /drops |
-| `quota-service` | Cuotas, saga QR Simple | PostgreSQL (quotas) | REST /quota |
-| `notification-service` | Emails, push, DLQ | Redis (colas) | RabbitMQ Consumer |
-| `admin-service` | Panel global, CQRS Read Model | PostgreSQL (audit_log) | REST /admin |
+| `auth-service` | SSO WebSISS, JWT, RBAC, tokens externos HMAC-SHA256 | PostgreSQL (users, roles, tokens_externos) | gRPC /auth |
+| `file-service` | Subida chunked, SHA-256, gestión, Outbox Pattern | PostgreSQL + MinIO | REST /files |
+| `simondrop-service` | Buzones, cierres, comprobantes, deep links LTI | PostgreSQL | REST /drops |
+| `quota-service` | Cuotas, saga QR Simple, Circuit Breaker | PostgreSQL (quotas) | REST /quota |
+| `expedientes-service` | Aprobación/rechazo documentos, control versiones | PostgreSQL (expedientes) | REST /expedientes |
+| `notification-service` | Emails, push, DLQ con reintentos exponenciales | Redis (colas) | RabbitMQ Consumer |
+| `admin-service` | Panel global, CQRS Read Model, audit log PDF | PostgreSQL (audit_log) | REST /admin |
 
 ### 6.2 Patrones de resiliencia aplicados
 
@@ -511,10 +515,12 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 | Artefacto | Prompts asociados |
 |-----------|-------------------|
 | BRD coherencia | `PR-BRD-001` |
-| FSD-UC-001 (Homologación LMS) | `PR-UC-001` | *(BACKLOG v2.0)* |
-| FSD-UC-002 (Hash SHA-256) | `PR-UC-002` |
-| FSD-UC-003 (QR Webhook) | `PR-UC-006` |
-| FSD-UC-007 (Notificaciones) | `PR-UC-008` |
+| FSD-UC-001 (Creación SimonDrop LTI — createLtiDeepLink) | `PR-UC-001` |
+| FSD-UC-002 (Hash SHA-256 incremental) | `PR-UC-002` |
+| FSD-UC-003 (QR Webhook — Guard HMAC) | `PR-UC-006` |
+| FSD-UC-007 (Notificaciones push) | `PR-UC-008` |
+| FSD-UC-010 (Admin audit log PDF) | `PR-UC-009` |
+| FSD-UC-011 (Token externo HMAC-SHA256) | PM-20260528-002 |
 | Admin Dashboard export | `PR-UC-009` |
 
 **Métricas AI-SDLC** (calculadas sobre `release/2.0.0`):
@@ -583,7 +589,7 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 
 | Amenaza | Vector | Control |
 |---------|--------|---------|
-| **Spoofing** | JWT falsificado | Firma HS256 con secret rotado en AWS Secrets Manager |
+| **Spoofing** | JWT falsificado | Firma HS256 con secret rotado vía Docker Secrets / HashiCorp Vault (on-premise) |
 | **Tampering** | Modificar archivo post-entrega | Hash SHA-256 + política WORM S3 Object Lock |
 | **Repudiation** | Negar entrega de tarea | `audit_log` inmutable + recibo PDF con hash y timestamp |
 | **Info Disclosure** | Acceso a archivos ajenos | RBAC estricto; presigned URLs de un solo uso |
@@ -594,7 +600,7 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 
 - **AuthN**: SSO WebSISS (OAuth2 / SAML 2.0) → JWT firmado HS256, TTL 8h, HttpOnly Cookie.
 - **AuthZ**: RBAC 4 roles (Estudiante, Docente, Administrativo, Admin). Permisos declarados en `AGENTS.md §RBAC-matrix`.
-- **Usuarios externos**: Token de buzón público (UUID firmado, TTL = vida del SimonDrop). Sin acceso al sistema de archivos personal.
+- **Usuarios externos (FSD-UC-011)**: Token temporal firmado con HMAC-SHA256, TTL máximo 72h configurable por el docente. El endpoint `GET /external/drops/:id/archivos?token=<hmac>` retorna 403 sin revelar el recurso si el token es inválido o expirado (BR-011). Ver `docs/adr/0002-autenticacion-sso-websiss.md` §token-externo.
 
 ### 13.3 Protección de datos
 
@@ -685,7 +691,7 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 
 ## §20. Glosario y Referencias
 
-**Glosario**: Ver `docs/fsd/FSD_vFinal.md §11` para definiciones de SimonDrop, SHA-256, SSO, Homologación, RBAC, Presigned URL, Audit Log.
+**Glosario**: Ver `docs/fsd/FSD_vFinal.md §11` para definiciones de SimonDrop, SHA-256, SSO, LTI Deep Link, LTI AGS, RBAC, Presigned URL, Audit Log.
 
 **Referencias**:
 - Richardson, C. (2019). *Microservices Patterns*. Manning Publications.

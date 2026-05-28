@@ -824,3 +824,71 @@ estudianteId: "20220001"
 
 **Error 403:** `{ "error": "SIMONDROP_CLOSED", "cerrado_en": "2026-05-10T23:59:00-04:00" }`
 **Error 413:** `{ "error": "QUOTA_EXCEEDED", "usado_mb": 15360, "limite_mb": 15360 }`
+
+### 12.3 POST /quota/upgrade/qr — Iniciar Upgrade de Cuota (FSD-UC-003)
+
+**Headers:** `Idempotency-Key: <uuid>` (obligatorio — previene duplicados si el cliente reintenta)
+
+**Request:**
+```json
+{
+  "plan": "PRO",
+  "montoBOB": 50.00
+}
+```
+
+**Response 202 Accepted:**
+```json
+{
+  "sagaId": "a0b1c2d3-e4f5-6789-abcd-ef0123456789",
+  "qrCode": "data:image/png;base64,...",
+  "montoBOB": 50.00,
+  "expiresAt": "2026-05-28T11:00:00Z"
+}
+```
+
+**Error 409:** `{ "error": "IDEMPOTENCY_CONFLICT", "sagaId": "<saga-existente>" }`
+**Error 402:** `{ "error": "ALREADY_PRO" }`
+
+### 12.4 POST /drops/{dropId}/external-token — Generar Token Externo (FSD-UC-011)
+
+**Request:**
+```json
+{
+  "archivoId": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+  "ttlHoras": 24
+}
+```
+
+**Response 201 Created:**
+```json
+{
+  "tokenId": "550e8400-e29b-41d4-a716-446655440000",
+  "accessUrl": "https://simoncloud.umss.edu.bo/external/drops/abc/archivos?token=<hmac>",
+  "expiresAt": "2026-05-29T10:00:00Z"
+}
+```
+
+**Error 400:** `{ "error": "TTL_EXCEEDS_MAX", "maxHoras": 72 }`
+
+### 12.5 GET /external/drops/{dropId}/archivos — Acceso Externo sin Auth (FSD-UC-011)
+
+> Este endpoint NO requiere JWT. La autenticación es el `?token=<hmac>` en la query string.
+
+**Query params:** `token=<hmac-sha256-hex>` (obligatorio)
+
+**Response 200 OK:**
+```json
+{
+  "archivoId": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+  "nombreOriginal": "tesis_final.pdf",
+  "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "downloadUrl": "https://storage.umss.edu.bo/presigned/...",
+  "expiresAt": "2026-05-29T10:00:00Z"
+}
+```
+
+**Error 403:** `{ "error": "TOKEN_INVALID" }` *(sin información del recurso — BR-011)*
+**Error 410:** `{ "error": "TOKEN_EXPIRED" }` *(sin información del recurso — BR-011)*
+
+> **Spec completa**: Ver `docs/api/openapi.yaml` (OpenAPI 3.1) para los 16 endpoints cubriendo FSD-UC-001..011.
