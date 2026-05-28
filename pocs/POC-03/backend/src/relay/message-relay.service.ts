@@ -47,12 +47,19 @@ export class MessageRelayService implements OnModuleInit, OnModuleDestroy {
         .replace(/IntegrationEvent$/, '')
         .replace(/([A-Z])/g, (m, c, i) => (i > 0 ? '.' : '') + c.toLowerCase());
 
-      this.channel.publish(
+      // channel.publish() devuelve false cuando el buffer TCP está lleno (back-pressure AMQP).
+      // Si es false NO marcamos como publicado → se reintenta en el siguiente ciclo de 2s.
+      const sent = this.channel.publish(
         EXCHANGE,
         routingKey,
         Buffer.from(JSON.stringify(event.payload)),
         { persistent: true, contentType: 'application/json' },
       );
+
+      if (!sent) {
+        this.logger.warn(`Back-pressure RabbitMQ — evento ${event.id} no enviado, se reintenta`);
+        break;
+      }
 
       await this.prisma.outboxEvent.update({
         where: { id: event.id },

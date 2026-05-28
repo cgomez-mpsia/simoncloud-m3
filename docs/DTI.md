@@ -214,7 +214,7 @@ sequenceDiagram
 
 | Tipo | Nombre | Invariantes | Ciclo de vida |
 |------|--------|-------------|---------------|
-| Aggregate Root | `File` | `hash_sha256` no nulo post-upload; `solo_lectura=true` si SimonDrop cerrado | SUBIENDO → ACTIVO → SOLO_LECTURA / EN_PAPELERA → PURGADO |
+| Aggregate Root | `File` | `hash_sha256` no nulo post-upload; `solo_lectura=true` si SimonDrop cerrado | SUBIENDO → ACTIVO → SOLO_LECTURA / EN_PAPELERA → PURGADO *(POC-03: `UPLOADING` → `COMPLETED` en inglés — simplificación de POC; migración a nombres de dominio en Módulo 5)* |
 | Aggregate Root | `SimonDrop` | `cierre_en` debe ser fecha futura al crear | ACTIVO → CERRADO (automático al pasar `cierre_en`) |
 | Aggregate Root | `Quota` | `quota_used_mb` ≤ `quota_limit_mb` antes de cualquier upload | FREEMIUM (15GB) → PRO (50GB) |
 | Value Object | `SHA256Hash` | 64 chars hex lowercase, inmutable | creado al completar upload |
@@ -413,6 +413,7 @@ El `admin-service` mantiene un `dashboard_metrics` materializado, actualizado as
 | Trazas distribuidas | **Jaeger** | Distributed tracing open source |
 | Secretos | **HashiCorp Vault** o Docker Secrets | Gestión segura sin dependencia de cloud |
 | CI/CD | **GitHub Actions** con runner self-hosted DTIC | Pipeline automatizado sobre infraestructura propia |
+| Generación de recibos PDF | **PDFKit** (`pdfkit` npm) en `file-service` | Librería Node.js pura, sin headless browser; genera recibo con `hash_sha256`, timestamps y `simondropId`. Implementación en Módulo 5 |
 
 ### 8.2 Diagrama de despliegue on-premise
 

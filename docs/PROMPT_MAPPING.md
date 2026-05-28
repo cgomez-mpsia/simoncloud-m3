@@ -95,6 +95,15 @@
 - **Bugs resueltos**: BigInt JSON serialization (Prisma sizeBytes), JwtAuthGuard DI container, amqplib ChannelModel typing
 - **Verificación**: applied — demo funcional en http://localhost:5173
 
+### PM-20260528-009
+- **Timestamp**: 2026-05-29T00:00:00-04:00
+- **Intent**: fix
+- **Artefactos generados**:
+  - `pocs/POC-03/backend/src/relay/message-relay.service.ts` — manejo de back-pressure AMQP: `channel.publish()` retorna `false` → `break` sin marcar publicado, se reintenta en ciclo siguiente
+  - `docs/DTI.md` — §4.2 File Aggregate: nota POC-03 usa `UPLOADING/COMPLETED` (inglés), migración a nombres de dominio en Módulo 5; §8.1: PDFKit (`pdfkit` npm) como librería de recibos PDF en `file-service`
+- **Trazabilidad**: DTI §7.1 (Outbox at-least-once), DTI §4.2 (ciclo de vida File), FSD-UC-002 (recibo PDF)
+- **Verificación**: applied — 25/25 tests pasan
+
 ### PM-20260528-008
 - **Timestamp**: 2026-05-28T23:30:00-04:00
 - **Intent**: fix
