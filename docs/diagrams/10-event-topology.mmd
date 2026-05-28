@@ -4,7 +4,7 @@ title: "Topología de Eventos — SimonCloud (11 eventos, 4 exchanges topic)"
 flowchart LR
     subgraph Producers["Productores (Single Writer Principle)"]
         AUTH["auth-service"]
-        SDROP["simondrop-service<br/>(file-service vía Outbox)"]
+        SDROP["simondrop-service<br/>(ArchivoSubido vía file-service Outbox)"]
         QUOTA["quota-service"]
         EXPED["expedientes-service"]
     end
@@ -21,6 +21,7 @@ flowchart LR
         NS["notification-service<br/>(notification-worker)"]
         ADMIN["admin-service<br/>(admin-cqrs-worker)"]
         FS_LOCK["file-service<br/>(lock archivos)"]
+        EXPED_C["expedientes-service<br/>(consumer)"]
     end
 
     AUTH -->|UsuarioAutenticadoIntegrationEvent<br/>TokenExternoAccedidoIntegrationEvent| EX4
@@ -34,8 +35,10 @@ flowchart LR
     EX4 --> NS
     NS -->|tras 3 fallos| DLQ
 
-    EX1 -->|ArchivoSubidoIntegrationEvent<br/>UsuarioAutenticadoIntegrationEvent<br/>QuotaActualizadaIntegrationEvent| ADMIN
-    EX4 --> ADMIN
-    EX2 --> ADMIN
+    EX1 -->|ArchivoSubidoIntegrationEvent<br/>ArchivoMovidoPapeleraIntegrationEvent| ADMIN
+    EX2 -->|QuotaActualizadaIntegrationEvent| ADMIN
+    EX4 -->|UsuarioAutenticadoIntegrationEvent<br/>TokenExternoAccedidoIntegrationEvent| ADMIN
 
     EX1 -->|SimonDropCerradoIntegrationEvent| FS_LOCK
+
+    EX1 -->|ArchivoSubidoIntegrationEvent| EXPED_C
