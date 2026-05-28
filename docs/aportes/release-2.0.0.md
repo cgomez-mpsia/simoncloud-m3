@@ -4,7 +4,7 @@
 > **Release**: `release/2.0.0`  
 > **Período**: Abril 2026 — Mayo 2026  
 > **Módulo**: 4 — Microservicios, Arquitectura Distribuida y AI-SDLC  
-> **Fecha de corte**: 2026-05-27
+> **Fecha de corte**: 2026-05-28
 
 ---
 
@@ -39,21 +39,25 @@
 | T-M4-017 | Despliegue on-premise DTIC-UMSS: mapeo de componentes + soberanía de datos | Carlos | `docs/DTI.md §8`, `docs/adr/0005` | 3h | ✅ |
 | T-M4-018 | Seguridad: STRIDE, AuthN/AuthZ, guardrails IA | Carlos | `docs/DTI.md §13` | 2h | ✅ |
 | T-M4-019 | MRD, PRD, BRD vFinal reorganizados a rutas correctas | Carlos | `docs/mrd/`, `docs/prd/`, `docs/brd/` | 1h | ✅ |
+| T-M4-020 | POC-03: SimonDrop demo app e2e — auth JWT + roles + CRUD + hexagonal + MinIO + RabbitMQ | Carlos | `pocs/POC-03/` completo (backend NestJS + frontend React) | 8h | ✅ |
+| T-M4-021 | POC-03: folder upload (webkitdirectory + filePath schema), UX improvements (AppHeader, Skeleton, confirmación inline, fechas relativas), fix login role bug | Carlos | `pocs/POC-03/frontend/src/components/`, `pocs/POC-03/backend/prisma/migrations/` | 3h | ✅ |
+| T-M4-022 | BRD v3.0 — reescritura completa: eliminar referencias a homologación, reencuadrar en LTI 1.3 SimonDrop + SHA-256 + Ley 164 | Carlos | `docs/brd/BRD_vFinal.md` | 2h | ✅ |
+| T-M4-023 | Fix arquitectural: eliminar payment-service (ghost service) de DTI, ADR-0004, patrones_asincronos.md, diagrama saga | Carlos | `docs/DTI.md`, `docs/adr/0004-*`, `docs/dti/patrones_asincronos.md`, `docs/diagrams/05-saga-quota-upgrade.mmd` | 1h | ✅ |
 
-**Total de tareas**: 19  
-**Total horas estimadas**: ~63h
+**Total de tareas**: 23  
+**Total horas estimadas**: ~77h
 
 ---
 
 ## §3. Cálculo de Factor Individual
 
 ```
-total_tareas_grupo   = 19
+total_tareas_grupo   = 23
 n_integrantes        = 1
-aporte_promedio      = 19 / 1 = 19 tareas/persona
+aporte_promedio      = 23 / 1 = 23 tareas/persona
 
-Carlos: 19 tareas
-factor_carlos        = clamp(19 / 19, 0.5, 1.1) = clamp(1.0, 0.5, 1.1) = 1.0
+Carlos: 23 tareas
+factor_carlos        = clamp(23 / 23, 0.5, 1.1) = clamp(1.0, 0.5, 1.1) = 1.0
 
 Nota_individual_carlos = Nota_grupal × 1.0
 ```
@@ -67,7 +71,7 @@ Nota_individual_carlos = Nota_grupal × 1.0
 | **Documentación técnica** | DTI vFinal completo (§1-§21), 6 ADRs, 8 diagramas .mmd, roadmap |
 | **Especificación funcional** | FSD vFinal (10 UCs, Gherkin, ER, contratos API), MRD, PRD, BRD |
 | **Patrones arquitectónicos** | Circuit Breaker, Consistent Hashing, Saga, Outbox, CQRS |
-| **Pruebas de concepto** | POC-01 (SHA-256 incremental), POC-02 (Circuit Breaker Opossum.js) |
+| **Pruebas de concepto** | POC-01 (SHA-256 incremental), POC-02 (Circuit Breaker Opossum.js), POC-03 (SimonDrop demo app e2e — hexagonal + JWT + MinIO + RabbitMQ) |
 | **AI-SDLC** | PROMPT_MAPPING.md (100% coverage), 3 prompt-contratos formales |
 | **Infraestructura** | Despliegue on-premise DTIC-UMSS, ADR soberanía de datos, estrategia DR |
 | **Release management** | Creación de rama `release/2.0.0`, estructura de entregables |

@@ -541,7 +541,7 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 
 ## §12. POCs Críticas
 
-> Detalle completo en `pocs/POC-01/` y `pocs/POC-02/`.
+> Detalle completo en `pocs/POC-01/`, `pocs/POC-02/` y `pocs/POC-03/`.
 
 ### 12.1 POC-01: Subida Reanudable con SHA-256 Incremental
 
@@ -556,6 +556,24 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 - **Hipótesis**: Opossum.js con `timeout: 3000ms, errorThresholdPercentage: 50, resetTimeout: 30000ms` transiciona a OPEN en < 5s ante 5 fallos consecutivos y sirve la respuesta desde Redis cache en < 500ms.
 - **Criterio de éxito medible**: Al simular QR Simple API fallando (mock retorna 503), el CB pasa a OPEN en ≤ 5 intentos fallidos. La respuesta de fallback controlado llega en p95 < 500ms. No hay thread exhaustion.
 - **Resultado**: ✅ Validado — CB transiciona a OPEN en exactamente 5 fallos (10s). Fallback desde Redis: p95 = 43ms. 0 thread leaks detectados con `clinic.js flame`.
+
+### 12.3 POC-03: SimonDrop Demo App e2e — Hexagonal + JWT + MinIO + RabbitMQ (Outbox)
+
+- **Riesgo que mitiga**: ¿La arquitectura hexagonal con Prisma + MinIO + Outbox Pattern funciona de punta a punta sin acoplamiento entre capas, con auth JWT real y roles diferenciados (docente/estudiante)?
+- **Hipótesis**: `FileService` (dominio) puede operar sin importar Prisma, `@aws-sdk` ni `amqplib` directamente — el DI container de NestJS inyecta los adapters en runtime. El Outbox Pattern garantiza entrega del evento `FileUploadedEvent` a RabbitMQ aunque el broker esté caído al momento del upload. Un solo campo `filePath String?` en el schema permite folder upload completo sin modelos adicionales.
+- **Criterio de éxito medible**:
+
+| Métrica | Umbral | Resultado |
+|---------|--------|-----------|
+| `file.service.ts` importa cero clases de Prisma/MinIO/amqplib | 0 imports externos | ✅ Solo importa ports |
+| SHA-256 coincide con `openssl sha256` local | 100% de casos | ✅ Match perfecto |
+| UPDATE files + INSERT outbox_events en una sola transacción | Atomicidad PostgreSQL | ✅ Confirmado |
+| Evento publicado en RabbitMQ ≤ 4s tras upload | < 4s | ✅ ~2.1s promedio |
+| Login JWT diferencia DOCENTE vs ESTUDIANTE | Roles correctos | ✅ Guards en frontend y backend |
+| Folder upload preserva estructura de directorios en MinIO | filePath en storageKey | ✅ webkitdirectory + filePath |
+
+- **Resultado**: ✅ Validado — App fullstack corriendo en http://localhost:5173. Demo reproducible con `docker compose up -d` + `npm run start:dev` + `npm run dev`. Stack: React 18 + NestJS 10 + Prisma 5 + PostgreSQL 16 + MinIO + RabbitMQ 3.
+- **Lecciones aprendidas clave**: BigInt no es serializable en JSON (fix: `BigInt.prototype.toJSON`); JwtAuthGuard requiere estar en el DI del módulo que lo usa; `amqplib` v0.10 retorna `ChannelModel` no `Connection`; `webkitdirectory` + `file.webkitRelativePath` permite folder upload sin schema adicional.
 
 ---
 
@@ -702,7 +720,7 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 - [x] Despliegue on-premise con justificación por componente (§8).
 - [x] Capa de IA / agentes descrita (§9).
 - [x] NFRs con umbrales y mecanismo de verificación (§11).
-- [x] 2 POCs críticas definidas con criterio de éxito medible (§12).
+- [x] 3 POCs ejecutadas con criterio de éxito medible y aprendizaje documentado (§12).
 - [x] Seguridad (STRIDE, AuthN/AuthZ, PII) (§13).
 - [x] Observabilidad (logs, métricas, trazas) (§14).
 - [x] DevOps y ciclo de vida (§15).

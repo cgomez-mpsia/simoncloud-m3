@@ -31,6 +31,11 @@
 | `processNotification` | `apps/notification-service/src/workers/notification.worker.ts` | FSD-UC-007 | Implementación manual: 3h | Generado + revisado: 30min |
 | `exportAuditLogPdf` | `apps/admin-service/src/controllers/audit.controller.ts` | FSD-UC-010 | Implementación manual: 4h | Generado + revisado: 45min |
 | DTI vFinal (§1-§21) | `docs/DTI.md` | Arquitectura completa | Redacción manual: ~20h | Con AI: ~3h + revisión 1h |
+| `FileService.upload` | `pocs/POC-03/backend/src/file/file.service.ts` | FSD-UC-002, DTI §5 | Implementación manual estimada: 6h | Generado + revisado: 40min |
+| `MessageRelayService.relayPendingEvents` | `pocs/POC-03/backend/src/relay/message-relay.service.ts` | DTI §7.1 (Outbox) | Implementación manual estimada: 4h | Generado + revisado: 25min |
+| `DropsService` | `pocs/POC-03/backend/src/drops/drops.service.ts` | FSD-UC-002, FSD-UC-004 | Implementación manual estimada: 3h | Generado + revisado: 20min |
+| `AppHeader` + `Skeleton` | `pocs/POC-03/frontend/src/components/` | POC-03 UX | Implementación manual estimada: 2h | Generado + revisado: 15min |
+| BRD v3.0 (LTI 1.3 rewrite) | `docs/brd/BRD_vFinal.md` | BRD §3,§6,§12-§21 | Reescritura manual estimada: 4h | Con AI: ~45min + revisión 15min |
 
 ---
 

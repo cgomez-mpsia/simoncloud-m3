@@ -46,7 +46,8 @@ Al comenzar cualquier tarea, el agente **MUST** leer en orden:
 │   └── aportes/release-2.0.0.md
 ├── pocs/
 │   ├── POC-01/                  ← SHA-256 incremental (validada)
-│   └── POC-02/                  ← Circuit Breaker Opossum.js (validada)
+│   ├── POC-02/                  ← Circuit Breaker Opossum.js (validada)
+│   └── POC-03/                  ← SimonDrop demo app e2e: auth JWT + hexagonal + MinIO + RabbitMQ (validada)
 ├── prompts/                     ← PR-UC-001, PR-UC-002, PR-UC-006
 ├── templates/                   ← plantillas de artefactos del módulo
 ├── apps/
@@ -184,6 +185,12 @@ npx ts-node pocs/POC-01/sha256-incremental.ts
 
 # Ejecutar POC-02 (Circuit Breaker)
 npx ts-node pocs/POC-02/qr-simple.mock.ts
+
+# Ejecutar POC-03 (SimonDrop demo app e2e)
+cd pocs/POC-03 && docker compose up -d
+cd pocs/POC-03/backend && npm run start:dev
+cd pocs/POC-03/frontend && npm run dev
+# Abrir http://localhost:5173 (credenciales en pocs/POC-03/README.md)
 ```
 
 ---
