@@ -42,22 +42,22 @@ Para los estudiantes y personal de la UMSS que sufren por la desorganización do
 | Institutos sin infraestructura propia | ~20,000 usuarios potenciales | Plataforma sin inversión en servidores | Suscripción mensual cloud |
 
 ### 4.2 Personas
-#### Persona 1 – Universitario promedio
+#### MRD-P-01 – Universitario promedio
 - **Rol**: Estudiante realizando trámite de titulación.
 - **Dolores actuales**: Filas largas, extravío de folders, falta de información sobre el estado del trámite.
 - **Comportamiento**: Prioriza herramientas móviles, acostumbrado a pagos por QR.
 
-#### Persona 2 – Encargado de Kardex
+#### MRD-P-02 – Encargado de Kardex
 - **Rol**: Personal administrativo que aprueba trámites.
 - **Dolores actuales**: Acumulación de papeles, dificultad para auditar quién tocó el archivo.
 - **Comportamiento**: Usa escritorio, requiere dashboards eficientes.
 
-#### Persona 3 – Usuario Externo (Tribunal / Evaluador Invitado)
+#### MRD-P-03 – Usuario Externo (Tribunal / Evaluador Invitado)
 - **Rol**: Miembro de tribunal de defensa de tesis o evaluador externo sin cuenta UMSS.
 - **Dolores actuales**: Recibe archivos por email (sin integridad garantizada); no puede autenticarse en WebSISS.
 - **Comportamiento**: Accede desde un enlace único con token temporal; solo necesita descargar y verificar el hash SHA-256 del documento asignado.
 
-#### Persona 4 – Docente Investigador
+#### MRD-P-04 – Docente Investigador
 - **Rol**: Docente que además de impartir clases gestiona proyectos de investigación y portafolio académico.
 - **Dolores actuales**: Necesita localizar versiones históricas de documentos entre cientos de archivos; no tiene forma de buscar por metadatos (SHA-256, rango de fechas, etiqueta semántica).
 - **Comportamiento**: Usa búsqueda avanzada, exporta listados a CSV, vincula documentos con ORCID para publicaciones.

@@ -503,27 +503,27 @@ erDiagram
 | `SIMONDROP` | `cierre_en` | datetime | sí | debe ser fecha futura al crear | usuario (Docente) |
 | `SIMONDROP` | `activo` | boolean | sí | false automáticamente al pasar `cierre_en` | sistema (job) |
 | `NOTA_ALUMNO` | `nota_original` | float | sí | 0 ≤ x ≤ escala máxima de origen | API LMS |
-| `NOTA_ALUMNO` | `nota_homologada_100` | float | sí | 0.0 ≤ x ≤ 100.0 | sistema (algoritmo) |
+| `NOTA_ALUMNO` | `nota_homologada_100` | float | no *(v2.0)* | 0.0 ≤ x ≤ 100.0 — grade passback LTI AGS, planificado v2.0 | sistema (v2.0) |
 | `NOTA_ALUMNO` | `lms_origen` | enum | sí | Moodle / Classroom | sistema |
 
-### 6.10 Diagrama de Secuencia: UC-001 Homologación de Calificaciones
+### 6.10 Diagrama de Secuencia: UC-001 Creación de SimonDrop desde LMS (LTI)
 ```mermaid
 sequenceDiagram
     participant D as Docente
+    participant L as LMS (Moodle/Classroom)
     participant S as SimonCloud
-    participant M as Moodle API
-    participant C as Classroom API
-    D->>S: Selecciona materia y presiona "Sincronizar"
-    S->>M: GET /grades (token LTI)
-    S->>C: GET /courses/:id/courseWork (OAuth2)
-    M-->>S: [{email, score/50}]
-    C-->>S: [{email, letter}]
-    S->>S: Cruza por email (Map<string, ConsolidatedGrade>)
-    S->>S: Convierte Moodle ×2 / Letras a números
-    S-->>D: Vista previa consolidada (columnas por LMS)
-    D->>S: Confirma y guarda acta
-    S->>S: Persiste con lms_origen por fila
-    S-->>D: Acta en estado BORRADOR guardada
+    participant DB as PostgreSQL
+
+    D->>S: Selecciona "Sincronizar LMS"
+    S->>L: GET /courses (OAuth2 / LTI token)
+    L-->>S: Lista de cursos y tareas activas
+    S-->>D: Muestra cursos disponibles para vincular
+    D->>S: Selecciona tarea y presiona "Crear SimonDrop"
+    S->>DB: INSERT simondrop (lms_assignment_id, lms_course_id, docente_id, cierre_en)
+    DB-->>S: SimonDrop creado (uuid)
+    S->>L: Registra deep link SimonDrop como External Tool
+    L-->>S: 200 OK — deep link configurado en tarea
+    S-->>D: "SimonDrop listo — estudiantes verán 'Entregar en SimonDrop'"
 ```
 
 ### 6.11 Diagrama de Secuencia: UC-002 Subida Segura y Hash
@@ -644,7 +644,7 @@ erDiagram
 ```
  ⚡🔧
 
-### 7.1 Prompt-contrato para FSD-UC-001 (Homologación)
+### 7.1 Prompt-contrato para FSD-UC-001 (Creación SimonDrop LTI)
 *(Ver archivo `docs/PROMPT_MAPPING.md` para detalle completo)*
 
 ## 8. Integraciones externas 🔧

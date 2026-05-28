@@ -104,10 +104,24 @@ journey
 ### 5.1 Épica 1: Gestión de Archivos y Buzones Seguros
 | ID | Historia | Prioridad | Valor | Criterios Gherkin |
 |----|----------|-----------|-------|-------------------|
-| PRD-US-001 | Como docente, quiero crear un buzón de recepción con fecha límite. | Must | 8 | Ver §5.1.1 |
-| PRD-US-002 | Como estudiante, quiero subir un archivo al buzón para cumplir mi tarea. | Must | 9 | ... |
-| PRD-US-003 | Como estudiante, quiero obtener un hash SHA-256 de mi archivo subido para tener prueba de entrega inmutable. | Must | 9 | ... |
-| PRD-US-004 | Como estudiante, quiero pagar por QR para aumentar mi cuota de 15GB a 50GB. | Should | 6 | ... |
+| PRD-US-001 | Como docente, quiero crear un buzón de recepción con fecha límite. | Must | 8 | Ver §5.1.1a |
+| PRD-US-002 | Como estudiante, quiero subir un archivo al buzón para cumplir mi tarea. | Must | 9 | Ver §5.1.0 |
+| PRD-US-003 | Como estudiante, quiero obtener un hash SHA-256 de mi archivo subido para tener prueba de entrega inmutable. | Must | 9 | Ver §5.1.1 |
+| PRD-US-004 | Como estudiante, quiero pagar por QR para aumentar mi cuota de 15GB a 50GB. | Should | 6 | Ver §5.1.2 |
+
+#### 5.1.1a Criterios PRD-US-001
+```gherkin
+Escenario: Docente crea SimonDrop con fecha límite futura
+  Dado un docente autenticado con al menos un curso en su LMS
+  Cuando crea un SimonDrop con nombre "Proyecto Final" y cierre "2026-11-30 23:59"
+  Entonces el sistema crea el buzón y genera el deep link LTI para el LMS
+  Y el buzón aparece en su dashboard con estado "Abierto"
+
+Escenario: Rechazo por fecha de cierre en el pasado
+  Dado un docente autenticado
+  Cuando intenta crear un SimonDrop con fecha de cierre anterior al momento actual
+  Entonces el sistema rechaza la creación con "La fecha de cierre debe ser futura"
+```
 
 #### 5.1.0 Criterios PRD-US-002
 ```gherkin
@@ -122,6 +136,21 @@ Escenario: Intento de subida en buzón cerrado
   Cuando el estudiante intenta subir un archivo
   Entonces el sistema rechaza la subida
   Y muestra "El plazo de entrega ha vencido"
+```
+
+#### 5.1.2 Criterios PRD-US-004
+```gherkin
+Escenario: Estudiante amplía cuota vía QR Simple Bolivia
+  Dado un estudiante con plan Freemium (15GB) y cuota al 90%
+  Cuando selecciona "Ampliar a 50GB" y escanea el QR generado de Bs. 20
+  Entonces QR Simple Bolivia confirma el pago en menos de 60 segundos
+  Y el sistema actualiza la cuota a 50GB de forma inmediata
+
+Escenario: QR expirado sin escanear
+  Dado un estudiante que generó un QR y no lo escaneó en 10 minutos
+  Cuando el QR expira
+  Entonces el sistema invalida el código y muestra "QR expirado — genera uno nuevo"
+  Y la cuota del estudiante no se modifica
 ```
 
 #### 5.1.1 Criterios PRD-US-003
@@ -195,10 +224,10 @@ Escenario: Intento de acceso con token expirado
 | ID | Historia | Prioridad | Valor | Criterios Gherkin |
 |----|----------|-----------|-------|-------------------|
 | PRD-US-017 | Como administrativo, quiero aprobar o rechazar documentos usando etiquetas de estado visuales para agilizar el flujo de trámites. | Must | 9 | Ver §5.5.1 |
-| PRD-US-018 | Como administrativo, quiero ver el historial de versiones (V1, V2) de un archivo para restaurar una versión anterior en caso de error. | Must | 10 | ... |
-| PRD-US-019 | Como estudiante, quiero que los archivos borrados vayan a una papelera de reciclaje retenida por 30 días para evitar pérdida accidental. | Must | 8 | ... |
-| PRD-US-020 | Como administrador, quiero ver un panel de métricas globales (salud, tráfico, almacenamiento) para monitorear el servidor. | Should | 7 | ... |
-| PRD-US-021 | Como estudiante, quiero importar archivos directamente desde Google Drive usando su API para no tener que descargar y volver a subir. | Could | 6 | ... |
+| PRD-US-018 | Como administrativo, quiero ver el historial de versiones (V1, V2) de un archivo para restaurar una versión anterior en caso de error. | Must | 10 | Ver §5.5.2 |
+| PRD-US-019 | Como estudiante, quiero que los archivos borrados vayan a una papelera de reciclaje retenida por 30 días para evitar pérdida accidental. | Must | 8 | Ver §5.5.3 |
+| PRD-US-020 | Como administrador, quiero ver un panel de métricas globales (salud, tráfico, almacenamiento) para monitorear el servidor. | Should | 7 | Ver §5.5.4 |
+| PRD-US-021 | Como estudiante, quiero importar archivos directamente desde Google Drive usando su API para no tener que descargar y volver a subir. | Could | 6 | *(v2.0 backlog — ver §3.2)* |
 
 #### 5.5.1 Criterios PRD-US-017
 ```gherkin
@@ -212,13 +241,45 @@ Escenario: Administrativo etiqueta un documento
 
 
 
+#### 5.5.2 Criterios PRD-US-018
+```gherkin
+Escenario: Administrativo restaura versión anterior de un documento
+  Dado un documento con 3 versiones donde la versión 3 fue subida por error
+  Cuando el administrativo selecciona "Restaurar V2"
+  Entonces el sistema crea una nueva versión (V4) con el contenido de V2
+  Y el hash SHA-256 de V4 coincide exactamente con el de V2
+```
+
+#### 5.5.3 Criterios PRD-US-019
+```gherkin
+Escenario: Archivo eliminado va a papelera y se restaura dentro del plazo
+  Dado un estudiante que elimina "borrador_v1.pdf"
+  Cuando confirma la eliminación
+  Entonces el archivo pasa a papelera con retención de 30 días y no cuenta para la cuota
+  Y el estudiante puede restaurarlo desde la papelera dentro de ese período
+
+Escenario: Purga automática tras 30 días
+  Dado un archivo en papelera con más de 30 días desde su eliminación
+  Cuando el job de purga nocturno se ejecuta (02:00 AM)
+  Entonces el archivo es eliminado definitivamente de MinIO y de la base de datos
+```
+
+#### 5.5.4 Criterios PRD-US-020
+```gherkin
+Escenario: Admin visualiza panel de métricas globales
+  Dado un usuario con rol Admin autenticado
+  Cuando accede al panel de métricas
+  Entonces ve: usuarios activos del mes, total de subidas, almacenamiento usado y errores últimas 24h
+  Y los datos se actualizan sin recargar la página (polling cada 30 segundos)
+```
+
 ### 5.3 Épica 3: Almacenamiento y Cuotas
 | ID | Historia | Prioridad | Valor | Criterios Gherkin |
 |----|----------|-----------|-------|-------------------|
 | PRD-US-008 | Como estudiante, quiero subir un archivo de hasta 2GB sin que la carga se cancele si se corta el internet. | Must | 10 | Ver §5.3.1 |
-| PRD-US-009 | Como docente, quiero crear un buzón (SimonDrop) con fecha y hora de cierre automático. | Must | 9 | ... |
-| PRD-US-010 | Como estudiante, quiero ver una barra de progreso en tiempo real mientras subo un archivo pesado. | Should | 7 | ... |
-| PRD-US-011 | Como administrador, quiero ver el uso de almacenamiento de toda la institución en un panel. | Could | 5 | ... |
+| PRD-US-009 | Como docente, quiero crear un buzón (SimonDrop) con fecha y hora de cierre automático. | Must | 9 | Ver §5.3.2 |
+| PRD-US-010 | Como estudiante, quiero ver una barra de progreso en tiempo real mientras subo un archivo pesado. | Should | 7 | Ver §5.3.3 |
+| PRD-US-011 | Como administrador, quiero ver el uso de almacenamiento de toda la institución en un panel. | Could | 5 | Ver §5.3.4 |
 
 #### 5.3.1 Criterios PRD-US-008
 ```gherkin
@@ -230,14 +291,42 @@ Escenario: Subida interrumpida se reanuda correctamente
    Y el archivo final es idéntico al original (verificado por hash)
 ```
 
+#### 5.3.2 Criterios PRD-US-009
+```gherkin
+Escenario: SimonDrop se cierra automáticamente al vencer el plazo
+  Dado un SimonDrop con cierre_en = "2026-11-30 23:59"
+  Cuando el sistema supera esa fecha
+  Entonces el estado del SimonDrop cambia automáticamente a "Cerrado"
+  Y todos los archivos existentes pasan a "Solo Lectura"
+  Y nuevas subidas son rechazadas con "El plazo de entrega ha vencido"
+```
+
+#### 5.3.3 Criterios PRD-US-010
+```gherkin
+Escenario: Barra de progreso en subida pesada
+  Dado un estudiante subiendo un archivo de 500MB
+  Cuando la subida está en progreso
+  Entonces la interfaz muestra porcentaje actualizado cada segundo y velocidad en KB/s
+  Y el botón "Cancelar" permanece activo durante toda la subida
+```
+
+#### 5.3.4 Criterios PRD-US-011
+```gherkin
+Escenario: Admin visualiza panel de almacenamiento
+  Dado un usuario con rol Admin autenticado
+  Cuando accede al panel de administración
+  Entonces ve el uso total de almacenamiento en GB y los 10 usuarios de mayor consumo
+  Y una alerta visual si el uso supera el 80% de la capacidad total contratada
+```
+
 ### 5.4 Épica 4: Autenticación y Seguridad
 | ID | Historia | Prioridad | Valor | Criterios Gherkin |
 |----|----------|-----------|-------|-------------------|
 | PRD-US-012 | Como cualquier usuario, quiero autenticarme con mis credenciales del WebSISS (SSO) sin crear una cuenta nueva. | Must | 10 | Ver §5.4.1 |
-| PRD-US-013 | Como docente, quiero compartir un archivo de resolución solo con un correo @umss.edu.bo específico. | Must | 8 | ... |
-| PRD-US-014 | Como estudiante, quiero que mis archivos subidos a un buzón sean de solo lectura automáticamente (sin configuración manual de permisos). | Must | 9 | ... |
-| PRD-US-015 | Como docente, quiero recibir una notificación cuando un estudiante sube un archivo a mi SimonDrop. | Should | 6 | ... |
-| PRD-US-016 | Como administrativo, quiero ver el historial de versiones de un documento para recuperar la última versión aprobada. | Could | 5 | ... |
+| PRD-US-013 | Como docente, quiero compartir un archivo de resolución solo con un correo @umss.edu.bo específico. | Must | 8 | Ver §5.4.2 |
+| PRD-US-014 | Como estudiante, quiero que mis archivos subidos a un buzón sean de solo lectura automáticamente (sin configuración manual de permisos). | Must | 9 | Ver §5.4.3 |
+| PRD-US-015 | Como docente, quiero recibir una notificación cuando un estudiante sube un archivo a mi SimonDrop. | Should | 6 | Ver §5.4.4 |
+| PRD-US-016 | Como administrativo, quiero ver el historial de versiones de un documento para recuperar la última versión aprobada. | Could | 5 | Ver §5.4.5 |
 
 #### 5.4.1 Criterios PRD-US-012
 ```gherkin
@@ -247,6 +336,47 @@ Escenario: Login con credenciales WebSISS
   Entonces el sistema autentica al usuario en menos de 3 segundos
    Y le asigna el rol correspondiente (Docente / Estudiante / Administrativo)
    Y lo redirige al Dashboard Unificado sin pedir datos adicionales
+```
+
+#### 5.4.2 Criterios PRD-US-013
+```gherkin
+Escenario: Docente comparte archivo con destinatario @umss.edu.bo
+  Dado un docente con "resolucion_rectoral.pdf" en su nube
+  Cuando ingresa "estudiante@est.umss.edu.bo" en el campo de compartir
+  Entonces el sistema crea un enlace de solo lectura para ese destinatario
+  Y envía notificación por email al destinatario con el enlace
+
+Escenario: Rechazo de email externo
+  Dado un docente intentando compartir con "usuario@gmail.com"
+  Cuando ingresa el email externo
+  Entonces el sistema rechaza con "Solo se puede compartir con correos @umss.edu.bo"
+```
+
+#### 5.4.3 Criterios PRD-US-014
+```gherkin
+Escenario: Archivo en buzón cerrado pasa a solo lectura automáticamente
+  Dado un archivo subido por un estudiante a un SimonDrop activo
+  Cuando el docente cierra el SimonDrop o vence el plazo automáticamente
+  Entonces el sistema marca todos los archivos del buzón como "Solo Lectura"
+  Y el estudiante no puede eliminar ni reemplazar sus archivos entregados
+```
+
+#### 5.4.4 Criterios PRD-US-015
+```gherkin
+Escenario: Docente recibe notificación de nueva entrega
+  Dado un docente con notificaciones activadas en su SimonDrop "Proyecto Final"
+  Cuando un estudiante sube un archivo al buzón
+  Entonces el docente recibe notificación push y/o email en menos de 30 segundos
+  Y la notificación incluye el nombre del estudiante y nombre del archivo entregado
+```
+
+#### 5.4.5 Criterios PRD-US-016
+```gherkin
+Escenario: Administrativo consulta historial de versiones
+  Dado un administrativo viendo el detalle de un documento con 3 versiones
+  Cuando selecciona "Ver historial"
+  Entonces el sistema lista las versiones con: número, fecha, autor y hash SHA-256
+  Y permite descargar cualquier versión anterior sin modificar la versión vigente
 ```
 
 ## 6. Priorización (MoSCoW + RICE)
@@ -268,6 +398,12 @@ Escenario: Login con credenciales WebSISS
 | PRD-US-014 (Permisos auto) | 20000 | 2 | 85 | 2 | 17000 |
 | PRD-US-004 (Pago QR) | 10000 | 1 | 70 | 5 | 1400 |
 | PRD-US-013 (Compartir @umss) | 5000 | 1 | 80 | 2 | 2000 |
+| PRD-US-001 (Crear SimonDrop con fecha límite) | 4000 | 2 | 90 | 2 | 3600 |
+| PRD-US-009 (SimonDrop cierre automático) | 4000 | 2 | 90 | 2 | 3600 |
+| PRD-US-015 (Notificación nueva entrega) | 4000 | 1 | 80 | 3 | 1067 |
+| PRD-US-017 (Aprobar/rechazar docs admin) | 5000 | 2 | 90 | 3 | 3000 |
+| PRD-US-019 (Papelera reciclaje 30 días) | 20000 | 1 | 85 | 2 | 8500 |
+| PRD-US-022 (Usuario Externo token temporal) | 500 | 2 | 85 | 3 | 283 |
 
 ## 7. Requerimientos funcionales (alto nivel)
 
