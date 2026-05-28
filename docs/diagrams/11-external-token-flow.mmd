@@ -1,0 +1,45 @@
+---
+title: "FSD-UC-011 — Acceso Usuario Externo con Token Temporal HMAC-SHA256"
+---
+sequenceDiagram
+    actor D as Docente (JWT)
+    actor UE as Usuario Externo<br/>(sin cuenta UMSS)
+    participant GW as API Gateway<br/>/api/*
+    participant AS as auth-service
+    participant EG as ExternalTokenGuard<br/>/external/*
+    participant SS as simondrop-service
+    participant MS as MinIO
+
+    Note over D,GW: Fase 1 — Generación del token (requiere JWT)
+
+    D->>GW: POST /api/drops/:dropId/external-token<br/>Authorization: Bearer JWT
+    GW->>GW: Valida JWT (RS256 clave pública)
+    GW->>AS: Genera token HMAC-SHA256<br/>{dropId, expiresAt: now+72h}
+    AS->>AS: HMAC-SHA256(secret, dropId+expiresAt)
+    AS->>AS: INSERT tokens_externos {token, dropId, expiresAt, usado:false}
+    AS-->>GW: {token, expiresAt}
+    GW-->>D: {tokenUrl: "/external/drops/:dropId/archivos?token=..."}
+
+    D->>UE: Comparte URL por email / WhatsApp
+
+    Note over UE,EG: Fase 2 — Acceso sin cuenta (sin JWT)
+
+    UE->>EG: GET /external/drops/:dropId/archivos?token=<hmac>
+    Note over EG: security:[] — JwtAuthGuard NO aplica
+    EG->>AS: Valida token HMAC<br/>{token, dropId}
+    AS->>AS: Verifica firma HMAC-SHA256
+    AS->>AS: Verifica expiresAt > NOW()
+
+    alt Token válido y no expirado
+        AS-->>EG: OK {dropId, permisos: READ_ONLY}
+        EG->>SS: GET archivos del drop
+        SS->>MS: GeneratePresignedURL (TTL 5min)
+        MS-->>SS: presignedUrl
+        SS-->>EG: [{archivoId, nombre, sha256, presignedUrl}]
+        EG->>AS: INSERT audit_log {token, ip, accessedAt}
+        EG-->>UE: 200 {archivos, sha256 para verificación}
+    else Token inválido / expirado / manipulado
+        AS-->>EG: REJECT
+        EG-->>UE: 403 Forbidden
+        Note over EG: BR-011 — no revela si el recurso existe
+    end

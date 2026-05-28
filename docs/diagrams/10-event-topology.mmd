@@ -1,0 +1,41 @@
+---
+title: "Topología de Eventos — SimonCloud (11 eventos, 4 exchanges topic)"
+---
+flowchart LR
+    subgraph Producers["Productores (Single Writer Principle)"]
+        AUTH["auth-service"]
+        SDROP["simondrop-service<br/>(file-service vía Outbox)"]
+        QUOTA["quota-service"]
+        EXPED["expedientes-service"]
+    end
+
+    subgraph Exchanges["RabbitMQ — Exchanges Topic"]
+        EX1["simoncloud.simondrop.events"]
+        EX2["simoncloud.pagos.events"]
+        EX3["simoncloud.expedientes.events"]
+        EX4["simoncloud.auth.events"]
+        DLQ["simoncloud.notifications.dlq<br/>(fanout — tras 3 fallos)"]
+    end
+
+    subgraph Consumers["Consumidores"]
+        NS["notification-service<br/>(notification-worker)"]
+        ADMIN["admin-service<br/>(admin-cqrs-worker)"]
+        FS_LOCK["file-service<br/>(lock archivos)"]
+    end
+
+    AUTH -->|UsuarioAutenticadoIntegrationEvent<br/>TokenExternoAccedidoIntegrationEvent| EX4
+    SDROP -->|ArchivoSubidoIntegrationEvent<br/>SimonDropCreadoIntegrationEvent<br/>SimonDropCerradoIntegrationEvent<br/>ArchivoMovidoPapeleraIntegrationEvent| EX1
+    QUOTA -->|QuotaUpgradeSolicitadoEvent<br/>PagoConfirmadoIntegrationEvent<br/>QuotaActualizadaIntegrationEvent| EX2
+    EXPED -->|DocumentoAprobadoIntegrationEvent<br/>DocumentoRechazadoIntegrationEvent| EX3
+
+    EX1 --> NS
+    EX2 --> NS
+    EX3 --> NS
+    EX4 --> NS
+    NS -->|tras 3 fallos| DLQ
+
+    EX1 -->|ArchivoSubidoIntegrationEvent<br/>UsuarioAutenticadoIntegrationEvent<br/>QuotaActualizadaIntegrationEvent| ADMIN
+    EX4 --> ADMIN
+    EX2 --> ADMIN
+
+    EX1 -->|SimonDropCerradoIntegrationEvent| FS_LOCK

@@ -1,0 +1,44 @@
+---
+title: "Outbox Pattern — Subida de Archivo (FSD-UC-002 / FSD-UC-007)"
+---
+sequenceDiagram
+    actor E as Estudiante
+    participant FS as file-service
+    participant PG as PostgreSQL
+    participant OB as outbox_events
+    participant RL as MessageRelayService<br/>(Polling cada 2s)
+    participant RMQ as RabbitMQ<br/>simoncloud.simondrop.events
+    participant NS as notification-service
+
+    E->>FS: POST /drops/:id/upload (buffer + JWT)
+    Note over FS: uploadAndHash() → SHA256Hash VO
+
+    rect rgb(230, 245, 255)
+        Note over FS,OB: prisma.$transaction — ATÓMICO
+        FS->>PG: UPDATE files SET sha256Hash, status='COMPLETED'
+        FS->>OB: INSERT outbox_events {eventType:'ArchivoSubidoIntegrationEvent', published:false}
+        PG-->>FS: COMMIT
+    end
+
+    FS-->>E: {fileId, sha256Hash, publicUrl}
+
+    Note over RL: @Interval(2000ms) — Polling Publisher
+    RL->>OB: SELECT WHERE published=false ORDER BY createdAt LIMIT 10
+
+    alt channel.publish() = true (buffer disponible)
+        RL->>RMQ: publish(exchange, 'archivo.subido', payload, persistent:true)
+        RL->>OB: UPDATE SET published=true, publishedAt=NOW()
+        Note over RL: at-least-once garantizado
+    else channel.publish() = false (back-pressure)
+        RL->>RL: break — reintento en siguiente ciclo
+        Note over RL: evento queda published=false
+    end
+
+    RMQ->>NS: Consume ArchivoSubidoIntegrationEvent
+
+    rect rgb(255, 245, 230)
+        Note over NS: Deduplicación por eventId (Módulo 5)
+        NS->>PG: INSERT processed_events ON CONFLICT DO NOTHING
+    end
+
+    NS-->>E: Email/Push "Nueva entrega confirmada"
