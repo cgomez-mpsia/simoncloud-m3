@@ -43,4 +43,5 @@ Usar **S3 Multipart Upload con presigned URLs** generadas por el `file-service`.
 
 ## Validación
 
-Ver `pocs/POC-01/` — SHA-256 incremental validado: mismo hash que `openssl sha256`, RAM pico < 100MB para archivo de 2GB.
+- **POC-01** — SHA-256 incremental validado: mismo hash que `openssl sha256`, RAM pico < 100MB para archivo de 2GB. ✅
+- **POC-03** — Arquitectura hexagonal del `file-service` (ports + adapters, Outbox) validada e2e. ⚠️ **Simplificación del POC**: el upload usa single PUT a través del servidor NestJS (`uploadAndHash(key, buffer, mimeType)`) en lugar de presigned URLs. Los bytes sí pasan por el servidor en el POC — el anti-patrón que esta ADR resuelve. La arquitectura de producción (presigned URLs, sin bytes en servidor, multipart reanudable) se valida en **POC-04 — Módulo 5**.

@@ -95,6 +95,17 @@
 - **Bugs resueltos**: BigInt JSON serialization (Prisma sizeBytes), JwtAuthGuard DI container, amqplib ChannelModel typing
 - **Verificación**: applied — demo funcional en http://localhost:5173
 
+### PM-20260528-005
+- **Timestamp**: 2026-05-28T21:00:00-04:00
+- **Intent**: fix + docs
+- **Artefactos generados**:
+  - `docs/DTI.md` — §12.3 Simplificaciones POC-03 vs producción (ADR-0003: single-PUT vs presigned URLs, Redis no validado, no multipart reanudable); §12.4 Componentes diseñados sin POC (MinIO Multipart, Redis Cluster, NFR-001 k6, NFR-005 JMeter, WORM); §7.3 Outbox idempotencia SQL; §8 nota WORM producción; §6.2 Docker Swarm (eliminado K8s HPA)
+  - `docs/adr/0003-subida-reanudable-s3-multipart-vs-tus.md` — sección Validación: añadida nota ⚠️ POC-03 usa single-PUT (anti-patrón que ADR resuelve); arquitectura presigned URLs → POC-04 Módulo 5
+  - `docs/fsd/FSD_vFinal.md` — tabla NFR §10: añadida columna Estado (✅ Verificado para NFR-002/NFR-008; ⏳ Pendiente Módulo 5 para NFR-001/003/004/005/006/007/009)
+  - `infra/perf/nfr-001-upload.k6.js` — script k6 para NFR-001 (p95 < 30 s, 100 MB); thresholds: `http_req_duration p(95)<30000`, `http_req_failed rate<0.01`
+- **Trazabilidad**: FSD §10 NFR-001/NFR-005/NFR-008, DTI §11/§12.3/§12.4, ADR-0003, CLAUDE.md §5 (hexagonal)
+- **Verificación**: applied
+
 ### PM-20260528-003
 - **Timestamp**: 2026-05-28T18:00:00-04:00
 - **Intent**: fix

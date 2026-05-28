@@ -736,17 +736,17 @@ erDiagram
 
 ## 10. Requerimientos No Funcionales (NFR) ⚡🔧
 
-| ID | Requisito | Métrica | Umbral | Cómo se verifica |
-|----|-----------|---------|--------|------------------|
-| NFR-001 | Tiempo de subida (p95) | p95 < 30 s para archivos ≤ 100 MB en red campus | < 30 s | Test de carga k6 |
-| NFR-002 | Integridad de entrega | SHA-256 generado en servidor = SHA-256 verificado offline | 100% | Auditoría BD + POC-01 |
-| NFR-003 | Seguridad | Acceso bloqueado a archivos no públicos sin JWT válido | 100% | Pentest / Token fuzzing |
-| NFR-004 | Usabilidad | Interfaz responsive (móvil y escritorio), 4 breakpoints | 100% | Test en 4 breakpoints |
-| NFR-005 | Escalabilidad | Soportar 10,000 subidas simultáneas en periodo de exámenes | 10k ops | Pruebas JMeter |
-| NFR-006 | Disponibilidad | Uptime del servicio de archivo (file-service) | 99.9% | Monitoreo Prometheus |
-| NFR-007 | Retención | Archivos en papelera se purgan automáticamente tras 30 días exactos | 30 días | Test cronjob |
-| NFR-008 | Mantenibilidad | Cobertura de tests unitarios del dominio (file-service, quota-service) | > 80% | Jest coverage |
-| NFR-009 | Seguridad tokens externos | Token externo no revela recurso si es inválido, expirado o revocado | 100% | Pentest / TTL test |
+| ID | Requisito | Métrica | Umbral | Cómo se verifica | Estado |
+|----|-----------|---------|--------|------------------|--------|
+| NFR-001 | Tiempo de subida (p95) | p95 < 30 s para archivos ≤ 100 MB en red campus | < 30 s | Test de carga k6 (`infra/perf/nfr-001-upload.k6.js`) | ⏳ Pendiente — staging DTIC, Módulo 5 |
+| NFR-002 | Integridad de entrega | SHA-256 generado en servidor = SHA-256 verificado offline | 100% | Auditoría BD + POC-01 | ✅ Verificado — POC-01 (mismo hash que `openssl sha256`), POC-03 |
+| NFR-003 | Seguridad | Acceso bloqueado a archivos no públicos sin JWT válido | 100% | Pentest / Token fuzzing | ⏳ Pendiente — pentest en Módulo 5 |
+| NFR-004 | Usabilidad | Interfaz responsive (móvil y escritorio), 4 breakpoints | 100% | Test en 4 breakpoints | ⏳ Pendiente — UI en Módulo 5 |
+| NFR-005 | Escalabilidad | Soportar 10,000 subidas simultáneas en periodo de exámenes | 10k ops | Pruebas JMeter | ⏳ Pendiente — staging DTIC, Módulo 5 |
+| NFR-006 | Disponibilidad | Uptime del servicio de archivo (file-service) | 99.9% | Monitoreo Prometheus | ⏳ Pendiente — infraestructura on-premise, Módulo 5 |
+| NFR-007 | Retención | Archivos en papelera se purgan automáticamente tras 30 días exactos | 30 días | Test cronjob | ⏳ Pendiente — implementación en Módulo 5 |
+| NFR-008 | Mantenibilidad | Cobertura de tests unitarios del dominio (file-service, quota-service) | > 80% | Jest coverage | ✅ Verificado — POC-03 domain coverage 97.05% (`npm run test -- --coverage`) |
+| NFR-009 | Seguridad tokens externos | Token externo no revela recurso si es inválido, expirado o revocado | 100% | Pentest / TTL test | ⏳ Pendiente — pentest en Módulo 5 |
 
 
 ## 15. Registro de cambios ⚡🔧

@@ -589,6 +589,21 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 
 - **Resultado**: ✅ Validado — App fullstack corriendo en http://localhost:5173. Demo reproducible con `docker compose up -d` + `npm run start:dev` + `npm run dev`. Stack: React 18 + NestJS 10 + Prisma 5 + PostgreSQL 16 + MinIO + RabbitMQ 3.
 - **Lecciones aprendidas clave**: BigInt no es serializable en JSON (fix: `BigInt.prototype.toJSON`); JwtAuthGuard requiere estar en el DI del módulo que lo usa; `amqplib` v0.10 retorna `ChannelModel` no `Connection`; `webkitdirectory` + `file.webkitRelativePath` permite folder upload sin schema adicional.
+- **Simplificaciones del POC respecto a la arquitectura de producción (ADR-0003)**:
+  - Upload: single PUT a través del servidor NestJS (`uploadAndHash(key, buffer, mimeType)`) — en producción los bytes van directo del cliente a MinIO vía presigned URL sin pasar por el servidor (ADR-0003).
+  - Sin Redis: sesiones de upload chunked no implementadas — en producción Redis Cluster almacena el estado de progreso por `uploadId` (Consistent Hashing, DTI §6.2).
+  - Sin multipart: un solo `PutObjectCommand` — en producción `CreateMultipartUpload` + N presigned URLs + `CompleteMultipartUpload` (ADR-0003).
+  - Estas simplificaciones son intencionales para mantener el POC enfocado en hexagonal + Outbox. La arquitectura de producción se valida en Módulo 5.
+
+### 12.4 Componentes diseñados sin POC de validación en release/2.0.0
+
+| Componente | Documentado en | Validación planificada |
+|------------|---------------|----------------------|
+| MinIO Multipart Upload + presigned URLs (ADR-0003) | ADR-0003, DTI §17, DTI §12.3 | POC-04 en Módulo 5 |
+| Redis Cluster / Consistent Hashing | DTI §6.2, §8, §17, ADR-0005 | POC-04 en Módulo 5 (junto con multipart upload) |
+| NFR-001: p95 < 30s (100MB) | FSD NFR-001, `infra/perf/nfr-001-upload.k6.js` | Script k6 disponible; ejecutar contra POC-03 levantado |
+| NFR-005: 10.000 uploads simultáneos | DTI §11 NFR-005, `docs/roadmap.md` | Staging DTIC — Módulo 5 |
+| WORM MinIO Object Lock | DTI §8, §13, §16 | Config producción: `mc mb --with-lock` |
 
 ---
 
