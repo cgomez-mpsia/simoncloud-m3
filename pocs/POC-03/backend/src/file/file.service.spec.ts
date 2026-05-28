@@ -7,6 +7,7 @@ import {
   UploadedFile,
 } from './ports/file-repository.port';
 import { FILE_STORAGE_PORT, FileStoragePort } from './ports/file-storage.port';
+import { createSHA256Hash } from './domain/sha256-hash.vo';
 
 const MOCK_FILE: UploadedFile = {
   id: 'file-uuid-001',
@@ -56,7 +57,7 @@ describe('FileService', () => {
       const sha256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
       repo.createPending.mockResolvedValue(undefined);
       repo.completeWithHash.mockResolvedValue(MOCK_FILE);
-      storage.uploadAndHash.mockResolvedValue(sha256);
+      storage.uploadAndHash.mockResolvedValue(createSHA256Hash(sha256));
       storage.getPublicUrl.mockReturnValue('http://localhost:9000/bucket/key');
 
       const result = await service.upload('tesis.pdf', Buffer.from(''), 'application/pdf', 100, 'drop-1', 'user-1');
@@ -73,7 +74,7 @@ describe('FileService', () => {
       const sha256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
       repo.createPending.mockResolvedValue(undefined);
       repo.completeWithHash.mockResolvedValue({ ...MOCK_FILE, sha256Hash: sha256 });
-      storage.uploadAndHash.mockResolvedValue(sha256);
+      storage.uploadAndHash.mockResolvedValue(createSHA256Hash(sha256));
       storage.getPublicUrl.mockReturnValue('http://localhost:9000/key');
 
       const result = await service.upload('f.pdf', Buffer.from(''), 'application/pdf', 1, 'drop', 'user');
@@ -85,7 +86,7 @@ describe('FileService', () => {
       const sha256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
       repo.createPending.mockResolvedValue(undefined);
       repo.completeWithHash.mockResolvedValue(MOCK_FILE);
-      storage.uploadAndHash.mockResolvedValue(sha256);
+      storage.uploadAndHash.mockResolvedValue(createSHA256Hash(sha256));
       storage.getPublicUrl.mockReturnValue('http://localhost:9000/key');
 
       await service.upload('archivo.pdf', Buffer.from(''), 'application/pdf', 1, 'drop', 'user', 'carpeta/subcarpeta/archivo.pdf');

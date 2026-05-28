@@ -296,7 +296,7 @@ flowchart LR
 | `file-service` | Subida chunked, SHA-256, gestión, Outbox Pattern | PostgreSQL + MinIO | REST /files |
 | `simondrop-service` | Buzones, cierres, comprobantes, deep links LTI | PostgreSQL | REST /drops |
 | `quota-service` | Cuotas, saga QR Simple, Circuit Breaker | PostgreSQL (quotas) | REST /quota |
-| `expedientes-service` | Aprobación/rechazo documentos, control versiones | PostgreSQL (expedientes) | REST /expedientes |
+| `expedientes-service` | Aprobación/rechazo documentos institucionales, control de versiones, audit trail | PostgreSQL (expedientes) | REST /expedientes *(diseño — implementación en Módulo 5; sin FSD-UC ni POC en release/2.0.0)* |
 | `notification-service` | Emails, push, DLQ con reintentos exponenciales | Redis (colas) | RabbitMQ Consumer |
 | `admin-service` | Panel global, CQRS Read Model, audit log PDF | PostgreSQL (audit_log) | REST /admin |
 
@@ -314,7 +314,7 @@ Los dos mecanismos nunca coexisten en la misma ruta. El docente genera el token 
 | Circuit Breaker | `quota-service` → QR Simple Bolivia | `timeout: 3s, failureRate: 50%, resetTimeout: 30s` |
 | Circuit Breaker | `file-service` → S3/MinIO | `timeout: 5s, failureRate: 50%, resetTimeout: 60s` |
 | Retry + Exponential Backoff | Notificaciones push | `3 reintentos, delays: 1s, 2s, 4s` |
-| Dead Letter Queue | `notification-service` | RabbitMQ DLQ tras 3 fallos |
+| Dead Letter Queue | `notification-service` | Exchange `simoncloud.notifications.dlq` (fanout); la cola de notificaciones declara `x-dead-letter-exchange: simoncloud.notifications.dlq` y `x-message-ttl: 5000` (3 reintentos × 5s); mensajes fallidos llegan al DLQ para revisión manual o reenvío |
 | Rate Limiting | `api-gateway` | `100 req/s por usuario` |
 | Consistent Hashing | Redis Cluster `file-service` | `150 vnodes/nodo; 3 nodos` |
 | Escalado horizontal | `file-service` Docker Swarm | `docker service scale file-service=9` (CPU > 70%) |

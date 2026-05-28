@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import * as crypto from 'crypto';
 import { FileStoragePort } from '../ports/file-storage.port';
+import { SHA256Hash, createSHA256Hash } from '../domain/sha256-hash.vo';
 
 @Injectable()
 export class S3FileStorage implements FileStoragePort {
@@ -24,10 +25,10 @@ export class S3FileStorage implements FileStoragePort {
     });
   }
 
-  async uploadAndHash(key: string, buffer: Buffer, contentType: string): Promise<string> {
+  async uploadAndHash(key: string, buffer: Buffer, contentType: string): Promise<SHA256Hash> {
     const hash = crypto.createHash('sha256');
     hash.update(buffer);
-    const sha256Hash = hash.digest('hex');
+    const sha256Hash = createSHA256Hash(hash.digest('hex'));
     await this.s3.send(new PutObjectCommand({
       Bucket: this.bucket,
       Key: key,

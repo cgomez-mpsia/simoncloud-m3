@@ -95,6 +95,18 @@
 - **Bugs resueltos**: BigInt JSON serialization (Prisma sizeBytes), JwtAuthGuard DI container, amqplib ChannelModel typing
 - **Verificación**: applied — demo funcional en http://localhost:5173
 
+### PM-20260528-008
+- **Timestamp**: 2026-05-28T23:30:00-04:00
+- **Intent**: fix
+- **Artefactos generados**:
+  - `pocs/POC-03/backend/src/file/domain/sha256-hash.vo.ts` — Value Object `SHA256Hash` (branded type) + `createSHA256Hash()` con validación 64-hex invariante
+  - `pocs/POC-03/backend/src/file/ports/file-storage.port.ts` — `uploadAndHash` retorna `Promise<SHA256Hash>` en lugar de `Promise<string>`
+  - `pocs/POC-03/backend/src/file/adapters/s3-file.storage.ts` — usa `createSHA256Hash()` al retornar hash
+  - `pocs/POC-03/backend/src/file/file.service.spec.ts` — mocks usan `createSHA256Hash()` para satisfacer tipo
+  - `docs/DTI.md` — §6.2: DLQ nombrado `simoncloud.notifications.dlq` con parámetros RabbitMQ; §6.1: `expedientes-service` marcado como diseño sin POC/FSD-UC en release/2.0.0
+- **Trazabilidad**: DTI §4.2 (SHA256Hash VO), CLAUDE.md §3 (SHA-256 invariante), DTI §6.2 (DLQ), DTI §6.1 (expedientes-service scope)
+- **Verificación**: applied — 25/25 tests pasan
+
 ### PM-20260528-007
 - **Timestamp**: 2026-05-28T23:00:00-04:00
 - **Intent**: fix + docs
