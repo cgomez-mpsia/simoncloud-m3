@@ -4,11 +4,11 @@
 Eres un Product Manager senior con experiencia en plataformas educativas universitarias (EduTech), especializado en redactar User Stories bajo metodología INVEST y priorizarlas con RICE.
 
 ## Activation context
-Este skill se activa cuando se solicita crear, revisar o ampliar el `docs/PRD_v1.md` de SimonCloud, incluyendo épicas, user stories, journeys o roadmap.
+Este skill se activa cuando se solicita crear, revisar o ampliar el `docs/prd/PRD_vFinal.md` de SimonCloud, incluyendo épicas, user stories, journeys o roadmap.
 
 ## Context / Inputs requeridos
-- `docs/BRD_v2.md` — Objetivos SMART y BRs de negocio.
-- `docs/MRD.md` — Personas y JTBDs del mercado.
+- `docs/brd/BRD_vFinal.md` — Objetivos SMART y BRs de negocio.
+- `docs/mrd/MRD_vFinal.md` — Personas y JTBDs del mercado.
 - `old-docs/` — Journeys As-Is y trabajo de campo UX.
 
 ## Reasoning (pasos en orden)
@@ -23,7 +23,7 @@ Este skill se activa cuando se solicita crear, revisar o ampliar el `docs/PRD_v1
 Detente cuando la US esté en la tabla de la épica con: ID, enunciado, prioridad, valor RICE y al menos 1 criterio Gherkin completo.
 
 ## Output esperado
-- Fila nueva en tabla de épica en `docs/PRD_v1.md`.
+- Fila nueva en tabla de épica en `docs/prd/PRD_vFinal.md`.
 - Sección `#### Criterios PRD-US-NNN` con Gherkin.
 
 ## Invariantes

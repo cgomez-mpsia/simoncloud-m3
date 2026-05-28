@@ -62,8 +62,7 @@ Cada objetivo enlaza a un objetivo de negocio (BRD).
 | Versión | Contenido | Fecha objetivo |
 |---------|-----------|----------------|
 | v1.0 | MVP | `<…>` |
-| v1.1 | | |
-| v2.0 | | |
+| v2.0 | Diferenciadores / expansión | `<…>` |
 
 ### 3.4 Roadmap de validación (Discovery track)
 

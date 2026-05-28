@@ -9,7 +9,7 @@
 | Fecha | 2026-05-17 |
 | Product Manager | Carlos Alberto Gomez Ormachea |
 | Estado | Aprobado |
-| Relación con BRD | `BRD_v2.md` |
+| Relación con BRD | `BRD_vFinal.md` |
 
 ## 1. Resumen ejecutivo
 SimonCloud es un ecosistema de gestión documental para la Universidad Mayor de San Simón (UMSS) diseñado para digitalizar trámites, asegurar la trazabilidad de los documentos, y reemplazar el modelo presencial burocrático actual. Con un mercado de miles de estudiantes y administrativos, la plataforma agiliza los procesos, eliminando horas de espera y pérdidas de archivos.

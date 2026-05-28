@@ -12,20 +12,23 @@
 | Revisores | Docente + 1 grupo par |
 | Estado | Borrador |
 | **Modo elegido** | **FSD clásico 🔧** |
-| Trazabilidad a PRD | `PRD_v1.md` |
+| Trazabilidad a PRD | `PRD_vFinal.md` |
 | Insumos M2 (UI/UX) | `old-docs/definicion_pantallas_simoncloud.md` |
 | Fase Spec Kit cubierta | Specify ✅ |
 | Prompts utilizados | `PR-FSD-001` |
 
 ## 1. Resumen ejecutivo ⚡🔧
-SimonCloud es una plataforma que proporciona soberanía digital a la UMSS. Funciona como un hub que centraliza la entrega de trabajos mediante buzones seguros (generando comprobantes Hash inmutables) y unifica la gestión académica permitiendo a los docentes homologar automáticamente calificaciones desde Moodle y Google Classroom, resolviendo conflictos de escalas y duplicidad de estudiantes.
+SimonCloud es una plataforma que proporciona soberanía digital a la UMSS. Funciona como un hub que centraliza la entrega de trabajos mediante buzones seguros (SimonDrop), genera comprobantes inmutables con Hash SHA-256, y se integra de forma nativa con Moodle y Google Classroom vía LTI 1.3. El grade passback automático vía LTI AGS es una funcionalidad planificada para v2.0 (ver `docs/roadmap.md §Hito 4`).
 
 ## 2. Alcance ⚡🔧
 
-### 2.1 Dentro del alcance
-- Sincronización bidireccional y homologación de notas desde Moodle y Classroom.
-- Sistema de subida de archivos con generación de Hash SHA-256.
+### 2.1 Dentro del alcance (v1.0)
+- SimonDrop como opción de entrega nativa en Moodle y Google Classroom vía LTI 1.3 + deep link.
+- Sistema de subida de archivos con generación de Hash SHA-256 e integridad inmutable.
 - Integración de pasarela de pago QR Simple para upgrade de cuotas.
+- Acceso para Usuario Externo mediante token temporal firmado (descarga sin cuenta institucional).
+
+> **v2.0 backlog**: LTI AGS grade passback automático (sincronización de notas desde Moodle/Classroom) y búsqueda avanzada por metadatos. Ver `docs/roadmap.md §Hito 4`.
 
 ### 2.2 Fuera del alcance (explícito)
 - Visualización en línea de documentos complejos (ej. AutoCAD, PSD).
@@ -51,8 +54,11 @@ SimonCloud es una plataforma que proporciona soberanía digital a la UMSS. Funci
 
 | Actor | Tipo | Responsabilidad principal | Permisos clave |
 |-------|------|---------------------------|----------------|
-| Docente | humano | Gestionar buzones y homologar actas | Lectura LMS, CRUD Buzones |
-| Estudiante | humano | Subir archivos y ver sus notas | Escritura en buzón abierto |
+| Docente | humano | Gestionar buzones SimonDrop y sincronizar cursos LMS | Lectura LMS, CRUD Buzones |
+| Estudiante | humano | Subir archivos a buzones y obtener comprobante SHA-256 | Escritura en buzón abierto |
+| Usuario Externo | humano | Descargar documentos específicos sin cuenta institucional | Solo lectura via token temporal firmado |
+| Administrativo | humano | Aprobar/rechazar documentos, auditar historial | CRUD etiquetas, lectura audit log |
+| Admin del sistema | humano | Monitorear métricas globales y gestionar usuarios | Acceso completo |
 
 ## 4. Casos de uso funcionales ⚡🔧
 
@@ -429,14 +435,14 @@ Escenario: Alerta de almacenamiento crítico
 
 ## 5. Reglas de negocio ⚡🔧
 
-| ID (BRD_v2) | Regla | Tipo | Origen | Casos de uso afectados |
+| ID (BRD_vFinal) | Regla | Tipo | Origen | Casos de uso afectados |
 |-------------|-------|------|--------|------------------------|
-| BR-003 | Identificar y deduplicar estudiantes por correo o ID institucional | validación | BRD_v2 §11 | FSD-UC-001 |
-| BR-004 | Mantener trazabilidad de la fuente original de cada calificación (`lms_origen`) | auditoría | BRD_v2 §11 | FSD-UC-001 |
-| BR-005 | Actas finales cerradas son inmutables sin autorización Administrativo | normativa | BRD_v2 §11 | FSD-UC-002 |
-| BR-006 | Control de acceso por roles RBAC (Docente / Estudiante / Admin) | seguridad | BRD_v2 §11 | FSD-UC-001, FSD-UC-002, FSD-UC-003 |
-| BR-007 | Comprobante de entrega con hash SHA-256 para archivos en buzones | seguridad | BRD_v2 §11 | FSD-UC-002 |
-| BR-010 | Integración con pasarela QR Simple para licencias Pro | negocio | BRD_v2 §11 | FSD-UC-003 |
+| BR-003 | Identificar y deduplicar estudiantes por correo o ID institucional | validación | BRD_vFinal §11 | FSD-UC-001 |
+| BR-004 | Mantener trazabilidad de la fuente original de cada calificación (`lms_origen`) | auditoría | BRD_vFinal §11 | FSD-UC-001 |
+| BR-005 | Actas finales cerradas son inmutables sin autorización Administrativo | normativa | BRD_vFinal §11 | FSD-UC-002 |
+| BR-006 | Control de acceso por roles RBAC (Docente / Estudiante / Admin) | seguridad | BRD_vFinal §11 | FSD-UC-001, FSD-UC-002, FSD-UC-003 |
+| BR-007 | Comprobante de entrega con hash SHA-256 para archivos en buzones | seguridad | BRD_vFinal §11 | FSD-UC-002 |
+| BR-010 | Integración con pasarela QR Simple para licencias Pro | negocio | BRD_vFinal §11 | FSD-UC-003 |
 
 ## 6. Modelo de datos funcional ⚡🔧
 

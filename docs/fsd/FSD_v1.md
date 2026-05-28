@@ -411,12 +411,12 @@ Escenario: Alerta de almacenamiento crítico
 
 | ID (BRD_v2) | Regla | Tipo | Origen | Casos de uso afectados |
 |-------------|-------|------|--------|------------------------|
-| BR-003 | Identificar y deduplicar estudiantes por correo o ID institucional | validación | BRD_v2 §11 | FSD-UC-001 |
-| BR-004 | Mantener trazabilidad de la fuente original de cada calificación (`lms_origen`) | auditoría | BRD_v2 §11 | FSD-UC-001 |
-| BR-005 | Actas finales cerradas son inmutables sin autorización Administrativo | normativa | BRD_v2 §11 | FSD-UC-002 |
-| BR-006 | Control de acceso por roles RBAC (Docente / Estudiante / Admin) | seguridad | BRD_v2 §11 | FSD-UC-001, FSD-UC-002, FSD-UC-003 |
-| BR-007 | Comprobante de entrega con hash SHA-256 para archivos en buzones | seguridad | BRD_v2 §11 | FSD-UC-002 |
-| BR-010 | Integración con pasarela QR Simple para licencias Pro | negocio | BRD_v2 §11 | FSD-UC-003 |
+| BR-003 | Identificar y deduplicar estudiantes por correo o ID institucional | validación | BRD_vFinal §11 | FSD-UC-001 |
+| BR-004 | Mantener trazabilidad de la fuente original de cada calificación (`lms_origen`) | auditoría | BRD_vFinal §11 | FSD-UC-001 |
+| BR-005 | Actas finales cerradas son inmutables sin autorización Administrativo | normativa | BRD_vFinal §11 | FSD-UC-002 |
+| BR-006 | Control de acceso por roles RBAC (Docente / Estudiante / Admin) | seguridad | BRD_vFinal §11 | FSD-UC-001, FSD-UC-002, FSD-UC-003 |
+| BR-007 | Comprobante de entrega con hash SHA-256 para archivos en buzones | seguridad | BRD_vFinal §11 | FSD-UC-002 |
+| BR-010 | Integración con pasarela QR Simple para licencias Pro | negocio | BRD_vFinal §11 | FSD-UC-003 |
 
 ## 6. Modelo de datos funcional ⚡🔧
 

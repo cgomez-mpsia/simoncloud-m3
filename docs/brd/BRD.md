@@ -1,5 +1,7 @@
 # Business Requirements Document (BRD) – SimonCloud
 
+> **⚠️ BORRADOR SUPERSEDIDO** — Este archivo es un borrador histórico. El documento canónico vigente es `docs/brd/BRD_vFinal.md`. La propuesta de valor ha sido reenfocada de "homologación automática de calificaciones" a "integración LMS vía SimonDrop (LTI 1.3) + SHA-256" (ver BRD_vFinal §changelog v3.0).
+
 > **Propósito del BRD**: formalizar las necesidades y restricciones de negocio que justifican la existencia del producto, independientemente de la solución técnica. Responde a **"¿qué necesita el negocio y por qué?"**.
 
 ---

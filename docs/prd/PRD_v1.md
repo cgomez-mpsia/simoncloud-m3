@@ -11,7 +11,7 @@
 | Product Manager | Equipo SimonCloud |
 | Revisores | Docente + Tech Lead + QA |
 | Estado | Borrador |
-| BRD de referencia | `BRD_v2.md` |
+| BRD de referencia | `BRD_vFinal.md` |
 | Insumos M2 (UI/UX) | `old-docs/definicion_pantallas_simoncloud.md`, mockups previos |
 | Fase Spec Kit cubierta | Specify ✅ |
 | Prompts utilizados | `PR-PRD-001` |
@@ -43,9 +43,8 @@ SimonCloud es un ecosistema universitario unificado que soluciona dos grandes pr
 ### 3.3 Roadmap de versiones
 | Versión | Contenido | Fecha objetivo |
 |---------|-----------|----------------|
-| v1.0 | MVP (Buzones Hash + Homologación de Notas + Pago QR) | Q4 2026 |
-| v1.1 | Integración profunda LTI con Moodle | Q1 2027 |
-| v2.0 | Migración Google Drive API | Q2 2027 |
+| v1.0 | MVP completo: Buzones Hash + Integración LMS LTI 1.3 + Pago QR + Usuario Externo | Q4 2026 |
+| v2.0 | LTI AGS grade passback + Búsqueda avanzada + Migración Google Drive API | Q2 2027 |
 
 ## 4. Personas y *user journeys*
 
@@ -256,7 +255,7 @@ Escenario: Login con credenciales WebSISS
 
 ## 10. Trazabilidad
 
-| PRD ID | BRD (BRD_v2.md) | FSD |
+| PRD ID | BRD (BRD_vFinal.md) | FSD |
 |--------|-----------------|-----|
 | PRD-REQ-001 | BR-003 (deduplicar alumnos) | FSD-UC-001 |
 | PRD-REQ-002 | BR-007 (hash SHA-256) | FSD-UC-002 |
