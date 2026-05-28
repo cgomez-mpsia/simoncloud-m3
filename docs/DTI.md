@@ -214,7 +214,7 @@ sequenceDiagram
 
 | Tipo | Nombre | Invariantes | Ciclo de vida |
 |------|--------|-------------|---------------|
-| Aggregate Root | `File` | `hash_sha256` no nulo post-upload; `solo_lectura=true` si SimonDrop cerrado | SUBIENDO → ACTIVO → SOLO_LECTURA / EN_PAPELERA → PURGADO *(POC-03: `UPLOADING` → `COMPLETED` en inglés — simplificación de POC; migración a nombres de dominio en Módulo 5)* |
+| Aggregate Root | `File` | `hash_sha256` no nulo post-upload; `solo_lectura=true` si SimonDrop cerrado | SUBIENDO → ACTIVO → SOLO_LECTURA / EN_PAPELERA → PURGADO *(POC-03: `UPLOADING` → `COMPLETED` en inglés — simplificación de POC; migración a nombres de dominio en Módulo 5)*. **Registros huérfanos**: archivos que quedan en `UPLOADING` por fallo de MinIO son purgados por un `@Cron('0 3 * * *')` en `file-service` que elimina registros con `status=UPLOADING` y `createdAt < NOW() - INTERVAL '2h'` — implementación en Módulo 5 |
 | Aggregate Root | `SimonDrop` | `cierre_en` debe ser fecha futura al crear | ACTIVO → CERRADO (automático al pasar `cierre_en`) |
 | Aggregate Root | `Quota` | `quota_used_mb` ≤ `quota_limit_mb` antes de cualquier upload | FREEMIUM (15GB) → PRO (50GB) |
 | Value Object | `SHA256Hash` | 64 chars hex lowercase, inmutable | creado al completar upload |
@@ -291,7 +291,7 @@ flowchart LR
 
 | Servicio | Responsabilidad | BD propia | API expuesta |
 |----------|-----------------|-----------|--------------|
-| `api-gateway` | Routing, JWT validation, rate-limit | — | REST /api/\* y REST /external/\* |
+| `api-gateway` | Routing, JWT validation, rate-limit | — | REST /api/\* y REST /external/\* — **Implementación**: NestJS custom (no Kong/Traefik); valida JWT localmente con clave pública RS256 (sin llamada a `auth-service` por request); rate-limit con `@nestjs/throttler` |
 | `auth-service` | SSO WebSISS, JWT, RBAC, tokens externos HMAC-SHA256 | PostgreSQL (users, roles, tokens_externos) | gRPC /auth |
 | `file-service` | Subida chunked, SHA-256, gestión, Outbox Pattern | PostgreSQL + MinIO | REST /files |
 | `simondrop-service` | Buzones, cierres, comprobantes, deep links LTI | PostgreSQL | REST /drops |
@@ -388,7 +388,9 @@ El `eventId` UUID v4 en el payload es el idempotency key primario (CLAUDE.md §6
 
 ### 7.4 CQRS: Panel de Administrador (FSD-UC-010)
 
-El `admin-service` mantiene un `dashboard_metrics` materializado, actualizado asíncronamente vía eventos (`ArchivoSubidoIntegrationEvent`, `UserRegisteredEvent`, `QuotaUpgradedEvent`). Consulta `GET /admin/metrics` lee el Read Model en O(1) sin impactar servicios transaccionales. Trade-off aceptado: consistencia eventual (latencia de segundos en métricas).
+El `admin-service` mantiene un `dashboard_metrics` materializado, actualizado asíncronamente vía eventos (`ArchivoSubidoIntegrationEvent`, `UsuarioAutenticadoIntegrationEvent`, `QuotaActualizadaIntegrationEvent`). Consulta `GET /admin/metrics` lee el Read Model en O(1) sin impactar servicios transaccionales. Trade-off aceptado: consistencia eventual (latencia de segundos en métricas).
+
+**Riesgo documentado — Eventos Unkeyed sin Outbox**: `UsuarioAutenticadoIntegrationEvent` y `TokenExternoAccedidoIntegrationEvent` son Unkeyed y se publican sin Outbox Pattern (ver `docs/events/catalog.md` §Política de Outbox). La pérdida de un evento de login no es crítica de negocio, pero sí implica que el contador de sesiones del Read Model puede quedar levemente desincronizado. Decisión aceptada: el `dashboard_metrics` es eventually consistent y no es fuente de verdad para auditoría forense — el `audit_log` inmutable en PostgreSQL es la fuente autoritativa.
 
 ---
 

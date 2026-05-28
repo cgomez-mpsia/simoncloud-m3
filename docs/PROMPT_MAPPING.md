@@ -95,6 +95,14 @@
 - **Bugs resueltos**: BigInt JSON serialization (Prisma sizeBytes), JwtAuthGuard DI container, amqplib ChannelModel typing
 - **Verificación**: applied — demo funcional en http://localhost:5173
 
+### PM-20260528-011
+- **Timestamp**: 2026-05-29T02:00:00-04:00
+- **Intent**: fix + docs
+- **Artefactos generados**:
+  - `docs/DTI.md` — §6.1 api-gateway: especificado como NestJS custom (no Kong/Traefik), valida JWT con RS256 clave pública, rate-limit con @nestjs/throttler; §7.4 CQRS: riesgo documentado de eventos Unkeyed sin Outbox (dashboard eventually consistent, audit_log es fuente autoritativa); §4.2 File Aggregate: cleanup job `@Cron('0 3 * * *')` para registros UPLOADING huérfanos (>2h), Módulo 5
+- **Trazabilidad**: DTI §4.2 (ciclo de vida File), DTI §7.4 (CQRS riesgos), DTI §6.1 (API Gateway tech)
+- **Verificación**: applied
+
 ### PM-20260528-010
 - **Timestamp**: 2026-05-29T01:00:00-04:00
 - **Intent**: fix
