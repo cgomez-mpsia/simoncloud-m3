@@ -93,6 +93,16 @@
 - **Bugs resueltos**: BigInt JSON serialization (Prisma sizeBytes), JwtAuthGuard DI container, amqplib ChannelModel typing
 - **Verificación**: applied — demo funcional en http://localhost:5173
 
+### PM-20260528-003
+- **Timestamp**: 2026-05-28T18:00:00-04:00
+- **Intent**: fix
+- **Artefactos generados**:
+  - `pocs/POC-03/backend/src/relay/message-relay.service.ts` — `assertQueue` → `assertExchange` topic `simoncloud.simondrop.events`; `sendToQueue` → `channel.publish` con routing key derivado del eventType
+  - `pocs/POC-03/backend/src/drops/drops.service.spec.ts` — añadidos tests `getOne()` y `listFiles()` para subir cobertura dominio ≥80%
+  - `docs/roadmap.md` — eliminada referencia a AWS t3.micro/cost alerts; sustituida por riesgo on-premise DTIC
+- **Trazabilidad**: CLAUDE.md §2 (exchanges topic), CLAUDE.md §7 + NFR-008 (cobertura ≥80%), CLAUDE.md §2 (no AWS como destino)
+- **Verificación**: applied
+
 ### PM-20260528-002
 - **Timestamp**: 2026-05-28T10:00:00-04:00
 - **Intent**: docs + skills

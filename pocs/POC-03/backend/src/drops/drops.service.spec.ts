@@ -2,7 +2,7 @@ import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { DropsService } from './drops.service';
-import { DROP_REPOSITORY_PORT, DropRepositoryPort, SimonDropEntity } from './ports/drop-repository.port';
+import { DROP_REPOSITORY_PORT, DropRepositoryPort, FileEntity, SimonDropEntity } from './ports/drop-repository.port';
 
 const MOCK_DROP: SimonDropEntity = {
   id: 'drop-uuid-001',
@@ -100,6 +100,48 @@ describe('DropsService', () => {
     it('lanza ForbiddenException si otro usuario intenta eliminar', async () => {
       repo.findById.mockResolvedValue(MOCK_DROP);
       await expect(service.remove('drop-uuid-001', 'impostor')).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  describe('getOne()', () => {
+    it('retorna el drop si existe', async () => {
+      repo.findById.mockResolvedValue(MOCK_DROP);
+      const result = await service.getOne('drop-uuid-001');
+      expect(result.id).toBe('drop-uuid-001');
+    });
+
+    it('lanza NotFoundException si el drop no existe', async () => {
+      repo.findById.mockResolvedValue(null);
+      await expect(service.getOne('no-existe')).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('listFiles()', () => {
+    const MOCK_FILE: FileEntity = {
+      id: 'file-uuid-001',
+      filename: 'tesis.pdf',
+      filePath: null,
+      sizeBytes: BigInt(52428800),
+      mimeType: 'application/pdf',
+      storageKey: 'drops/drop-uuid-001/docente-uuid-001/file-uuid-001/tesis.pdf',
+      sha256Hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      status: 'COMPLETED',
+      dropId: 'drop-uuid-001',
+      uploaderId: 'docente-uuid-001',
+      uploadedAt: new Date('2026-05-01T10:00:00Z'),
+    };
+
+    it('docente ve todos los archivos del drop (uploaderId undefined)', async () => {
+      repo.listFiles.mockResolvedValue([MOCK_FILE]);
+      const result = await service.listFiles('drop-uuid-001', 'docente-uuid-001', 'DOCENTE');
+      expect(repo.listFiles).toHaveBeenCalledWith('drop-uuid-001', undefined);
+      expect(result[0].publicUrl).toContain(MOCK_FILE.storageKey);
+    });
+
+    it('estudiante solo ve sus propios archivos (uploaderId pasado)', async () => {
+      repo.listFiles.mockResolvedValue([MOCK_FILE]);
+      await service.listFiles('drop-uuid-001', 'student-001', 'ESTUDIANTE');
+      expect(repo.listFiles).toHaveBeenCalledWith('drop-uuid-001', 'student-001');
     });
   });
 });

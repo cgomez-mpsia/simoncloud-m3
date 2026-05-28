@@ -4,7 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import * as amqplib from 'amqplib';
 import { PrismaService } from '../prisma/prisma.service';
 
-const QUEUE = 'simondrop.file.uploaded';
+// Topic exchange per CLAUDE.md §2 — nunca cola directa
+const EXCHANGE = 'simoncloud.simondrop.events';
 
 @Injectable()
 export class MessageRelayService implements OnModuleInit, OnModuleDestroy {
@@ -22,8 +23,8 @@ export class MessageRelayService implements OnModuleInit, OnModuleDestroy {
       const url = this.config.get<string>('RABBITMQ_URL', 'amqp://simon:simon123@localhost:5672');
       this.connection = await amqplib.connect(url);
       this.channel = await this.connection.createChannel();
-      await this.channel.assertQueue(QUEUE, { durable: true });
-      this.logger.log(`Relay conectado a RabbitMQ → cola "${QUEUE}"`);
+      await this.channel.assertExchange(EXCHANGE, 'topic', { durable: true });
+      this.logger.log(`Relay conectado a RabbitMQ → exchange "${EXCHANGE}"`);
     } catch (err) {
       this.logger.error('No se pudo conectar a RabbitMQ', err);
     }
@@ -41,8 +42,14 @@ export class MessageRelayService implements OnModuleInit, OnModuleDestroy {
     });
 
     for (const event of events) {
-      this.channel.sendToQueue(
-        QUEUE,
+      // routingKey: ArchivoSubidoIntegrationEvent → archivo.subido
+      const routingKey = event.eventType
+        .replace(/IntegrationEvent$/, '')
+        .replace(/([A-Z])/g, (m, c, i) => (i > 0 ? '.' : '') + c.toLowerCase());
+
+      this.channel.publish(
+        EXCHANGE,
+        routingKey,
         Buffer.from(JSON.stringify(event.payload)),
         { persistent: true, contentType: 'application/json' },
       );
@@ -52,7 +59,7 @@ export class MessageRelayService implements OnModuleInit, OnModuleDestroy {
         data: { published: true, publishedAt: new Date() },
       });
 
-      this.logger.log(`Publicado ${event.eventType} [${event.id}] → RabbitMQ`);
+      this.logger.log(`Publicado ${event.eventType} [${event.id}] → ${EXCHANGE} [${routingKey}]`);
     }
   }
 

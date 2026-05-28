@@ -125,5 +125,5 @@
 | Riesgo | Probabilidad | Mitigación planificada |
 |--------|-------------|------------------------|
 | DTIC UMSS no provee acceso a WebSISS staging | Media | Implementar mock SSO para desarrollo; negociar con DTIC en paralelo |
-| Costo AWS supera budget DTIC | Media | Usar `t3.micro` en staging; activar AWS cost alerts desde día 1 |
+| Recursos de servidores DTIC insuficientes para staging | Media | Provisionar VM adicional en Proxmox DTIC; coordinar con responsable de infraestructura |
 | QR Simple Bolivia cambia esquema HMAC | Baja | Validación HMAC encapsulada en Guard — fácil de actualizar |
