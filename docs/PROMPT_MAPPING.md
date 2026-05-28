@@ -93,15 +93,31 @@
 - **Bugs resueltos**: BigInt JSON serialization (Prisma sizeBytes), JwtAuthGuard DI container, amqplib ChannelModel typing
 - **Verificación**: applied — demo funcional en http://localhost:5173
 
+### PM-20260528-002
+- **Timestamp**: 2026-05-28T10:00:00-04:00
+- **Intent**: docs + skills
+- **Artefactos generados**:
+  - `docs/fsd/FSD_vFinal.md` — agregado FSD-UC-011 (Acceso Usuario Externo: HMAC-SHA256, TTL 72h, 3 Gherkin scenarios, BR-011)
+  - `docs/events/catalog.md` — catálogo completo de 11 eventos (taxonomía Unkeyed/Entity/Keyed, Single Writer, exchanges, anti-patrones)
+  - `docs/events/schemas/ArchivoSubidoIntegrationEvent.json` — JSON Schema draft-07, SHA-256 64-hex pattern
+  - `docs/events/schemas/PagoConfirmadoIntegrationEvent.json` — JSON Schema draft-07, montoBOB multipleOf 0.01
+  - `docs/api/openapi.yaml` — OpenAPI 3.1 spec-first, 16 endpoints FSD-UC-001..FSD-UC-011, JWT Bearer, Idempotency-Key
+  - `docs/adr/README.md` — índice de 6 ADRs con trazabilidad DTI/FSD
+  - `.claude/commands/` — 12 slash commands: gherkin-to-tests, uc-to-slice, event-catalog, resilience, async-reviewer, saga, ddd-aggregate, ipc-selector, arch-reviewer, adr-recorder, dti-author, openapi-spec
+  - `prompts/PR-UC-001.md` — corregido stale content: ahora documenta createLtiDeepLink (LTI 1.3) en lugar de homologateGrades (eliminado del proyecto)
+  - `docs/aportes/release-2.0.0.md` — actualizado T-M4-024..029, total 29 tareas / ~85.5h
+- **Trazabilidad**: FSD-UC-011, DTI §7 (events), DTI §8 (ADR-0005), Criterio 2/6/7 rubrica defensa
+- **Verificación**: applied — commit pendiente
+
 ---
 
 ## Métricas AI-SDLC — release/2.0.0
 
 ### Prompt Coverage
 ```
-UCs con prompt-contrato: 10 (PR-BRD-001 + PR-UC-001..009)
-Total UCs en FSD: 10 (FSD-UC-001..010)
-prompt_coverage = 10/10 = 100%   ✅ (umbral ≥ 80%)
+UCs con prompt-contrato: 11 (PR-BRD-001 + PR-UC-001..009 + FSD-UC-011 via PM-20260528-002)
+Total UCs en FSD: 11 (FSD-UC-001..011)
+prompt_coverage = 11/11 = 100%   ✅ (umbral ≥ 80%)
 ```
 
 ### Spec Fidelity

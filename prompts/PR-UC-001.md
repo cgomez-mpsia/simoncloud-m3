@@ -1,9 +1,9 @@
-# PR-UC-001 — Generador del Algoritmo de Homologación de Notas
+# PR-UC-001 — Generador del Servicio LTI Deep Linking (createLtiDeepLink)
 
 | Campo | Valor |
 |-------|-------|
 | **ID** | `PR-UC-001` |
-| **Título** | Generador del Algoritmo de Homologación de Notas |
+| **Título** | Generador del Servicio LTI Deep Linking — createLtiDeepLink |
 | **Artefacto origen** | `docs/fsd/FSD_vFinal.md §4.1 FSD-UC-001` |
 | **Tipo** | Generación / Transformación |
 | **Modelo** | Claude Sonnet 4 |
@@ -14,68 +14,77 @@
 
 ## Role
 ```
-Eres un Senior Backend Engineer experto en procesamiento de datos
-y algoritmos de normalización en TypeScript/Node.js.
+Eres un Senior Backend Engineer experto en integración de sistemas LMS
+y el estándar LTI 1.3 con TypeScript/NestJS.
 ```
 
 ## Task
 ```
-Implementar la función homologateGrades(moodleData, classroomData)
-que consolide dos arreglos de calificaciones heterogéneas en un solo
-arreglo estandarizado sobre 100 puntos, unificando a los estudiantes
-por su correo electrónico. Reglas BR-001, BR-002, BR-003 y BR-004.
+Implementar el método createLtiDeepLink(params: LtiDeepLinkParams): Promise<string>
+en el LtiDeeplinkService de NestJS que genere un JWT firmado con RS256 para
+responder al flujo LTI 1.3 Deep Linking (content-item selection) de un LMS
+externo (Moodle / Google Classroom).
 ```
 
 ## Context
 ```
 - Fuente: FSD-UC-001 en docs/fsd/FSD_vFinal.md
-- BR-001: importar calificaciones desde Moodle y Classroom
-- BR-002: homologar automáticamente a escala 0-100
-- BR-003: deduplicar estudiantes por correo institucional
-- BR-004: mantener trazabilidad de fuente original (lms_origen)
-- moodleData: Array<{ email: string, moodleScore: number }> (Score /50)
-- classroomData: Array<{ email: string, classroomLetter: string }> (A=90, B=75, C=60, D=50, F=0)
-- Restricción: TypeScript estricto, sin librerías externas
+- BR-001: el docente puede crear un SimonDrop directamente desde el LMS
+- BR-005: la integración sigue el estándar LTI 1.3 (IMS Global)
+- El servicio reside en apps/lms-connector/src/deeplink/lti-deeplink.service.ts
+- La clave privada RSA está en HashiCorp Vault / Docker Secrets (nunca hardcoded)
+- El JWT resultante debe llevar claim "https://purl.imsglobal.org/spec/lti-dl/claim/content_items"
+- Parámetros de entrada: dropId, titulo, descripcion, docenteId, lmsAssignmentId (nullable)
+- El iss del JWT es la URL canónica de SimonCloud (configurable por env)
 ```
 
 ## Reasoning
 ```
-1. Crear Map<string, ConsolidatedGrade> usando email como llave
-2. Iterar moodleData: multiplicar score × 2, agregar al Map
-3. Iterar classroomData: aplicar tabla de equivalencia de letras, actualizar Map
-4. Convertir el Map a Array y retornarlo
+1. Construir el payload JWT con los claims LTI 1.3 obligatorios
+2. Incluir el content_item de tipo ltiResourceLink apuntando al dropId
+3. Firmar con RS256 usando la private key de Vault
+4. Retornar el JWT como string para redirigir al LMS
 No exponer el razonamiento en el output.
 ```
 
 ## Stop Condition
 ```
-Detente cuando la función principal y la función auxiliar de mapeo
-de letras estén completas, tipadas y exportadas. No generes tests.
+Detente cuando el método createLtiDeepLink y su tipo LtiDeepLinkParams
+estén completos, tipados, exportados e inyectables como NestJS Service.
+No generes tests ni mocks.
 ```
 
 ## Output Esperado
 ```typescript
-export interface ConsolidatedGrade {
-  email: string;
-  moodleGrade: number | null;
-  classroomGrade: number | null;
-  lms_origen: 'Moodle' | 'Classroom' | 'Ambos';
+export interface LtiDeepLinkParams {
+  dropId: string;
+  titulo: string;
+  descripcion: string;
+  docenteId: string;
+  lmsAssignmentId: string | null;
+  deploymentId: string;
+  returnUrl: string;
 }
 
-export function homologateGrades(
-  moodleData: Array<{ email: string; moodleScore: number }>,
-  classroomData: Array<{ email: string; classroomLetter: string }>
-): ConsolidatedGrade[] { /* implementación */ }
+@Injectable()
+export class LtiDeeplinkService {
+  constructor(private readonly config: ConfigService) {}
+
+  async createLtiDeepLink(params: LtiDeepLinkParams): Promise<string> {
+    /* implementación JWT RS256 con claims LTI 1.3 */
+  }
+}
 ```
 
 ## Invariantes
-- Salida **debe** aplicar: Moodle /50 → × 2
-- Salida **no debe** tener duplicados por email
-- Salida **debe** incluir `lms_origen` en cada objeto (BR-004)
+- El JWT **debe** incluir claim `https://purl.imsglobal.org/spec/lti-dl/claim/content_items`
+- El algoritmo de firma **debe** ser RS256 (nunca HS256 para LTI)
+- La private key **nunca** debe estar hardcodeada; siempre desde ConfigService
+- `lmsAssignmentId` puede ser null (SimonDrop sin asignación LMS)
 
 ## Failure Modes
 | Código | Descripción | Acción |
 |--------|-------------|--------|
-| `E_DUPLICATE_EMAILS` | Emails no unificados | Verificar uso correcto del Map |
-| `E_BAD_MATH` | Nota de Moodle no en base 100 | Corregir factor ×2 |
-| `E_MISSING_LMS_ORIGEN` | Campo lms_origen ausente | Revisar lógica de fusión |
+| `E_VAULT_KEY_MISSING` | Private key no encontrada en Vault/Secrets | Verificar montaje de Docker Secret |
+| `E_INVALID_RETURN_URL` | returnUrl malformada | Validar con zod antes de firmar |
+| `E_LTI_CLAIM_MISSING` | JWT sin content_items claim | Revisar construcción del payload |

@@ -43,21 +43,27 @@
 | T-M4-021 | POC-03: folder upload (webkitdirectory + filePath schema), UX improvements (AppHeader, Skeleton, confirmación inline, fechas relativas), fix login role bug | Carlos | `pocs/POC-03/frontend/src/components/`, `pocs/POC-03/backend/prisma/migrations/` | 3h | ✅ |
 | T-M4-022 | BRD v3.0 — reescritura completa: eliminar referencias a homologación, reencuadrar en LTI 1.3 SimonDrop + SHA-256 + Ley 164 | Carlos | `docs/brd/BRD_vFinal.md` | 2h | ✅ |
 | T-M4-023 | Fix arquitectural: eliminar payment-service (ghost service) de DTI, ADR-0004, patrones_asincronos.md, diagrama saga | Carlos | `docs/DTI.md`, `docs/adr/0004-*`, `docs/dti/patrones_asincronos.md`, `docs/diagrams/05-saga-quota-upgrade.mmd` | 1h | ✅ |
+| T-M4-024 | FSD-UC-011: Acceso de Usuario Externo con Token Temporal (HMAC-SHA256, TTL 72h, Gherkin 3 escenarios, BR-011) | Carlos | `docs/fsd/FSD_vFinal.md §4.11`, `docs/fsd/FSD_vFinal.md §5 BR-011` | 1h | ✅ |
+| T-M4-025 | Catálogo de eventos completo: 11 eventos, taxonomía Unkeyed/Entity/Keyed, Single Writer Principle, exchanges RabbitMQ, anti-patrones | Carlos | `docs/events/catalog.md` | 1h | ✅ |
+| T-M4-026 | JSON Schemas (draft-07) para eventos críticos: ArchivoSubidoIntegrationEvent y PagoConfirmadoIntegrationEvent | Carlos | `docs/events/schemas/*.json` | 1h | ✅ |
+| T-M4-027 | OpenAPI 3.1 spec-first: 16 endpoints FSD-UC-001 a FSD-UC-011, JWT Bearer, Idempotency-Key, SHA-256 pattern | Carlos | `docs/api/openapi.yaml` | 2h | ✅ |
+| T-M4-028 | 12 custom slash commands Claude Code adaptados al stack NestJS/Prisma/Jest del proyecto | Carlos | `.claude/commands/*.md` (12 archivos) | 2h | ✅ |
+| T-M4-029 | ADR README index actualizado con trazabilidad §DTI-§FSD; corrección PR-UC-001 (LTI Deep Link, eliminar referencia stale a homologación) | Carlos | `docs/adr/README.md`, `prompts/PR-UC-001.md` | 0.5h | ✅ |
 
-**Total de tareas**: 23  
-**Total horas estimadas**: ~77h
+**Total de tareas**: 29  
+**Total horas estimadas**: ~85.5h
 
 ---
 
 ## §3. Cálculo de Factor Individual
 
 ```
-total_tareas_grupo   = 23
+total_tareas_grupo   = 29
 n_integrantes        = 1
-aporte_promedio      = 23 / 1 = 23 tareas/persona
+aporte_promedio      = 29 / 1 = 29 tareas/persona
 
-Carlos: 23 tareas
-factor_carlos        = clamp(23 / 23, 0.5, 1.1) = clamp(1.0, 0.5, 1.1) = 1.0
+Carlos: 29 tareas
+factor_carlos        = clamp(29 / 29, 0.5, 1.1) = clamp(1.0, 0.5, 1.1) = 1.0
 
 Nota_individual_carlos = Nota_grupal × 1.0
 ```
@@ -69,10 +75,10 @@ Nota_individual_carlos = Nota_grupal × 1.0
 | Área | Contribución de Carlos |
 |------|----------------------|
 | **Documentación técnica** | DTI vFinal completo (§1-§21), 6 ADRs, 8 diagramas .mmd, roadmap |
-| **Especificación funcional** | FSD vFinal (10 UCs, Gherkin, ER, contratos API), MRD, PRD, BRD |
+| **Especificación funcional** | FSD vFinal (11 UCs, Gherkin, ER, contratos API), OpenAPI 3.1 (16 endpoints), MRD, PRD, BRD |
 | **Patrones arquitectónicos** | Circuit Breaker, Consistent Hashing, Saga, Outbox, CQRS |
 | **Pruebas de concepto** | POC-01 (SHA-256 incremental), POC-02 (Circuit Breaker Opossum.js), POC-03 (SimonDrop demo app e2e — hexagonal + JWT + MinIO + RabbitMQ) |
-| **AI-SDLC** | PROMPT_MAPPING.md (100% coverage), 3 prompt-contratos formales |
+| **AI-SDLC** | PROMPT_MAPPING.md (100% coverage), 9 prompt-contratos formales |
 | **Infraestructura** | Despliegue on-premise DTIC-UMSS, ADR soberanía de datos, estrategia DR |
 | **Release management** | Creación de rama `release/2.0.0`, estructura de entregables |
 
