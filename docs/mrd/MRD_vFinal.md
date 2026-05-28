@@ -111,7 +111,7 @@ SimonCloud opera bajo tres modelos de despliegue según la capacidad de la insti
 |------|-------------|--------|-----------------|-------------------|
 | **Tier 1 — On-Premise** | UMSS y universidades grandes con DTIC propio | Licencia + soporte | Servidores propios de la institución | Total — datos nunca salen de la universidad |
 | **Tier 2 — SCaaS Federado** | Universidades medianas sin DTIC (UCB, UPSA, etc.) | SaaS anual | Servidores UMSS / SimonCloud | Alta — datos en Bolivia, custodia compartida |
-| **Tier 3 — SCaaS Cloud** | Institutos pequeños, sin infraestructura | SaaS mensual | Cloud (Supabase / AWS sa-east-1) | Media — datos en región latinoamericana |
+| **Tier 3 — SCaaS Cloud** | Institutos pequeños, sin infraestructura | SaaS mensual | Cloud on-premise boliviano / VPS regional (ej. Internexa Bolivia) | Media — datos en región latinoamericana |
 
 **Nota sobre Tier 2**: la institución cliente aporta su propio SSO para autenticación. SimonCloud consume ese IdP y crea un tenant aislado. Los datos del tenant nunca se mezclan con los de UMSS.
 

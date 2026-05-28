@@ -95,6 +95,20 @@
 - **Bugs resueltos**: BigInt JSON serialization (Prisma sizeBytes), JwtAuthGuard DI container, amqplib ChannelModel typing
 - **Verificación**: applied — demo funcional en http://localhost:5173
 
+### PM-20260528-006
+- **Timestamp**: 2026-05-28T22:00:00-04:00
+- **Intent**: fix
+- **Artefactos generados**:
+  - `docs/DTI.md` — §13 amenazas: "HPA en file-service" → `docker service scale file-service=9` (Docker Swarm)
+  - `docs/dti/patrones_asincronos.md` — `FileUploadedEvent` → `ArchivoSubidoIntegrationEvent`
+  - `docs/diagrams/03-hexagonal-file-service.mmd` — `publish(FileUploadedEvent)` → `publish(ArchivoSubidoIntegrationEvent)`
+  - `docs/diagrams/06-sequence-upload-hash.mmd` — `FileUploadedEvent` → `ArchivoSubidoIntegrationEvent` (2 ocurrencias)
+  - `docs/fsd/FSD_vFinal.md` — diagramas mermaid: `AWS S3 / MinIO` → `MinIO (S3-compatible)` / `MinIO on-premise`
+  - `docs/mrd/MRD_vFinal.md` — Tier 3: `Cloud (Supabase / AWS sa-east-1)` → cloud on-premise boliviano / VPS regional
+  - `pocs/POC-03/backend/prisma/migrations/20260528011116_add_users_drops/` — migración Prisma trackeada en git
+- **Trazabilidad**: CLAUDE.md §2 (Docker Swarm, nunca K8s), CLAUDE.md §6 (ArchivoSubidoIntegrationEvent), CLAUDE.md §2 (nunca AWS/GCP/Azure)
+- **Verificación**: applied
+
 ### PM-20260528-005
 - **Timestamp**: 2026-05-28T21:00:00-04:00
 - **Intent**: fix + docs

@@ -617,7 +617,7 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
 | **Tampering** | Modificar archivo post-entrega | Hash SHA-256 + política WORM S3 Object Lock |
 | **Repudiation** | Negar entrega de tarea | `audit_log` inmutable + recibo PDF con hash y timestamp |
 | **Info Disclosure** | Acceso a archivos ajenos | RBAC estricto; presigned URLs de un solo uso |
-| **DoS** | Flood de uploads | Rate limiting en API Gateway (100 req/s); HPA en file-service |
+| **DoS** | Flood de uploads | Rate limiting en API Gateway (100 req/s); `docker service scale file-service=9` (Docker Swarm) |
 | **Elevation of Privilege** | RBAC bypass | Roles asignados exclusivamente por WebSISS SSO; no editables por usuario |
 
 ### 13.2 AuthN / AuthZ

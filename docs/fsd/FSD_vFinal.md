@@ -585,7 +585,7 @@ sequenceDiagram
 sequenceDiagram
     participant E as Estudiante
     participant S as SimonCloud
-    participant S3 as AWS S3 / MinIO
+    participant S3 as MinIO (S3-compatible)
     participant BD as PostgreSQL
     E->>S: Selecciona archivo (hasta 2GB)
     S->>S3: Solicita presigned URL (PUT, TTL=15min)
@@ -652,7 +652,7 @@ gantt
 graph TD
     UI[Frontend React] --> API[Backend NestJS]
     API --> DB[(PostgreSQL)]
-    API --> S3[(AWS S3 / MinIO)]
+    API --> S3[(MinIO on-premise)]
     API --> Redis[(Redis Cache)]
     API --> Moodle[Moodle UMSS]
 ```

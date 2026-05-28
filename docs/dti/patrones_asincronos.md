@@ -31,7 +31,7 @@ Basado en la lectura de *Microservices Patterns* (Richardson): Cap. 3 §3.3 (Tra
 - **Problema que resuelve:** Si el `file-service` guarda el archivo en PostgreSQL pero luego falla al intentar publicar el mensaje en el Message Broker (ej. RabbitMQ/Redis está caído), el sistema queda en un estado inconsistente y el docente nunca es notificado (Problema de la escritura dual).
 - **Implementación:**
   1. El `file-service` guarda los metadatos del archivo en la tabla `files`.
-  2. En la **misma transacción local de PostgreSQL**, inserta el evento `FileUploadedEvent` en una tabla llamada `outbox`.
+  2. En la **misma transacción local de PostgreSQL**, inserta el evento `ArchivoSubidoIntegrationEvent` en una tabla llamada `outbox`.
   3. Se realiza el `COMMIT` de la base de datos garantizando atomicidad.
   4. Un proceso asíncrono (Message Relay, como Debezium leyendo el log de transacciones o un Polling Publisher) lee la tabla `outbox` y publica el mensaje en el Broker, garantizando entrega *at-least-once* al `notification-service`.
 

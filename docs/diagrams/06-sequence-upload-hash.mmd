@@ -39,13 +39,13 @@ sequenceDiagram
 
     Note over FS,OB: Transacción atómica PostgreSQL
     FS->>BD: INSERT archivo {hash, solo_lectura=true}
-    FS->>OB: INSERT FileUploadedEvent {fileId, docenteId, hash}
+    FS->>OB: INSERT ArchivoSubidoIntegrationEvent {fileId, docenteId, hash}
     BD-->>FS: COMMIT
 
     FS-->>SPA: {fileId, hash_sha256, recibo_url}
     SPA-->>E: ✅ Entrega confirmada + Recibo PDF
 
     Note over OB,NS: Async — Message Relay (Outbox Pattern)
-    OB->>RMQ: Publica FileUploadedEvent (AMQP)
+    OB->>RMQ: Publica ArchivoSubidoIntegrationEvent (AMQP)
     RMQ->>NS: Consume evento
     NS-->>E: Email/Push al docente "Nueva entrega"
