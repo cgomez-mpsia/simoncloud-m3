@@ -1,0 +1,63 @@
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Interval } from '@nestjs/schedule';
+import { ConfigService } from '@nestjs/config';
+import * as amqplib from 'amqplib';
+import { PrismaService } from '../prisma/prisma.service';
+
+const QUEUE = 'simondrop.file.uploaded';
+
+@Injectable()
+export class MessageRelayService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(MessageRelayService.name);
+  private connection: amqplib.Connection | null = null;
+  private channel: amqplib.Channel | null = null;
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly config: ConfigService,
+  ) {}
+
+  async onModuleInit() {
+    try {
+      const url = this.config.get<string>('RABBITMQ_URL', 'amqp://simon:simon123@localhost:5672');
+      this.connection = await amqplib.connect(url);
+      this.channel = await this.connection.createChannel();
+      await this.channel.assertQueue(QUEUE, { durable: true });
+      this.logger.log(`Relay conectado a RabbitMQ → cola "${QUEUE}"`);
+    } catch (err) {
+      this.logger.error('No se pudo conectar a RabbitMQ', err);
+    }
+  }
+
+  // Polling cada 2 segundos — patrón Polling Publisher del Outbox
+  @Interval(2000)
+  async relayPendingEvents() {
+    if (!this.channel) return;
+
+    const events = await this.prisma.outboxEvent.findMany({
+      where: { published: false },
+      take: 10,
+      orderBy: { createdAt: 'asc' },
+    });
+
+    for (const event of events) {
+      this.channel.sendToQueue(
+        QUEUE,
+        Buffer.from(JSON.stringify(event.payload)),
+        { persistent: true, contentType: 'application/json' },
+      );
+
+      await this.prisma.outboxEvent.update({
+        where: { id: event.id },
+        data: { published: true, publishedAt: new Date() },
+      });
+
+      this.logger.log(`Publicado ${event.eventType} [${event.id}] → RabbitMQ`);
+    }
+  }
+
+  async onModuleDestroy() {
+    await this.channel?.close();
+    await this.connection?.close();
+  }
+}
