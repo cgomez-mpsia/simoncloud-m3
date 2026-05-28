@@ -32,14 +32,19 @@ export class PgFileRepository implements FileRepositoryPort {
       });
       await tx.outboxEvent.create({
         data: {
-          eventType: 'FileUploadedEvent',
+          eventType: 'ArchivoSubidoIntegrationEvent',
           payload: {
-            fileId: file.id,
-            filename: file.filename,
-            sha256Hash,
+            eventId: require('crypto').randomUUID(),
+            eventType: 'ArchivoSubidoIntegrationEvent',
+            eventVersion: '1.0',
+            archivoId: file.id,
             dropId: file.dropId,
-            uploaderId: file.uploaderId,
-            uploadedAt: file.uploadedAt.toISOString(),
+            estudianteId: file.uploaderId,
+            docenteId: file.uploaderId,  // resuelto por simondrop-service en producción
+            sha256: sha256Hash,
+            tamanoBytes: Number(file.sizeBytes),
+            nombreOriginal: file.filename,
+            subitoEn: file.uploadedAt.toISOString(),
           },
         },
       });

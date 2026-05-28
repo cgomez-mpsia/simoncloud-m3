@@ -5,6 +5,8 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt.guard';
 import { PrismaService } from '../prisma/prisma.service';
+import { PgUserRepository } from './adapters/pg-user.repository';
+import { USER_REPOSITORY_PORT } from './ports/user-repository.port';
 
 @Module({
   imports: [
@@ -18,7 +20,12 @@ import { PrismaService } from '../prisma/prisma.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, PrismaService, JwtAuthGuard],
+  providers: [
+    AuthService,
+    PrismaService,
+    JwtAuthGuard,
+    { provide: USER_REPOSITORY_PORT, useClass: PgUserRepository },
+  ],
   exports: [JwtModule, JwtAuthGuard],
 })
 export class AuthModule {}

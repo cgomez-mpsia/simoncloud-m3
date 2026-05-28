@@ -1,16 +1,16 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from '../prisma/prisma.service';
+import { USER_REPOSITORY_PORT, UserRepositoryPort } from './ports/user-repository.port';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly prisma: PrismaService,
+    @Inject(USER_REPOSITORY_PORT) private readonly userRepo: UserRepositoryPort,
     private readonly jwt: JwtService,
   ) {}
 
   async login(email: string, password: string) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
+    const user = await this.userRepo.findByEmail(email);
     if (!user || user.password !== password) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
