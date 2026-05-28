@@ -345,7 +345,7 @@ graph LR
 | `QuotaUpgradeRequested` | `quota-service` (saga) | `quota-service` (QR Simple adapter) | `{userId, plan, amount}` | exactly-once (Saga) |
 | `PaymentConfirmedEvent` | `quota-service` (webhook) | Saga orchestrator | `{paymentId, userId, hmacValid}` | at-least-once |
 | `QuotaUpgradedEvent` | `quota-service` | `notification-service` | `{userId, newQuotaMb}` | at-least-once |
-| `UserRegisteredEvent` | `auth-service` | `admin-service` (CQRS) | `{userId, rol, timestamp}` | at-least-once |
+| `UsuarioAutenticadoIntegrationEvent` | `auth-service` | `admin-service` (CQRS) | `{eventId, userId, rol, ip, loginAt}` | at-least-once |
 
 ### 7.2 Saga: Upgrade de Cuota por QR (FSD-UC-003)
 
@@ -603,6 +603,8 @@ Ver documento completo en `docs/PROMPT_MAPPING.md`.
   - Upload: single PUT a través del servidor NestJS (`uploadAndHash(key, buffer, mimeType)`) — en producción los bytes van directo del cliente a MinIO vía presigned URL sin pasar por el servidor (ADR-0003).
   - Sin Redis: sesiones de upload chunked no implementadas — en producción Redis Cluster almacena el estado de progreso por `uploadId` (Consistent Hashing, DTI §6.2).
   - Sin multipart: un solo `PutObjectCommand` — en producción `CreateMultipartUpload` + N presigned URLs + `CompleteMultipartUpload` (ADR-0003).
+  - **JWT HS256 vs RS256**: POC-03 usa `HS256` con secreto simétrico (`JWT_SECRET`) para simplicidad. Producción usa `RS256`: `auth-service` firma con clave privada; `api-gateway` y microservicios verifican con clave pública — ningún servicio distinto de `auth-service` conoce la clave privada.
+  - **Cierre automático de SimonDrops**: POC-03 no implementa el cron de cierre. En producción `simondrop-service` tiene `@Cron('* * * * *')` que consulta `WHERE cierre_en <= NOW() AND status='OPEN'`, actualiza a `CLOSED` y emite `SimonDropCerradoIntegrationEvent` al exchange topic.
   - Estas simplificaciones son intencionales para mantener el POC enfocado en hexagonal + Outbox. La arquitectura de producción se valida en Módulo 5.
 
 ### 12.4 Componentes diseñados sin POC de validación en release/2.0.0

@@ -95,6 +95,14 @@
 - **Bugs resueltos**: BigInt JSON serialization (Prisma sizeBytes), JwtAuthGuard DI container, amqplib ChannelModel typing
 - **Verificación**: applied — demo funcional en http://localhost:5173
 
+### PM-20260528-012
+- **Timestamp**: 2026-05-29T03:00:00-04:00
+- **Intent**: fix
+- **Artefactos generados**:
+  - `docs/DTI.md` — §7.1: `UserRegisteredEvent` → `UsuarioAutenticadoIntegrationEvent` (alineado con catalog.md); §12.3: dos simplificaciones nuevas documentadas — JWT HS256 vs RS256 producción, y cron de cierre automático de SimonDrops
+- **Trazabilidad**: DTI §7.1 (catálogo eventos), DTI §12.3 (simplificaciones POC-03), events/catalog.md (Single Writer)
+- **Verificación**: applied
+
 ### PM-20260528-011
 - **Timestamp**: 2026-05-29T02:00:00-04:00
 - **Intent**: fix + docs
