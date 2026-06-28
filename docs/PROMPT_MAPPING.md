@@ -212,6 +212,16 @@
 - **Trazabilidad**: cierre release/2.0.0 → main; CLAUDE.md §8 (política Git), §11 (config Claude Code)
 - **Verificación**: applied
 
+### PM-20260628-002
+- **Timestamp**: 2026-06-28T15:25:00-04:00
+- **Intent**: chore
+- **Artefactos generados**:
+  - `.claude/hooks/relocate-local-perms.py` — reubica permisos con rutas absolutas (`/Users/`, `/home/`) desde settings.json a settings.local.json; idempotente, fail-safe, con re-stage seguro (RELOCATE_RESTAGE)
+  - `.claude/settings.json` — hooks `PreToolUse` (antes de cada `git commit`) y `SessionEnd` cableados al script
+  - `CLAUDE.md` §11 — documentadas las dos redes de seguridad automáticas
+- **Trazabilidad**: CLAUDE.md §11 (config Claude Code, settings.json vs local)
+- **Verificación**: applied — flujo pre-commit verificado en repo temporal (settings.json staged se limpia, local no entra al commit); SessionEnd como barrido final
+
 ---
 
 ## Métricas AI-SDLC — release/2.0.0

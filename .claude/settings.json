@@ -11,7 +11,38 @@
       "Bash(npm install *)",
       "Bash(npm run *)",
       "Bash(npx prisma *)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(git commit -m 'chore\\(claude\\): separar config compartida vs local en .claude *)",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Bash(git commit -m 'chore\\(claude\\): hooks para mantener settings.json portable *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command' | grep -q 'commit' && RELOCATE_RESTAGE=1 python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/relocate-local-perms.py\" || true",
+            "timeout": 10,
+            "statusMessage": "Revisando settings.json antes del commit…"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/relocate-local-perms.py\"",
+            "timeout": 10,
+            "statusMessage": "Reubicando permisos locales…"
+          }
+        ]
+      }
     ]
   }
 }

@@ -186,3 +186,14 @@ Dos archivos de configuración con propósitos distintos:
 - Nunca escribir rutas absolutas ni permisos one-off en `settings.json`.
 - Permisos aprobados "no volver a preguntar" → van a `settings.local.json` (comportamiento por defecto de Claude Code).
 - Si un permiso es genuinamente reutilizable por el equipo, promoverlo manualmente a `settings.json` como glob portable.
+
+**Redes de seguridad automáticas** (`.claude/hooks/relocate-local-perms.py` mueve
+permisos con ruta absoluta `/Users/`, `/home/` y `additionalDirectories` desde
+`settings.json` → `settings.local.json`; idempotente y fail-safe):
+- **`PreToolUse` (antes de cada `git commit`)**: limpia `settings.json` y, si ya
+  estaba *staged*, refresca su copia en el índice. Nunca lo agrega si no estaba
+  staged (no contamina commits ajenos). Garantiza que ningún commit lleve permisos
+  de máquina.
+- **`SessionEnd` (al cerrar sesión)**: barrido final por si algo se coló.
+
+Así `settings.json` se mantiene portable aunque un permiso de máquina se cuele.
