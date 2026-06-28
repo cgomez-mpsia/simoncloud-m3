@@ -4,7 +4,14 @@
       "Bash(grep -E \"\\\\.\\(md|mmd\\)$\")",
       "Bash(git checkout *)",
       "Bash(git commit -m ' *)",
-      "Bash(git mv *)"
+      "Bash(git mv *)",
+      "Bash(git restore *)",
+      "Bash(git stash *)",
+      "Bash(git check-ignore *)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(npx prisma *)",
+      "Bash(npx tsc *)"
     ]
   }
 }

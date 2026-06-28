@@ -1,2 +1,5 @@
 old-docs/
 classes/
+
+# Claude Code — config local de esta máquina (permisos y dirs personales)
+.claude/settings.local.json

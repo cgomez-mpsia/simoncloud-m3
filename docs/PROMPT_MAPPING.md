@@ -201,6 +201,17 @@
 - **Trazabilidad**: FSD-UC-011, DTI §7 (events), DTI §8 (ADR-0005), Criterio 2/6/7 rubrica defensa
 - **Verificación**: applied — commit pendiente
 
+### PM-20260628-001
+- **Timestamp**: 2026-06-28T15:10:00-04:00
+- **Intent**: chore
+- **Artefactos generados**:
+  - `.gitignore` — ignorar solo `.claude/settings.local.json` (config local de esta máquina)
+  - `.claude/settings.json` — depurado: solo permisos portables (globs reutilizables por cualquier agente)
+  - `.claude/settings.local.json` — nuevo (no versionado): permisos con rutas absolutas y `additionalDirectories` de esta máquina
+  - `CLAUDE.md` §11 — convención settings.json (compartido) vs settings.local.json (local) para todos los agentes
+- **Trazabilidad**: cierre release/2.0.0 → main; CLAUDE.md §8 (política Git), §11 (config Claude Code)
+- **Verificación**: applied
+
 ---
 
 ## Métricas AI-SDLC — release/2.0.0

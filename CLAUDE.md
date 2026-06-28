@@ -170,3 +170,19 @@ En `.claude/commands/` hay 12 comandos especializados para este proyecto:
 | `/ipc-selector` | Elegir patrón de comunicación entre servicios |
 | `/adr-recorder` | Redactar un ADR con ≥3 opciones y trade-offs |
 | `/dti-author` | Completar secciones del DTI vFinal |
+
+---
+
+## 11. Configuración de Claude Code — settings.json vs settings.local.json
+
+Dos archivos de configuración con propósitos distintos:
+
+| Archivo | Versionado | Contenido permitido |
+|---|---|---|
+| `.claude/settings.json` | **Sí** (commiteado) | Solo config/permisos **portables** útiles a cualquier agente o máquina: globs genéricos (`npm run *`, `npx prisma *`, `git checkout *`), hooks compartidos, env del proyecto. |
+| `.claude/settings.local.json` | **No** (en `.gitignore`) | Todo lo específico de **esta** máquina: rutas absolutas (`/Users/.../`), `additionalDirectories`, permisos one-off, credenciales/env locales. |
+
+**Reglas para los agentes:**
+- Nunca escribir rutas absolutas ni permisos one-off en `settings.json`.
+- Permisos aprobados "no volver a preguntar" → van a `settings.local.json` (comportamiento por defecto de Claude Code).
+- Si un permiso es genuinamente reutilizable por el equipo, promoverlo manualmente a `settings.json` como glob portable.
