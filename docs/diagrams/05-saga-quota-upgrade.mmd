@@ -1,0 +1,32 @@
+---
+title: "Saga Orquestada — Upgrade de Cuota por QR Simple (FSD-UC-003)"
+---
+stateDiagram-v2
+    [*] --> UpgradePending : Estudiante solicita upgrade 50GB\n[Transacción Compensable]
+
+    UpgradePending --> QRGenerado : GenerateQR → QR Simple Bolivia API\nQR válido por 5 minutos
+
+    QRGenerado --> QRExpirado : Timeout 5 min\nsin pago detectado
+
+    QRExpirado --> UpgradeCancelled : CancelUpgradeRequest\n[Transacción Compensatoria]
+
+    UpgradeCancelled --> [*] : Notifica "QR expirado,\ngenera uno nuevo"
+
+    QRGenerado --> HMACInvalido : Webhook recibido\npero HMAC inválido
+
+    HMACInvalido --> UpgradeCancelled : Compensar
+
+    QRGenerado --> PagoConfirmado : Webhook payment.confirmed\nHMAC válido ✓\n[TRANSACCIÓN PIVOTE — irrevocable]
+
+    PagoConfirmado --> QuotaActualizada : UpgradeQuota\nquota_limit_mb = 51200\n[Transacción Reintentable]
+
+    QuotaActualizada --> EmailEnviado : SendConfirmationEmail\n[Transacción Reintentable]
+
+    EmailEnviado --> [*] : ✅ Upgrade completado\nUsuario notificado
+
+    note right of PagoConfirmado
+        Punto de no retorno
+        Si falla UpgradeQuota → reintentar
+        No hay compensación posible
+        el pago ya ocurrió
+    end note

@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "PagoConfirmadoIntegrationEvent",
+  "title": "PagoConfirmadoIntegrationEvent",
+  "description": "Emitido por el bounded context Pagos cuando recibe el webhook de QR Simple Bolivia con firma HMAC válida. Es el punto de no retorno (transacción pivote) en la Saga de upgrade de cuota. UC origen: FSD-UC-003.",
+  "x-producer": "pagos-service (webhook adapter)",
+  "x-consumers": ["pagos-service (saga orchestrator)", "notification-service"],
+  "x-compatibility": "backward",
+  "x-guarantee": "at-least-once",
+  "x-exchange": "simoncloud.pagos.events",
+  "x-routing-key": "pago.confirmado",
+  "x-saga": "QuotaUpgradeSaga — transacción pivote",
+  "type": "object",
+  "required": [
+    "eventId",
+    "eventType",
+    "eventVersion",
+    "sagaId",
+    "paymentId",
+    "userId",
+    "montoBOB",
+    "hmacValido",
+    "confirmedAt"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Idempotency key primario — UUID v4 único por emisión del webhook"
+    },
+    "eventType": {
+      "type": "string",
+      "const": "PagoConfirmadoIntegrationEvent",
+      "description": "Discriminador de tipo"
+    },
+    "eventVersion": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "sagaId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Correlation ID de la saga QuotaUpgrade. Propagado desde QuotaUpgradeSolicitadoEvent."
+    },
+    "paymentId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "ID de pago asignado por QR Simple Bolivia. Usado como idempotency key secundario."
+    },
+    "userId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Identificador del usuario que realizó el pago"
+    },
+    "montoBOB": {
+      "type": "number",
+      "multipleOf": 0.01,
+      "minimum": 0.01,
+      "maximum": 9999.99,
+      "description": "Monto pagado en Bolivianos (BOB) con exactamente 2 decimales. NUNCA usar float sin control de precisión."
+    },
+    "planSolicitado": {
+      "type": "string",
+      "enum": ["PRO"],
+      "description": "Plan solicitado. Valor extensible (backward-compatible). Actualmente solo PRO."
+    },
+    "hmacValido": {
+      "type": "boolean",
+      "description": "true si la firma HMAC del webhook fue validada exitosamente por el adaptador. SIEMPRE debe ser true al emitir este evento; si hmacValido=false, no emitir el evento (descartar silenciosamente y registrar en audit_log)."
+    },
+    "confirmedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp ISO 8601 UTC del momento en que QR Simple Bolivia envió el webhook"
+    }
+  },
+  "examples": [
+    {
+      "eventId": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+      "eventType": "PagoConfirmadoIntegrationEvent",
+      "eventVersion": "1.0",
+      "sagaId": "a0b1c2d3-e4f5-6789-abcd-ef0123456789",
+      "paymentId": "QRS-2026-1234567",
+      "userId": "550e8400-e29b-41d4-a716-446655440000",
+      "montoBOB": 50.00,
+      "planSolicitado": "PRO",
+      "hmacValido": true,
+      "confirmedAt": "2026-10-15T23:58:42Z"
+    }
+  ]
+}

@@ -1,3 +1,5 @@
+> **⚠️ ARCHIVO HISTÓRICO — Borrador supersedido por `docs/DTI.md` (vFinal release/2.0.0). No usar como referencia.**
+
 # Documento de Diseño Técnico (DTI) - SimonCloud
 
 ## §0. Metadatos del Documento

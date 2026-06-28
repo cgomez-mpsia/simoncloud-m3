@@ -1,0 +1,107 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "ArchivoSubidoIntegrationEvent",
+  "title": "ArchivoSubidoIntegrationEvent",
+  "description": "Emitido por SimonDrop bounded context cuando un estudiante completa exitosamente la subida de un archivo. Requiere Outbox Pattern (Prisma $transaction + outbox_events). UC origen: FSD-UC-002.",
+  "x-producer": "simondrop-service",
+  "x-consumers": ["notification-service", "expedientes-service", "admin-service"],
+  "x-compatibility": "backward",
+  "x-guarantee": "at-least-once",
+  "x-exchange": "simoncloud.simondrop.events",
+  "x-routing-key": "archivo.subido",
+  "type": "object",
+  "required": [
+    "eventId",
+    "eventType",
+    "eventVersion",
+    "archivoId",
+    "dropId",
+    "estudianteId",
+    "docenteId",
+    "sha256",
+    "tamanoBytes",
+    "nombreOriginal",
+    "subitoEn"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Idempotency key primario — UUID v4 único por emisión"
+    },
+    "eventType": {
+      "type": "string",
+      "const": "ArchivoSubidoIntegrationEvent",
+      "description": "Discriminador de tipo para deserialización polimórfica"
+    },
+    "eventVersion": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Versión del schema para gestión de compatibility"
+    },
+    "archivoId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Identificador del archivo en el bounded context SimonDrop"
+    },
+    "dropId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Identificador del SimonDrop al que pertenece el archivo"
+    },
+    "estudianteId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Identificador del usuario que realizó la subida (rol ESTUDIANTE)"
+    },
+    "docenteId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Identificador del docente propietario del SimonDrop"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "Hash SHA-256 del contenido del archivo, generado con módulo nativo crypto de Node.js. Exactamente 64 caracteres hexadecimales en minúsculas."
+    },
+    "tamanoBytes": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483648,
+      "description": "Tamaño del archivo en bytes. Máximo 2 GB (2147483648 bytes) por PRD-REQ-002."
+    },
+    "nombreOriginal": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "description": "Nombre original del archivo tal como lo subió el estudiante"
+    },
+    "mimeType": {
+      "type": "string",
+      "description": "Tipo MIME detectado en el servidor (opcional — campo nuevo backward-compatible)",
+      "examples": ["application/pdf", "application/zip", "video/mp4"]
+    },
+    "subitoEn": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp ISO 8601 UTC del momento de confirmación de subida completa (zona America/La_Paz recomendada para display, UTC para almacenamiento)"
+    }
+  },
+  "examples": [
+    {
+      "eventId": "550e8400-e29b-41d4-a716-446655440000",
+      "eventType": "ArchivoSubidoIntegrationEvent",
+      "eventVersion": "1.0",
+      "archivoId": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+      "dropId": "6ba7b811-9dad-11d1-80b4-00c04fd430c8",
+      "estudianteId": "6ba7b812-9dad-11d1-80b4-00c04fd430c8",
+      "docenteId": "6ba7b813-9dad-11d1-80b4-00c04fd430c8",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tamanoBytes": 52428800,
+      "nombreOriginal": "tesis_final_v2.pdf",
+      "mimeType": "application/pdf",
+      "subitoEn": "2026-10-15T23:45:00Z"
+    }
+  ]
+}

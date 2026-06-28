@@ -1,0 +1,51 @@
+---
+title: "Secuencia — Subida Segura con Hash SHA-256 (FSD-UC-002)"
+---
+sequenceDiagram
+    actor E as Estudiante
+    participant SPA as React SPA
+    participant GW as API Gateway
+    participant FS as file-service
+    participant CB as CB[MinIO]
+    participant S3 as MinIO
+    participant BD as PostgreSQL
+    participant OB as Outbox Table
+    participant RMQ as RabbitMQ
+    participant NS as notification-service
+
+    E->>SPA: Arrastra archivo (2GB)
+    SPA->>GW: POST /drops/:id/upload/init (JWT)
+    GW->>GW: Valida JWT
+    GW->>FS: Inicia sesión de upload
+    FS->>BD: INSERT upload_session {uploadId, chunks, progress=0%}
+    FS-->>SPA: {uploadId, presignedUrls[]}
+
+    loop Por cada chunk (8MB)
+        SPA->>S3: PUT chunk (presigned URL directa)
+        S3-->>SPA: 200 OK
+        SPA->>GW: PATCH /upload/:id/progress
+        GW->>FS: Actualiza progreso
+        FS->>CB: Check CircuitBreaker[MinIO]
+        CB-->>FS: CLOSED
+        FS->>BD: UPDATE upload_session progress%
+        FS-->>SPA: {progress: N%, speed: "X MB/s"}
+    end
+
+    SPA->>GW: POST /upload/:id/complete
+    GW->>FS: CompleteMultipartUpload
+    FS->>S3: CompleteMultipartUpload API
+    S3-->>FS: 200 OK (ETag final)
+    FS->>FS: Calcula SHA-256 del stream final
+
+    Note over FS,OB: Transacción atómica PostgreSQL
+    FS->>BD: INSERT archivo {hash, solo_lectura=true}
+    FS->>OB: INSERT ArchivoSubidoIntegrationEvent {fileId, docenteId, hash}
+    BD-->>FS: COMMIT
+
+    FS-->>SPA: {fileId, hash_sha256, recibo_url}
+    SPA-->>E: ✅ Entrega confirmada + Recibo PDF
+
+    Note over OB,NS: Async — Message Relay (Outbox Pattern)
+    OB->>RMQ: Publica ArchivoSubidoIntegrationEvent (AMQP)
+    RMQ->>NS: Consume evento
+    NS-->>E: Email/Push al docente "Nueva entrega"

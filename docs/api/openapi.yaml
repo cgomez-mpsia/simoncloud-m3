@@ -1,0 +1,932 @@
+openapi: "3.1.0"
+
+info:
+  title: SimonCloud API
+  version: "1.0.0"
+  description: |
+    API REST de SimonCloud — plataforma documental UMSS.
+
+    **Trazabilidad**: Todos los endpoints están trazados a su FSD-UC correspondiente.
+    **Autenticación**: JWT Bearer (emitido por auth-service tras intercambio con WebSISS SSO).
+    **Usuario Externo**: Acceso via token temporal firmado como query param `?token=` (sin JWT).
+    **Integridad**: Hash SHA-256 de cada archivo, siempre generado en el servidor (nunca en cliente).
+
+    Documentación completa: `docs/fsd/FSD_vFinal.md`
+
+  contact:
+    name: Carlos Alberto Gomez Ormachea
+    email: beto.sempai@gmail.com
+
+servers:
+  - url: http://localhost:3000
+    description: Dev local (NestJS + PostgreSQL + MinIO)
+  - url: https://simoncloud.umss.edu.bo/api
+    description: Producción on-premise DTIC-UMSS
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT emitido por auth-service (TTL 8 horas). Almacenado en cookie HttpOnly en el frontend.
+
+  schemas:
+    UUID:
+      type: string
+      format: uuid
+      example: "550e8400-e29b-41d4-a716-446655440000"
+
+    SHA256Hash:
+      type: string
+      pattern: "^[a-f0-9]{64}$"
+      description: Hash SHA-256 generado con módulo nativo crypto de Node.js. Exactamente 64 caracteres hexadecimales en minúsculas.
+      example: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+    ISO8601DateTime:
+      type: string
+      format: date-time
+      example: "2026-10-15T20:00:00-04:00"
+
+    RolUsuario:
+      type: string
+      enum: [ESTUDIANTE, DOCENTE, ADMINISTRATIVO, ADMIN]
+
+    EstadoDocumento:
+      type: string
+      enum: [PENDIENTE, APROBADO, RECHAZADO, EN_CORRECCION]
+
+    ErrorResponse:
+      type: object
+      required: [statusCode, message, errorCode, timestamp]
+      properties:
+        statusCode:
+          type: integer
+          example: 422
+        message:
+          type: string
+          example: "Regla de negocio violada"
+        errorCode:
+          type: string
+          example: "SIMONDROP_CERRADO"
+          description: Código de error trazable a BR-NNN del FSD §5
+        timestamp:
+          $ref: "#/components/schemas/ISO8601DateTime"
+
+    # Auth schemas
+    LoginRequest:
+      type: object
+      required: [codigoSIS, password]
+      properties:
+        codigoSIS:
+          type: string
+          minLength: 7
+          maxLength: 20
+          example: "20220001"
+        password:
+          type: string
+          format: password
+
+    LoginResponse:
+      type: object
+      required: [jwtToken, rol, nombreCompleto, expiresAt]
+      properties:
+        jwtToken:
+          type: string
+          description: JWT firmado HS256, TTL 8 horas
+        rol:
+          $ref: "#/components/schemas/RolUsuario"
+        nombreCompleto:
+          type: string
+          example: "Juan Pérez Mamani"
+        expiresAt:
+          $ref: "#/components/schemas/ISO8601DateTime"
+
+    # SimonDrop schemas
+    CreateDropRequest:
+      type: object
+      required: [titulo, cierreEn]
+      properties:
+        titulo:
+          type: string
+          minLength: 5
+          maxLength: 200
+          example: "Entrega Proyecto Final INF-401 2026-2"
+        descripcion:
+          type: string
+          maxLength: 1000
+        cierreEn:
+          $ref: "#/components/schemas/ISO8601DateTime"
+        lmsAssignmentId:
+          type: string
+          nullable: true
+          description: ID de la tarea en Moodle/Classroom si el Drop fue creado via LTI (FSD-UC-001)
+        lmsCourseId:
+          type: string
+          nullable: true
+
+    DropResponse:
+      type: object
+      required: [id, titulo, cierreEn, status, docenteId, creadoEn]
+      properties:
+        id:
+          $ref: "#/components/schemas/UUID"
+        titulo:
+          type: string
+        descripcion:
+          type: string
+          nullable: true
+        cierreEn:
+          $ref: "#/components/schemas/ISO8601DateTime"
+        status:
+          type: string
+          enum: [ACTIVO, CERRADO]
+        docenteId:
+          $ref: "#/components/schemas/UUID"
+        lmsAssignmentId:
+          type: string
+          nullable: true
+        totalArchivos:
+          type: integer
+          minimum: 0
+        creadoEn:
+          $ref: "#/components/schemas/ISO8601DateTime"
+
+    GenerateTokenRequest:
+      type: object
+      required: [ttlHoras]
+      properties:
+        ttlHoras:
+          type: integer
+          minimum: 1
+          maximum: 72
+          description: Tiempo de vida del token en horas. Máximo 72 horas por BR-011.
+          example: 48
+
+    TokenExternoResponse:
+      type: object
+      required: [tokenId, enlace, expiresAt]
+      properties:
+        tokenId:
+          $ref: "#/components/schemas/UUID"
+        enlace:
+          type: string
+          format: uri
+          description: URL pública de acceso para el Usuario Externo
+          example: "https://simoncloud.umss.edu.bo/external/drops/abc123?token=eyJhbGci..."
+        expiresAt:
+          $ref: "#/components/schemas/ISO8601DateTime"
+
+    # File schemas
+    ArchivoResponse:
+      type: object
+      required: [id, dropId, estudianteId, sha256, tamanoBytes, nombreOriginal, soloLectura, subitoEn]
+      properties:
+        id:
+          $ref: "#/components/schemas/UUID"
+        dropId:
+          $ref: "#/components/schemas/UUID"
+        estudianteId:
+          $ref: "#/components/schemas/UUID"
+        sha256:
+          $ref: "#/components/schemas/SHA256Hash"
+        tamanoBytes:
+          type: integer
+          minimum: 1
+        nombreOriginal:
+          type: string
+        mimeType:
+          type: string
+          nullable: true
+        soloLectura:
+          type: boolean
+          description: true cuando el archivo está en estado inmutable (depositado en SimonDrop cerrado)
+        reciboUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: URL al PDF de recibo con hash y timestamps
+        subitoEn:
+          $ref: "#/components/schemas/ISO8601DateTime"
+
+    ExternalArchivoResponse:
+      type: object
+      required: [fileName, sha256, uploadedAt, dropTitle, downloadUrl]
+      properties:
+        fileName:
+          type: string
+        sha256:
+          $ref: "#/components/schemas/SHA256Hash"
+        uploadedAt:
+          $ref: "#/components/schemas/ISO8601DateTime"
+        dropTitle:
+          type: string
+        downloadUrl:
+          type: string
+          format: uri
+          description: URL presignada de MinIO con TTL de 5 minutos
+
+    # Quota / Payment schemas
+    QuotaStatusResponse:
+      type: object
+      required: [userId, plan, usadoMb, limiteMb, porcentajeUso]
+      properties:
+        userId:
+          $ref: "#/components/schemas/UUID"
+        plan:
+          type: string
+          enum: [FREE, PRO]
+        usadoMb:
+          type: number
+          multipleOf: 0.01
+        limiteMb:
+          type: integer
+        porcentajeUso:
+          type: number
+          minimum: 0
+          maximum: 100
+
+    UpgradeQrResponse:
+      type: object
+      required: [sagaId, qrCode, montoBOB, expiresAt]
+      properties:
+        sagaId:
+          $ref: "#/components/schemas/UUID"
+          description: Correlation ID de la saga QuotaUpgrade
+        qrCode:
+          type: string
+          description: Imagen del QR en base64 (data:image/png;base64,...)
+        montoBOB:
+          type: number
+          multipleOf: 0.01
+          example: 50.00
+        expiresAt:
+          $ref: "#/components/schemas/ISO8601DateTime"
+          description: El QR expira en 5 minutos (TTL fijo por FSD-UC-003)
+
+    # Admin schemas
+    MetricasGlobalesResponse:
+      type: object
+      required: [almacenamientoTotalMb, usuariosActivos24h, subidasUltimas24h, porcentajeCapacidad]
+      properties:
+        almacenamientoTotalMb:
+          type: number
+        usuariosActivos24h:
+          type: integer
+        subidasUltimas24h:
+          type: integer
+        porcentajeCapacidad:
+          type: number
+          minimum: 0
+          maximum: 100
+        alertaCritica:
+          type: boolean
+          description: true cuando porcentajeCapacidad > 80 (FSD-UC-010 A1)
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: auth
+    description: Autenticación SSO WebSISS (FSD-UC-004)
+  - name: drops
+    description: Gestión de SimonDrops — buzones de entrega (FSD-UC-001)
+  - name: archivos
+    description: Upload seguro y comprobante SHA-256 (FSD-UC-002, FSD-UC-005, FSD-UC-008, FSD-UC-009)
+  - name: quota
+    description: Gestión de cuota de almacenamiento y upgrade Pro (FSD-UC-003)
+  - name: expedientes
+    description: Aprobación, rechazo y control de versiones de documentos (FSD-UC-005, FSD-UC-006)
+  - name: external
+    description: Acceso de Usuario Externo sin cuenta institucional (FSD-UC-011)
+  - name: admin
+    description: Panel de administrador y métricas globales (FSD-UC-010)
+
+paths:
+
+  # ─── AUTH ───────────────────────────────────────────────────────────────────
+  /auth/login:
+    post:
+      tags: [auth]
+      operationId: loginWebSISS
+      summary: "FSD-UC-004 — Autenticación SSO WebSISS"
+      description: |
+        Intercambia credenciales WebSISS por un JWT de SimonCloud (TTL 8 horas).
+        PRD-US-012, PRD-REQ-007, BR-006.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Autenticación exitosa
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: "Credenciales inválidas o WebSISS no disponible"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/refresh:
+    post:
+      tags: [auth]
+      operationId: refreshToken
+      summary: Renovar JWT antes de expiración
+      description: Renueva el JWT activo si aún es válido. Sin re-autenticación con WebSISS.
+      responses:
+        "200":
+          description: JWT renovado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: JWT expirado o inválido — redirigir a /auth/login
+
+  # ─── SIMON DROPS ────────────────────────────────────────────────────────────
+  /drops:
+    post:
+      tags: [drops]
+      operationId: createDrop
+      summary: "FSD-UC-001 — Crear SimonDrop"
+      description: |
+        Crea un buzón de entrega. Requiere rol DOCENTE.
+        Si `lmsAssignmentId` está presente, el Drop fue creado via integración LTI desde Moodle/Classroom.
+        PRD-US-001, PRD-REQ-001, BR-006.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDropRequest"
+      responses:
+        "201":
+          description: SimonDrop creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DropResponse"
+        "400":
+          description: Datos de entrada inválidos (cierreEn en el pasado, título muy corto)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: JWT inválido o expirado
+        "403":
+          description: "Rol insuficiente — requiere DOCENTE"
+
+    get:
+      tags: [drops]
+      operationId: listDropsByDocente
+      summary: Listar SimonDrops del docente autenticado
+      description: Retorna los SimonDrops creados por el docente autenticado. Paginado.
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVO, CERRADO]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        "200":
+          description: Lista de SimonDrops
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/DropResponse"
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  pageSize:
+                    type: integer
+
+  /drops/{dropId}:
+    get:
+      tags: [drops]
+      operationId: getDrop
+      summary: Obtener detalle de un SimonDrop
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: Detalle del SimonDrop
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DropResponse"
+        "404":
+          description: SimonDrop no encontrado
+
+  /drops/{dropId}/close:
+    post:
+      tags: [drops]
+      operationId: closeDrop
+      summary: "FSD-UC-001 — Cerrar SimonDrop manualmente"
+      description: Cierra el SimonDrop antes de su fecha de cierre programada. Requiere ser el docente propietario. BR-005.
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: SimonDrop cerrado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DropResponse"
+        "422":
+          description: El SimonDrop ya está cerrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /drops/{dropId}/external-token:
+    post:
+      tags: [drops]
+      operationId: generateExternalToken
+      summary: "FSD-UC-011 — Generar token temporal para Usuario Externo"
+      description: |
+        Genera un token temporal firmado (HMAC-SHA256) para que un Usuario Externo
+        (evaluador, miembro de tribunal) acceda a los archivos del SimonDrop sin cuenta institucional.
+        PRD-US-022, PRD-REQ-013, BR-011.
+        Requiere rol DOCENTE y ser el propietario del Drop.
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateTokenRequest"
+      responses:
+        "201":
+          description: Token temporal generado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenExternoResponse"
+        "403":
+          description: No es propietario del SimonDrop
+        "422":
+          description: SimonDrop sin archivos — no se puede generar token (BR-011)
+
+  # ─── ARCHIVOS ────────────────────────────────────────────────────────────────
+  /drops/{dropId}/archivos:
+    post:
+      tags: [archivos]
+      operationId: uploadArchivo
+      summary: "FSD-UC-002 — Subir archivo a SimonDrop con generación de SHA-256"
+      description: |
+        Sube un archivo a un SimonDrop activo. El SHA-256 se genera en el servidor con el
+        módulo nativo crypto de Node.js — NUNCA en el cliente.
+        El archivo queda en estado solo_lectura=true tras la subida.
+        PRD-US-003, PRD-REQ-002, BR-007, BR-005.
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [archivo]
+              properties:
+                archivo:
+                  type: string
+                  format: binary
+                  description: "Archivo a subir. Máximo 2 GB (2147483648 bytes) por PRD-REQ-002."
+      responses:
+        "201":
+          description: Archivo subido exitosamente. Incluye SHA-256 y URL del recibo PDF.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArchivoResponse"
+        "400":
+          description: Archivo vacío o nombre inválido
+        "401":
+          description: No autenticado
+        "403":
+          description: Rol insuficiente o SimonDrop de otro docente
+        "413":
+          description: "Archivo excede el límite de 2 GB"
+        "422":
+          description: "SimonDrop cerrado (BR-005) o cuota insuficiente — redirigir a upgrade"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    get:
+      tags: [archivos]
+      operationId: listArchivos
+      summary: Listar archivos de un SimonDrop
+      description: El docente ve todos los archivos entregados. El estudiante ve solo los suyos.
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: Lista de archivos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ArchivoResponse"
+
+  /archivos/{archivoId}/versiones:
+    get:
+      tags: [archivos, expedientes]
+      operationId: getVersionesArchivo
+      summary: "FSD-UC-005 — Historial de versiones de un documento"
+      description: |
+        Retorna el historial de versiones del archivo (audit log de cambios).
+        Requiere rol ADMINISTRATIVO o ser el propietario.
+        PRD-US-018, PRD-REQ-011.
+      parameters:
+        - name: archivoId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: Historial de versiones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    version:
+                      type: integer
+                    sha256:
+                      $ref: "#/components/schemas/SHA256Hash"
+                    tamanoBytes:
+                      type: integer
+                    modificadoPor:
+                      $ref: "#/components/schemas/UUID"
+                    modificadoEn:
+                      $ref: "#/components/schemas/ISO8601DateTime"
+
+  /archivos/{archivoId}/compartir:
+    post:
+      tags: [archivos]
+      operationId: compartirArchivo
+      summary: "FSD-UC-008 — Compartir archivo con correo @umss.edu.bo"
+      description: |
+        Genera un enlace de acceso único con expiración de 7 días para un correo institucional.
+        Solo acepta dominios @umss.edu.bo o @est.umss.edu.bo (BR-006).
+        PRD-US-013, PRD-REQ-010.
+      parameters:
+        - name: archivoId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [correoDestino]
+              properties:
+                correoDestino:
+                  type: string
+                  format: email
+                  pattern: "^[^@]+@(umss|est\\.umss)\\.edu\\.bo$"
+                  example: "alumno@est.umss.edu.bo"
+      responses:
+        "201":
+          description: Enlace generado y enviado al correo destino
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  enlaceId:
+                    $ref: "#/components/schemas/UUID"
+                  expiresAt:
+                    $ref: "#/components/schemas/ISO8601DateTime"
+        "422":
+          description: Correo externo no institucional (BR-006)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /archivos/{archivoId}:
+    delete:
+      tags: [archivos]
+      operationId: moverPapelera
+      summary: "FSD-UC-009 — Mover archivo a papelera (soft delete 30 días)"
+      description: |
+        Mueve el archivo a la papelera. El archivo no se elimina físicamente por 30 días.
+        Archivos en SimonDrops cerrados no pueden ser eliminados por el estudiante (solo Admin).
+        PRD-US-019, BR-005.
+      parameters:
+        - name: archivoId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: Archivo movido a papelera
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  purgaEn:
+                    $ref: "#/components/schemas/ISO8601DateTime"
+        "422":
+          description: Archivo en SimonDrop cerrado — solo Admin puede eliminar
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ─── QUOTA ──────────────────────────────────────────────────────────────────
+  /quota/status:
+    get:
+      tags: [quota]
+      operationId: getQuotaStatus
+      summary: "FSD-UC-003 — Consultar estado de cuota del usuario autenticado"
+      responses:
+        "200":
+          description: Estado de cuota actual
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaStatusResponse"
+
+  /quota/upgrade/qr:
+    post:
+      tags: [quota]
+      operationId: initiateUpgradeQR
+      summary: "FSD-UC-003 — Iniciar upgrade a Pro via QR Simple Bolivia"
+      description: |
+        Inicia la saga de upgrade de cuota. Genera un QR de Bs. 50 con TTL 5 minutos.
+        PRD-US-004, PRD-REQ-004, BR-010.
+        Idempotency-Key header obligatorio para evitar doble cobro.
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+          description: UUID único por intento de pago. Previene doble cobro en caso de retry.
+      responses:
+        "201":
+          description: QR generado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpgradeQrResponse"
+        "422":
+          description: Usuario ya tiene plan Pro activo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ─── EXPEDIENTES ────────────────────────────────────────────────────────────
+  /expedientes/{documentoId}/aprobar:
+    post:
+      tags: [expedientes]
+      operationId: aprobarDocumento
+      summary: "FSD-UC-006 — Aprobar documento (Administrativo)"
+      description: |
+        Cambia el estado del documento a APROBADO (inmutable).
+        Notifica al solicitante. Registra administrativo responsable en audit_log.
+        PRD-US-017, PRD-REQ-011, BR-005.
+      parameters:
+        - name: documentoId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+      responses:
+        "200":
+          description: Documento aprobado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  documentoId:
+                    $ref: "#/components/schemas/UUID"
+                  estado:
+                    $ref: "#/components/schemas/EstadoDocumento"
+                  aprobadoEn:
+                    $ref: "#/components/schemas/ISO8601DateTime"
+        "403":
+          description: Rol insuficiente — requiere ADMINISTRATIVO
+        "422":
+          description: Documento no está en estado PENDIENTE
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /expedientes/{documentoId}/rechazar:
+    post:
+      tags: [expedientes]
+      operationId: rechazarDocumento
+      summary: "FSD-UC-006 — Rechazar documento con justificación obligatoria"
+      description: |
+        Cambia el estado a RECHAZADO. La justificación debe tener mínimo 20 caracteres (FSD-UC-006 A1).
+        PRD-US-017, PRD-REQ-011, BR-005.
+      parameters:
+        - name: documentoId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [justificacion]
+              properties:
+                justificacion:
+                  type: string
+                  minLength: 20
+                  maxLength: 1000
+                  example: "El documento no cumple con el formato requerido por la normativa 2026."
+      responses:
+        "200":
+          description: Documento rechazado
+        "400":
+          description: Justificación demasiado corta (< 20 caracteres)
+        "422":
+          description: Documento no está en estado PENDIENTE o EN_CORRECCION
+
+  # ─── EXTERNAL (Usuario Externo — sin JWT) ──────────────────────────────────
+  /external/drops/{dropId}/archivos:
+    get:
+      tags: [external]
+      operationId: getExternalArchivo
+      summary: "FSD-UC-011 — Acceso de Usuario Externo con token temporal"
+      description: |
+        Permite a un Usuario Externo (evaluador, miembro de tribunal sin cuenta UMSS)
+        descargar un archivo de un SimonDrop mediante un token temporal firmado.
+        NO requiere JWT — el token va como query parameter.
+        El sistema muestra el SHA-256 para verificación de integridad.
+        El acceso queda registrado en audit_log con IP y timestamp.
+        PRD-US-022, PRD-REQ-013, BR-011.
+      security: []
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Token temporal firmado (HMAC-SHA256). Generado por el docente con POST /drops/{dropId}/external-token.
+      responses:
+        "200":
+          description: Información del archivo y URL presignada de descarga (TTL 5 min)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExternalArchivoResponse"
+        "403":
+          description: Token inválido o corrupto — sin información adicional del recurso (BR-011)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "410":
+          description: Token expirado — enlace ya no disponible
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: SimonDrop eliminado o sin archivos disponibles
+
+  # ─── ADMIN ──────────────────────────────────────────────────────────────────
+  /admin/metrics:
+    get:
+      tags: [admin]
+      operationId: getMetricasGlobales
+      summary: "FSD-UC-010 — Panel de Administrador (Métricas Globales)"
+      description: |
+        Lee el Read Model materializado por CQRS (consistencia eventual).
+        Requiere rol ADMIN.
+        PRD-US-020, PRD-US-011, BR-006.
+      responses:
+        "200":
+          description: Métricas globales del sistema
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetricasGlobalesResponse"
+        "403":
+          description: Rol insuficiente — requiere ADMIN
+
+  /admin/usuarios/{userId}/quota:
+    patch:
+      tags: [admin]
+      operationId: ajustarQuotaUsuario
+      summary: "FSD-UC-010 — Ajustar cuota de un usuario específico"
+      description: |
+        El administrador puede ajustar la cuota individual de cualquier usuario.
+        El cambio queda en audit_log con el admin responsable.
+        Idempotency-Key obligatorio para evitar doble ajuste.
+        PRD-US-011, BR-006.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nuevaQuotaMb]
+              properties:
+                nuevaQuotaMb:
+                  type: integer
+                  minimum: 1024
+                  example: 102400
+                  description: Nueva cuota en megabytes. Mínimo 1 GB (1024 MB).
+                motivo:
+                  type: string
+                  maxLength: 500
+                  description: Justificación opcional del cambio de cuota
+      responses:
+        "200":
+          description: Cuota actualizada. Notificación enviada al usuario.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaStatusResponse"
+        "403":
+          description: Rol insuficiente — requiere ADMIN
+        "404":
+          description: Usuario no encontrado
