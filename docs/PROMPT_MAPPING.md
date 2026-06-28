@@ -20,6 +20,10 @@
 | `PR-UC-007` | GET /archivos/:id/versiones contrato | FSD-UC-005 | Claude Sonnet 4 | contrato-listo |
 | `PR-UC-008` | Worker RabbitMQ notificaciones push contrato | FSD-UC-007 | Claude Sonnet 4 | contrato-listo |
 | `PR-UC-009` | Export PDF audit log streaming contrato | FSD-UC-010 | Claude Sonnet 4 | contrato-listo |
+| `PR-IMPL-001` | Slice NestJS acceso externo token HMAC (`docs/design/DD-UC-011.md`) | FSD-UC-011 | Claude Opus 4.8 | contrato-listo |
+
+> **Leyenda capa viva (release/3.0.0+)**: los prompts de implementación viven en
+> `docs/prompts/impl/PR-IMPL-NNN.md`, trazables vía `FSD-UC → DD-UC → PR-IMPL → código`.
 
 ---
 
@@ -221,6 +225,57 @@
   - `CLAUDE.md` §11 — documentadas las dos redes de seguridad automáticas
 - **Trazabilidad**: CLAUDE.md §11 (config Claude Code, settings.json vs local)
 - **Verificación**: applied — flujo pre-commit verificado en repo temporal (settings.json staged se limpia, local no entra al commit); SessionEnd como barrido final
+
+### PM-20260628-003
+- **Timestamp**: 2026-06-28T16:10:00-04:00
+- **Intent**: docs
+- **Artefactos generados**:
+  - **Transición M4→implementación** (modelo documental del docente): tag `release/2.0.0` (baseline congelado)
+  - `docs/baseline/` — copias congeladas BRD/MRD/PRD/FSD/DTI vFinal + README (`status: congelado`)
+  - `docs/product/` — `PRD.md`, `FSD.md` (vivos, LFSD ⚡) + `DTP.md` (Documento Técnico del Producto, nace del DTI)
+  - `docs/design/`, `docs/prompts/impl/` — carpetas de la capa viva con README
+  - `AGENTS.md` — regla **cobertura ≥90%**, protección del baseline, flujo diseño-primero
+  - `CLAUDE.md` §12 — modelo de dos capas (congelado vs vivo); §7 cobertura 90%
+  - `.github/CODEOWNERS` — protege `docs/baseline/`, DTP, AGENTS, CLAUDE
+  - `.claude/commands/feature-design-doc.md`, `dtp-sync.md` — skills adaptados a rutas del repo
+  - `docs/design/DD-UC-011.md` — design doc del feature del demo (FSD-UC-011, token externo HMAC). ADR evaluado → **no requerido** (decisión pre-existe en DTI §3)
+  - `docs/prompts/impl/PR-IMPL-001.md` — prompt-contrato de implementación de UC-011 (no ejecutado)
+- **Trazabilidad**: FSD-UC-011 → DD-UC-011 → PR-IMPL-001; modelo `templates/MODELO_DOCUMENTAL_IMPLEMENTACION.md`; consigna docente 19/06/2026
+- **Verificación**: applied (documentación); código de UC-011 pendiente (diseño primero)
+
+### PM-20260628-004
+- **Timestamp**: 2026-06-28T16:35:00-04:00
+- **Intent**: chore
+- **Artefactos generados**:
+  - `.claude/settings.json` — hook `PreToolUse` de tipo `agent` (`trace-auditor`, modelo Haiku) antes de cada `git commit`: audita `FSD-UC → DD-UC → PR-IMPL → PROMPT_MAPPING`, advisory, bloquea solo si se toca `docs/baseline/`
+  - `AGENTS.md` §6 — agente `trace-auditor` documentado
+  - `CLAUDE.md` §12 — auditor de trazabilidad automático documentado
+- **Trazabilidad**: CLAUDE.md §1 (trazabilidad obligatoria), §12 (modelo documental); refuerza la regla con un guardián automático y barato
+- **Verificación**: applied — JSON y schema del hook validados; requiere recargar config (`/hooks` o reinicio) para activarse en esta sesión
+
+### PM-20260628-005
+- **Timestamp**: 2026-06-28T17:05:00-04:00
+- **Intent**: docs
+- **Artefactos generados**:
+  - `.claude/agents/trace-audit.md` — subagente read-only de auditoría completa del grafo de trazabilidad (Haiku); complementa al hook automático
+  - **Ronda de gaps** ejecutada (escaneo de DD-coverage, integridad baseline, enlaces, consistencia de reglas) y corregida:
+  - `CLAUDE.md` §9 — tabla canónica reescrita a 3 columnas (vivo `docs/product/` / congelado `docs/baseline/` / histórico M4) con regla de fuente-de-verdad
+  - `AGENTS.md` §3 — estructura de repo actualizada con la capa viva (baseline/product/design/prompts/impl)
+  - `.github/CODEOWNERS` — owner real (carlos.gomez.mpsia@est.umss.edu)
+  - `templates/MODELO_DOCUMENTAL_IMPLEMENTACION.md`, `DTP_TEMPLATE.md`, `feature-design-doc-SKILL.md`, `dtp-sync-SKILL.md` — banners de mapeo de rutas docente→repo
+- **Trazabilidad**: cierre de gaps de la transición M4→impl (PM-20260628-003/004); CLAUDE.md §9/§12, AGENTS.md §3
+- **Verificación**: applied — integridad baseline confirmada (copias byte-idénticas a originales); regla de cobertura uniforme a 90%
+
+### PM-20260628-006
+- **Timestamp**: 2026-06-28T17:30:00-04:00
+- **Intent**: docs
+- **Prompt**: — (cambio de regla/config, sin código)
+- **Artefactos generados**:
+  - `CLAUDE.md` §1 — nuevo campo requerido **`Prompt`** en la entrada + regla específica: todo prompt que modifica código DEBE citar su ID (`PR-IMPL-NNN`/`PR-UC-NNN`)
+  - `AGENTS.md` §6 — guardrail: el eslabón `prompt → código` es obligatorio en PROMPT_MAPPING
+  - `.claude/settings.json` — hook `trace-auditor` exige el ID del prompt en commits con código
+- **Trazabilidad**: refuerza CLAUDE.md §1 (trazabilidad obligatoria) por pedido del docente (entrada del prompt que modifica código)
+- **Verificación**: applied — JSON del hook validado; la propia entrada estrena el campo `Prompt`
 
 ---
 

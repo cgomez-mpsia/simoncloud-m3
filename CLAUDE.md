@@ -14,11 +14,18 @@ en `docs/PROMPT_MAPPING.md` sección `## Bitácora de Sesiones` **antes o junto 
 **Cuándo registrar:** cambios en código, esquemas, configuración o documentación versionada.  
 **No registrar:** preguntas conceptuales, lecturas, exploración sin cambios.
 
+**Regla específica para código** (énfasis del docente): **todo prompt que modifica código
+DEBE registrar una entrada que cite el ID del prompt que lo produjo** (`PR-IMPL-NNN` en la
+capa viva; `PR-UC-NNN` en M4). No basta con listar los archivos: hay que poder responder
+*"¿qué prompt generó este código?"*. El hook `trace-auditor` lo verifica antes del commit.
+
 **Formato de ID:** `PM-YYYYMMDD-NNN` (NNN reinicia cada día: 001, 002, …)
 
 **Campos requeridos por entrada:**
 - `Timestamp`: ISO 8601 con offset `-04:00` (Bolivia)
 - `Intent`: `feature | fix | schema | refactor | docs | chore | security`
+- `Prompt`: ID del prompt que produjo el cambio (`PR-IMPL-NNN` / `PR-UC-NNN`). **Obligatorio
+  si el cambio toca código o esquema**; en cambios solo-docs/chore puede ser `—`.
 - `Artefactos generados`: lista de paths relativos
 - `Trazabilidad`: FSD-UC-XXX o DTI §X afectados
 - `Verificación`: `applied | pending | failed`
@@ -123,7 +130,7 @@ adapter/out/     ← implementa ports de domain/
 - **Framework**: Jest + Supertest (nunca Mocha, nunca Cucumber-JVM)
 - **Mocks HTTP**: nock o MSW (nunca Wiremock)
 - **Tests de integración**: usan base de datos real (nunca mock de Prisma)
-- **Cobertura mínima dominio**: 80% (umbral NFR-008)
+- **Cobertura mínima**: **90%** en features de implementación (regla M4→impl en AGENTS.md; NFR-008). Un PR por debajo de 90% no está "hecho".
 - **Comando**: `npm run test` — nunca `mvn verify`
 
 ---
@@ -140,15 +147,27 @@ adapter/out/     ← implementa ports de domain/
 
 ## 9. Documentación — archivos canónicos
 
-| Artefacto | Archivo canónico | NO usar |
-|---|---|---|
-| Arquitectura | `docs/DTI.md` | `docs/dti/DTI_v2.md` (borrador) |
-| Spec funcional | `docs/fsd/FSD_vFinal.md` | `docs/fsd/FSD_v1.md` |
-| BRD | `docs/brd/BRD_vFinal.md` | `docs/brd/BRD.md`, `BRD_v2.md` |
-| API REST | `docs/api/openapi.yaml` | — |
-| Eventos | `docs/events/catalog.md` + `schemas/` | — |
-| ADRs | `docs/adr/00NN-*.md` (6 ADRs) | — |
-| Trazabilidad AI | `docs/PROMPT_MAPPING.md` | — |
+> **Fuente de verdad por capa** (ver §12). Desde `release/3.0.0` hay dos capas. Antes de
+> editar una spec, identifica **cuál copia**: lo que evoluciona se edita en `docs/product/`;
+> lo congelado en `docs/baseline/` **no se toca**; los archivos M4 originales
+> (`docs/fsd/`, `docs/brd/`, `docs/DTI.md`, …) quedan como **histórico** y tampoco se editan.
+
+| Artefacto | Editar aquí (VIVO) | Congelado (NO editar) | Histórico M4 (NO editar) |
+|---|---|---|---|
+| Arquitectura | `docs/product/DTP.md` | `docs/baseline/DTI_vFinal.md` | `docs/DTI.md` |
+| Spec funcional | `docs/product/FSD.md` | `docs/baseline/FSD.md` | `docs/fsd/FSD_vFinal.md` |
+| PRD | `docs/product/PRD.md` | `docs/baseline/PRD.md` | `docs/prd/PRD_vFinal.md` |
+| BRD / MRD | — (estable) | `docs/baseline/BRD.md` · `MRD.md` | `docs/brd/BRD_vFinal.md` · `docs/mrd/MRD_vFinal.md` |
+| Design docs | `docs/design/DD-UC-NNN.md` | — | — |
+| Prompts impl | `docs/prompts/impl/PR-IMPL-NNN.md` | — | — |
+| API REST | `docs/api/openapi.yaml` | — | — |
+| Eventos | `docs/events/catalog.md` + `schemas/` | — | — |
+| ADRs | `docs/adr/00NN-*.md` | — | — |
+| Trazabilidad AI | `docs/PROMPT_MAPPING.md` | — | — |
+
+> Las referencias existentes de M4 que apuntan a `docs/fsd/FSD_vFinal.md` etc. siguen
+> siendo válidas como histórico; **no** crear nuevas: para enlaces nuevos usa la copia
+> viva (`docs/product/`) o la congelada (`docs/baseline/`) según corresponda.
 
 ---
 
@@ -197,3 +216,30 @@ permisos con ruta absoluta `/Users/`, `/home/` y `additionalDirectories` desde
 - **`SessionEnd` (al cerrar sesión)**: barrido final por si algo se coló.
 
 Así `settings.json` se mantiene portable aunque un permiso de máquina se cuele.
+
+---
+
+## 12. Modelo documental M4 → implementación (capa congelada vs viva)
+
+A partir de `release/3.0.0` la documentación tiene **dos capas** (modelo normativo en
+[`templates/MODELO_DOCUMENTAL_IMPLEMENTACION.md`](templates/MODELO_DOCUMENTAL_IMPLEMENTACION.md)):
+
+| Capa | Ubicación | Estado | Regla |
+|---|---|---|---|
+| **Baseline congelado (M4)** | `docs/baseline/` (BRD/MRD/PRD/FSD/DTI vFinal) | `congelado`, tag `release/2.0.0` | **NUNCA editar.** Registro histórico evaluado. |
+| **Viva (implementación)** | `docs/product/` (PRD, FSD ⚡LFSD, **DTP**), `docs/design/` (DD-UC), `docs/prompts/impl/` (PR-IMPL) | `vivo` | Aquí evoluciona todo con el código. |
+
+**Reglas de oro:**
+- **Cero divergencia silenciosa**: si el código contradice el DTI vFinal → primero ADR + DTP + spec viva; nunca al revés.
+- **Diseño-primero por feature**: `DD-UC-NNN` → ADR (si aplica) → `PR-IMPL-NNN` + PROMPT_MAPPING → código → tests **≥90%** → DTP. Nunca código antes del design doc.
+- El **baseline `docs/baseline/**` está protegido** por `CODEOWNERS` y por regla en `AGENTS.md`.
+- IDs: `FSD-UC-NNN` · `DD-UC-NNN` (design doc) · `PR-IMPL-NNN` (prompt impl) · `ADR-NNNN`.
+
+Skills de apoyo: `/feature-design-doc` (crea un DD-UC trazable al FSD) y `/dtp-sync`
+(sincroniza specs vivas + DTP tras implementar, sin tocar el baseline).
+
+**Auditor de trazabilidad (automático, modelo barato):** un hook `PreToolUse` de tipo
+`agent` con **Haiku** corre **antes de cada `git commit`**, revisa solo los archivos
+staged y verifica la cadena `FSD-UC → DD-UC → PR-IMPL → PROMPT_MAPPING`. Es **advisory**
+(reporta gaps sin frenar) y **solo bloquea si se tocó `docs/baseline/`**. Definido en
+`.claude/settings.json`. Usa Haiku para minimizar tokens.

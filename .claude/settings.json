@@ -12,10 +12,10 @@
       "Bash(npm run *)",
       "Bash(npx prisma *)",
       "Bash(npx tsc *)",
-      "Bash(git commit -m 'chore\\(claude\\): separar config compartida vs local en .claude *)",
+      "Bash(git tag *)",
       "Skill(update-config)",
       "Skill(update-config:*)",
-      "Bash(git commit -m 'chore\\(claude\\): hooks para mantener settings.json portable *)"
+      "Bash(git commit -m 'docs\\(impl\\): transición M4→implementación + trazabilidad y guardianes *)"
     ]
   },
   "hooks": {
@@ -28,6 +28,14 @@
             "command": "jq -r '.tool_input.command' | grep -q 'commit' && RELOCATE_RESTAGE=1 python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/relocate-local-perms.py\" || true",
             "timeout": 10,
             "statusMessage": "Revisando settings.json antes del commit…"
+          },
+          {
+            "type": "agent",
+            "prompt": "Eres el auditor de trazabilidad de SimonCloud. Modelo económico: sé breve y minimiza pasos/lecturas para ahorrar tokens. Revisa SOLO los archivos staged del commit en curso.\n\nPasos:\n1. Ejecuta `git diff --cached --name-only`.\n2. Si algún archivo está bajo `docs/baseline/` → responde con decision \"block\" y motivo: el baseline congelado (tag release/2.0.0) es inmutable; el cambio debe ir a docs/product/ (ver docs/baseline/README.md).\n3. Si el diff incluye código (`src/`, `tests/`, `pocs/`, `*.ts`, `*.tsx`, `*.prisma`): EXIGE que `docs/PROMPT_MAPPING.md` tenga una entrada de bitácora reciente que **cite el ID del prompt** (`PR-IMPL-NNN` o `PR-UC-NNN`) responsable del cambio, además de la cadena FSD-UC → docs/design/DD-UC-*.md → docs/prompts/impl/PR-IMPL-*.md. Si falta la entrada con el ID del prompt, avísalo como gap (no bloquees).\n4. Para docs cambiados en `docs/product/` o `docs/design/`: verifica que su frontmatter cite un FSD-UC válido.\n\nRegla de bloqueo: bloquea ÚNICAMENTE el caso 2 (baseline tocado). Todo lo demás es solo aviso, no bloquees.\n\nSalida: máximo 6 líneas. Si todo bien: \"✓ Trazabilidad OK\". Si hay gaps: lista breve \"⚠ <archivo>: <qué eslabón falta>\". No leas archivos que no necesites.\n\nContexto del hook: $ARGUMENTS",
+            "if": "Bash(git commit *)",
+            "timeout": 90,
+            "model": "claude-haiku-4-5-20251001",
+            "statusMessage": "Auditando trazabilidad (Haiku)…"
           }
         ]
       }

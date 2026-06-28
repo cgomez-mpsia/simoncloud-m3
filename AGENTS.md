@@ -34,16 +34,21 @@ Al comenzar cualquier tarea, el agente **MUST** leer en orden:
 /
 ├── AGENTS.md                    ← este archivo (sincronizado con DTI)
 ├── docs/
-│   ├── DTI.md                   ← DTI vFinal §0-§21
+│   ├── baseline/                ← CONGELADO M4 (tag release/2.0.0). NO EDITAR
+│   │   └── BRD/MRD/PRD/FSD.md + DTI_vFinal.md (+ README)
+│   ├── product/                ← VIVO (release/3.0.0+): PRD.md, FSD.md (⚡LFSD), DTP.md
+│   ├── design/                 ← DD-UC-NNN.md (design doc por feature)
+│   ├── prompts/impl/           ← PR-IMPL-NNN.md (prompts de implementación)
+│   ├── DTI.md                   ← DTI vFinal (histórico M4; canónico vivo → product/DTP.md)
 │   ├── PROMPT_MAPPING.md        ← trazabilidad AI-SDLC
 │   ├── roadmap.md
-│   ├── fsd/FSD_vFinal.md        ← 11 UCs con Gherkin, ER, contratos
-│   ├── mrd/MRD_vFinal.md
-│   ├── prd/PRD_vFinal.md
-│   ├── brd/BRD_vFinal.md
-│   ├── adr/                     ← 0001-0006 (ADRs formales)
-│   ├── diagrams/                ← 8 diagramas .mmd (Mermaid)
-│   └── aportes/release-2.0.0.md
+│   ├── fsd/FSD_vFinal.md        ← histórico M4 (canónico vivo → docs/product/FSD.md)
+│   ├── mrd/MRD_vFinal.md        ← histórico M4
+│   ├── prd/PRD_vFinal.md        ← histórico M4 (canónico vivo → docs/product/PRD.md)
+│   ├── brd/BRD_vFinal.md        ← histórico M4
+│   ├── adr/                     ← 0001-0006 (ADRs formales; crece con la implementación)
+│   ├── diagrams/                ← diagramas .mmd (Mermaid)
+│   └── aportes/                 ← release-1.0.0 / 2.0.0 / 3.0.0 (aportes por sprint)
 ├── pocs/
 │   ├── POC-01/                  ← SHA-256 incremental (validada)
 │   ├── POC-02/                  ← Circuit Breaker Opossum.js (validada)
@@ -87,7 +92,7 @@ Al comenzar cualquier tarea, el agente **MUST** leer en orden:
 | Secretos | **HashiCorp Vault** | — | Self-hosted; sin vendor cloud |
 | Monitoreo | **Prometheus + Grafana** | — | Stack open source; reemplaza CloudWatch |
 | Trazas distribuidas | **Jaeger** | — | Reemplaza X-Ray |
-| Testing unitario | Jest | 29.x | cobertura ≥ 80% en file-service y quota-service (NFR-008) |
+| Testing unitario | Jest | 29.x | **cobertura ≥ 90%** en features de implementación (regla M4→impl; NFR-008) |
 | Testing integración | TestContainers | — | Módulo 5 |
 
 > El agente **MUST NOT** introducir dependencias fuera de esta tabla sin crear un ADR y solicitar aprobación humana.
@@ -116,6 +121,7 @@ Al comenzar cualquier tarea, el agente **MUST** leer en orden:
 | `dev-agent` | Implementar casos de uso backend | Claude Sonnet 4.6 | read, edit, bash (tests) | No toca `infra/`; MUST ejecutar `npm test` antes de proponer PR |
 | `docs-agent` | Mantener y actualizar documentación | Claude Haiku 4.5 | read, edit | Solo `docs/`, `prompts/`; MUST sincronizar AGENTS.md si cambia DTI |
 | `infra-agent` | Cambios de IaC (Módulo 6) | Claude Sonnet 4.6 | read, edit, terraform plan | **MUST NOT** ejecutar `terraform apply` sin aprobación humana |
+| `trace-auditor` | Auditar trazabilidad `FSD-UC → DD-UC → PR-IMPL → PROMPT_MAPPING` antes de cada commit | Claude Haiku 4.5 | read, bash (git diff) | **Automático** (hook `PreToolUse` de tipo `agent`); advisory, **bloquea solo si se toca `docs/baseline/`**. Modelo barato para ahorrar tokens |
 
 ### Guardrails generales
 
@@ -124,8 +130,21 @@ Al comenzar cualquier tarea, el agente **MUST** leer en orden:
 - **MUST NOT** realizar force push ni reescribir historia de `main` o `release/*`.
 - **MUST NOT** modificar migraciones de base de datos ya aplicadas en `main`.
 - **MUST** crear o actualizar tests para cada caso de uso implementado.
+- **MUST** mantener **cobertura de tests ≥ 90 %** en todo feature de implementación
+  (líneas y ramas del dominio/aplicación del slice). Un PR por debajo de 90 % no se
+  considera "hecho". Regla del modelo M4→implementación; alineada con NFR-008.
+- **MUST NOT** editar el **baseline congelado** `docs/baseline/**` (BRD/MRD/PRD/FSD/DTI
+  vFinal, tag `release/2.0.0`). Es el registro histórico evaluado de M4. Todo cambio de
+  especificación va a la **capa viva** `docs/product/**` + `docs/product/DTP.md`; las
+  decisiones a `docs/adr/`. Ver `docs/baseline/README.md`.
 - **MUST** actualizar el ADR correspondiente si una decisión arquitectónica cambia.
+- **MUST** seguir el flujo **diseño-primero** por feature: `DD-UC-NNN` (design doc) →
+  ADR si aplica → `PR-IMPL-NNN` (prompt) → código → tests ≥90% → DTP. Nunca código antes
+  del design doc.
 - **MUST** registrar toda sesión de IA en `docs/PROMPT_MAPPING.md` con entrada append-only.
+- **MUST**: si la sesión **modifica código o esquema**, la entrada de `PROMPT_MAPPING.md`
+  **debe citar el ID del prompt** que lo produjo (`PR-IMPL-NNN` / `PR-UC-NNN`). El eslabón
+  `prompt → código` es obligatorio, no solo `archivo → FSD-UC`.
 
 ---
 

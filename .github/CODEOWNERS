@@ -1,0 +1,12 @@
+# CODEOWNERS — SimonCloud
+#
+# El baseline congelado de M4 (registro histórico evaluado) requiere revisión humana
+# explícita del owner. Ningún agente IA ni PR automático debe modificarlo.
+# Ver docs/baseline/README.md y CLAUDE.md §12.
+
+/docs/baseline/**        carlos.gomez.mpsia@est.umss.edu
+
+# La capa viva y las reglas del proceso también pasan por el owner.
+/docs/product/DTP.md     carlos.gomez.mpsia@est.umss.edu
+/AGENTS.md               carlos.gomez.mpsia@est.umss.edu
+/CLAUDE.md               carlos.gomez.mpsia@est.umss.edu
