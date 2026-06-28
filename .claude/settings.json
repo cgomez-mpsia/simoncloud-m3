@@ -15,7 +15,7 @@
       "Bash(git tag *)",
       "Skill(update-config)",
       "Skill(update-config:*)",
-      "Bash(git commit -m 'docs\\(impl\\): transición M4→implementación + trazabilidad y guardianes *)"
+      "Bash(git commit -m 'feat\\(ds\\): absorber supabase-ds como design system + shell \\(ADR-0007\\) *)"
     ]
   },
   "hooks": {

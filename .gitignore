@@ -3,3 +3,7 @@ classes/
 
 # Claude Code — config local de esta máquina (permisos y dirs personales)
 .claude/settings.local.json
+
+# Design System — material fuente de extracción (no versionar; ver ADR-0007)
+libs/design-system/sources/
+**/*.mhtml

@@ -1,0 +1,256 @@
+{
+  "source": "Supabase _ The Postgres Development Platform..mhtml",
+  "url": "https://supabase.com/",
+  "analyzedAt": "2026-06-05",
+  "theme": "dark",
+  "tokens": {
+    "colors": {
+      "semanticTokens": {
+        "backgroundDefault": "hsl(0, 0%, 7.1%)",
+        "backgroundSurface75": "hsl(0, 0%, 9%)",
+        "backgroundSurface100": "hsl(0, 0%, 12.2%)",
+        "backgroundSurface200": "hsl(0, 0%, 12.9%)",
+        "backgroundSurface300": "hsl(0, 0%, 16.1%)",
+        "backgroundSurface400": "hsl(0, 0%, 16.1%)",
+        "foregroundDefault": "hsl(0, 0%, 98%)",
+        "foregroundLight": "hsl(0, 0%, 70.6%)",
+        "foregroundLighter": "hsl(0, 0%, 53.7%)",
+        "foregroundMuted": "hsl(0, 0%, 30.2%)",
+        "foregroundContrast": "hsl(0, 0%, 8.6%)",
+        "borderDefault": "hsl(0, 0%, 18%)",
+        "borderStrong": "hsl(0, 0%, 21.2%)",
+        "borderStronger": "hsl(0, 0%, 27.1%)",
+        "borderMuted": "hsl(0, 0%, 14.1%)"
+      },
+      "brand": {
+        "brandDefault": "hsl(153.1, 60.2%, 52.7%)",
+        "brand300dark": "hsl(155.1, 100%, 8%)",
+        "brand500dark": "hsl(154.9, 100%, 19.2%)",
+        "brand100": "#041b10",
+        "brand700": "#8ed2af",
+        "brand800": "#34b27b",
+        "brand900": "#3fcf8e",
+        "brand1000": "#40bf86",
+        "brand1100": "#2b825b",
+        "brand1200": "#ebfaf3"
+      },
+      "note": "Button primary dark theme: bg=brand-500dark, hover=brand-default/50 (dark:hover:bg-brand/50). brand-default es el alias base usado para opacidad en hovers."
+    },
+    "typography": {
+      "fontFamily": "Circular, custom-font, Helvetica, ui-sans-serif, system-ui, sans-serif",
+      "fontFamilyMono": "Source Code Pro, Office Code Pro, ui-monospace, monospace",
+      "sizes": {
+        "xs": "0.75rem",
+        "sm": "0.875rem",
+        "base": "1rem",
+        "lg": "1.125rem",
+        "xl": "1.25rem",
+        "2xl": "1.5rem",
+        "3xl": "1.875rem",
+        "4xl": "2.25rem",
+        "5xl": "3rem",
+        "6xl": "3.75rem",
+        "7xl": "4.5rem"
+      },
+      "weights": {
+        "light": "300",
+        "normal": "400",
+        "medium": "500",
+        "semibold": "600",
+        "bold": "700",
+        "extrabold": "800"
+      }
+    },
+    "spacing": {
+      "xs": "4px",
+      "sm": "8px",
+      "md": "16px",
+      "lg": "32px",
+      "scale": "2px",
+      "note": "Supabase usa Tailwind spacing + custom variables. La escala base de Tailwind (4px) es la unidad mínima."
+    },
+    "borderRadius": {
+      "sm": "4px",
+      "md": "6px",
+      "lg": "8px",
+      "xl": "12px",
+      "full": "9999px",
+      "note": "Valores observados: rounded-md (6px), rounded-lg (8px), rounded-xl (12px), rounded-full"
+    },
+    "shadows": {
+      "sm": "Tailwind shadow-sm",
+      "md": "Tailwind shadow-md",
+      "none": "shadow-none",
+      "note": "No se observaron valores custom de box-shadow. Usa clases utilitarias Tailwind."
+    }
+  },
+  "components": [
+    {
+      "id": "button",
+      "name": "Button",
+      "level": "atom",
+      "description": "Botón polimórfico (puede ser <button> o <a>) con múltiples tamaños y variantes. Usa data-size para el tamaño y clases para la variante visual.",
+      "variants": ["primary", "default", "outline", "ghost"],
+      "sizes": ["tiny", "small", "medium", "large"],
+      "props": ["children", "variant", "size", "href", "onClick", "disabled", "className"],
+      "cssClasses": {
+        "base": "relative justify-center cursor-pointer inline-flex items-center text-center font-regular ease-out duration-200 rounded-md outline-hidden transition-all",
+        "primary": "bg-brand-400 dark:bg-brand-500 hover:bg-brand/80 text-foreground border border-brand-500/75 dark:border-brand/30 hover:border-brand-600 focus-visible:outline-brand-600",
+        "default": "border text-foreground hover:bg-surface-300 shadow-none focus-visible:outline-4",
+        "tiny": "px-2.5 py-1 h-[26px] text-xs",
+        "small": "px-3 py-2 text-sm",
+        "medium": "px-4 text-base md:text-sm"
+      },
+      "htmlSample": "<a data-size=\"medium\" type=\"button\" class=\"relative justify-center cursor-pointer inline-flex items-center text-center font-regular ease-out duration-200 rounded-md outline-hidden transition-all bg-brand-400 dark:bg-brand-500 hover:bg-brand/80 text-foreground border border-brand-500/75 px-4\"><span class=\"truncate\">Start your project</span></a>",
+      "notes": "Supabase usa <a> con atributos de botón para la mayoría de CTAs. El tamaño se controla con data-size. La variante primary usa brand-400/brand-500 de fondo con border brand."
+    },
+    {
+      "id": "icon-button",
+      "name": "IconButton",
+      "level": "atom",
+      "description": "Botón cuadrado que contiene solo un icono SVG. Usado para acciones secundarias.",
+      "variants": ["ghost", "outline"],
+      "sizes": ["sm", "md"],
+      "props": ["icon", "label", "size", "variant", "onClick", "className"],
+      "cssClasses": {
+        "base": "inline-flex items-center justify-center rounded-md p-2 focus-visible:outline-4",
+        "ghost": "hover:bg-overlay text-foreground-lighter hover:text-foreground"
+      },
+      "htmlSample": "<button class=\"text-foreground-lighter focus-visible:outline-4 focus-visible:outline-offset-1 inline-flex items-center justify-center rounded-md p-2 hover:bg-overlay\"><svg>...</svg></button>",
+      "notes": "Visto en navbar mobile para toggle menu."
+    },
+    {
+      "id": "github-star-badge",
+      "name": "GitHubStarBadge",
+      "level": "molecule",
+      "description": "Badge que muestra el conteo de estrellas de GitHub. Combina ícono de estrella + número formateado (ej: 103.4K). Es un enlace al repo.",
+      "variants": [],
+      "props": ["count", "href", "className"],
+      "cssClasses": {
+        "base": "relative justify-center cursor-pointer inline-flex items-center text-center rounded-md border text-foreground hover:bg-surface-300",
+        "size": "text-xs px-2.5 py-1 h-[26px] hidden lg:block"
+      },
+      "htmlSample": "<a href=\"https://github.com/supabase/supabase\" target=\"_blank\" data-size=\"tiny\" class=\"... hidden lg:block\"><span class=\"flex items-center gap-2\"><svg>...</svg><span>103.4K</span></span></a>",
+      "notes": "Solo visible en lg+ (hidden lg:block). Contiene icono estrella y número con K suffix."
+    },
+    {
+      "id": "navbar",
+      "name": "Navbar",
+      "level": "organism",
+      "description": "Barra de navegación principal sticky. Contiene logo Supabase, links de navegación con dropdowns, GitHubStarBadge, botón Sign In y CTA Start your project.",
+      "variants": [],
+      "props": ["navItems", "className"],
+      "cssClasses": {
+        "base": "relative z-40 border-default",
+        "inner": "flex items-center gap-2 transition-opacity"
+      },
+      "htmlSample": "<nav class=\"relative z-40 border-default\"><div class=\"flex items-center gap-2\"><a class=\"block w-auto h-6\"><!-- Logo --></a><nav aria-label=\"Main\"><!-- Nav items --></nav><div class=\"flex items-center gap-2\"><!-- GitHubStarBadge --><a>Sign in</a><a>Start your project</a></div></div></nav>",
+      "notes": "Tiene nav aria-label='Main' para accesibilidad. Logo es SVG. Botones Sign In y Start project en extremo derecho. En mobile oculta nav items y muestra hamburger menu."
+    },
+    {
+      "id": "hero-section",
+      "name": "HeroSection",
+      "level": "organism",
+      "description": "Sección hero principal. Título grande centrado, subtítulo, y dos CTAs (Start your project + Documentation). Fondo oscuro con efectos de gradiente.",
+      "variants": [],
+      "props": ["headline", "subtitle", "primaryCTA", "secondaryCTA", "className"],
+      "cssClasses": {
+        "wrapper": "flex flex-col items-center",
+        "h1": "text-foreground",
+        "ctaGroup": "flex items-center gap-2"
+      },
+      "htmlSample": "<div class=\"flex flex-col items-center\"><h1 class=\"text-foreground\">Build in a weekend<br/>Scale to millions</h1><div class=\"flex items-center gap-2\"><a data-size=\"medium\">Start your project</a><a data-size=\"medium\">Documentation</a></div></div>",
+      "notes": "h1 tiene line break con 'Build in a weekend / Scale to millions'. CTAs son Button primary + Button default."
+    },
+    {
+      "id": "product-card",
+      "name": "ProductCard",
+      "level": "molecule",
+      "description": "Card de producto/feature. Es un enlace completo con icono SVG, título h2, descripción y efecto hover. Fondo con gradiente sutil y borde.",
+      "variants": [],
+      "props": ["icon", "title", "description", "href", "className"],
+      "cssClasses": {
+        "wrapper": "group/panel rounded-lg md:rounded-xl p-px bg-surface-75 bg-linear-to-b from-border to-border/50",
+        "inner": "z-10 rounded-[7px] md:rounded-[11px] relative overflow-hidden flex-1 flex flex-col",
+        "iconWrapper": "w-[52px] h-[52px] md:w-[62px] md:h-[62px] flex items-center justify-center rounded-lg border bg",
+        "title": ""
+      },
+      "htmlSample": "<a class=\"group relative w-full sm:h-[400px] flex flex-col gap-5\" href=\"/database\"><div class=\"group/panel rounded-lg md:rounded-xl p-px bg-surface-75\"><div class=\"z-10 rounded-[7px] relative overflow-hidden flex-1 flex flex-col\"><div class=\"w-[62px] h-[62px] flex items-center justify-center rounded-lg border bg\"><svg></svg></div><h2>Database</h2></div></div></a>",
+      "notes": "6 productos: Database, Auth, Edge Functions, Storage, Realtime, AI+Vectors. Altura fija sm:h-[400px]. El card completo es clickeable."
+    },
+    {
+      "id": "product-grid",
+      "name": "ProductGrid",
+      "level": "organism",
+      "description": "Grid de 6 ProductCards. Layout responsive 2 cols en md, 3 cols en xl para los pequeños, 2 cols para los grandes.",
+      "variants": [],
+      "props": ["products", "className"],
+      "cssClasses": {
+        "grid": "grid grid-cols-12 gap-4",
+        "colLarge": "col-span-6 md:col-span-12 xl:col-span-6",
+        "colSmall": "col-span-6 xl:col-span-3"
+      },
+      "htmlSample": "<div class=\"grid grid-cols-12\"><a class=\"col-span-6 md:col-span-12 xl:col-span-6\"><!-- ProductCard large --></a><a class=\"col-span-6 xl:col-span-3\"><!-- ProductCard small --></a></div>",
+      "notes": "Database y AI tienen col-span mayor (xl:col-span-6). Auth, Edge Functions, Storage, Realtime son xl:col-span-3."
+    },
+    {
+      "id": "integration-logo",
+      "name": "IntegrationLogo",
+      "level": "atom",
+      "description": "Icono circular de una integración/partner. SVG dentro de un contenedor circular con borde y hover state.",
+      "variants": [],
+      "props": ["logo", "name", "href", "className"],
+      "cssClasses": {
+        "base": "transition-all text-foreground-light border-foreground-light hover:shadow-sm",
+        "wrapper": "flex items-center justify-center rounded-full bg-surface-100 border border"
+      },
+      "htmlSample": "<a class=\"transition-opacity group\" href=\"/partners\"><div class=\"flex items-center justify-center rounded-full bg-surface-100 border\"><svg width=\"45\" height=\"45\" fill-rule=\"evenodd\">...</svg></div></a>",
+      "notes": "SVGs de logos: Vercel, OpenAI, y otros partners. Todos 45x45 dentro de contenedor circular."
+    },
+    {
+      "id": "section-header",
+      "name": "SectionHeader",
+      "level": "molecule",
+      "description": "Encabezado de sección con título y descripción centrados. Patrón repetido en múltiples secciones.",
+      "variants": [],
+      "props": ["title", "description", "className"],
+      "cssClasses": {
+        "wrapper": "flex flex-col items-center text-center",
+        "title": "text-foreground",
+        "description": "text-foreground-light"
+      },
+      "htmlSample": "<div class=\"flex flex-col items-center text-center\"><h2 class=\"text-foreground\">Section Title</h2><p class=\"text-foreground-light\">Section description text...</p></div>",
+      "notes": "Patrón muy repetido. El h2 suele ser text-3xl o text-4xl."
+    },
+    {
+      "id": "code-example-card",
+      "name": "CodeExampleCard",
+      "level": "molecule",
+      "description": "Card de ejemplo de código con un code browser integrado (syntax highlighting). Tiene título, tags de tecnología (IconButton) y preview del código.",
+      "variants": [],
+      "props": ["title", "tags", "codePreview", "href", "className"],
+      "cssClasses": {
+        "wrapper": "col-span-12 h-full lg:col-span-6 xl:col-span-4 flex items-stretch",
+        "inner": "flex flex-col gap-5 p-5 pt-0",
+        "tagGroup": "flex items-stretch gap-2",
+        "codeArea": "ch-code-browser"
+      },
+      "htmlSample": "<div class=\"col-span-12 h-full lg:col-span-6 xl:col-span-4\"><a class=\"w-full h-full\"><div class=\"flex flex-col gap-5 p-5 pt-0\"><div class=\"flex items-stretch gap-2\"><button data-size=\"tiny\">Tag</button></div><div class=\"ch-code-browser\">...</div></div></a></div>",
+      "notes": "Parte de un carrusel (Swiper). Width fijo 368.4px en el slider. El code browser usa la librería Code Hike."
+    },
+    {
+      "id": "customer-story-card",
+      "name": "CustomerStoryCard",
+      "level": "molecule",
+      "description": "Card de caso de éxito de cliente. Incluye descripción de cómo usan Supabase y CTA para ver la historia completa.",
+      "variants": [],
+      "props": ["company", "description", "href", "className"],
+      "cssClasses": {
+        "wrapper": "group relative w-full flex flex-col gap-3",
+        "description": "text-foreground-light"
+      },
+      "htmlSample": "<a class=\"group relative w-full flex flex-col gap-3\" href=\"/customers\"><p class=\"text-foreground-light\">Description of customer success...</p></a>",
+      "notes": "Grid de casos de éxito. Cada card lleva a /customers/[slug]."
+    }
+  ]
+}

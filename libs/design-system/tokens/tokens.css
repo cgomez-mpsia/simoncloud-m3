@@ -1,0 +1,83 @@
+:root {
+  /* Background */
+  --background-default: hsl(0, 0%, 7.1%);
+  --background-surface-75: hsl(0, 0%, 9%);
+  --background-surface-100: hsl(0, 0%, 12.2%);
+  --background-surface-200: hsl(0, 0%, 12.9%);
+  --background-surface-300: hsl(0, 0%, 16.1%);
+  --background-surface-400: hsl(0, 0%, 16.1%);
+  --background-muted: hsl(0, 0%, 14.1%);
+  --background-alternative: hsl(0, 0%, 5.9%);
+  --background-selection: hsl(0, 0%, 19.2%);
+  --background-overlay: hsl(0, 0%, 14.1%);
+
+  /* Foreground */
+  --foreground-default: hsl(0, 0%, 98%);
+  --foreground-light: hsl(0, 0%, 70.6%);
+  --foreground-lighter: hsl(0, 0%, 53.7%);
+  --foreground-muted: hsl(0, 0%, 30.2%);
+  --foreground-contrast: hsl(0, 0%, 8.6%);
+
+  /* Border */
+  --border-default: hsl(0, 0%, 18%);
+  --border-strong: hsl(0, 0%, 21.2%);
+  --border-stronger: hsl(0, 0%, 27.1%);
+  --border-muted: hsl(0, 0%, 14.1%);
+  --border-control: hsl(0, 0%, 22.4%);
+
+  /* Status colors (dark theme) */
+  --warning-default: hsl(38.9, 100%, 42.9%);
+  --warning-500: hsl(34.8, 90.9%, 21.6%);
+  --destructive-default: hsl(10.2, 77.9%, 53.9%);
+
+  /* Brand (Supabase emerald green — dark theme values) */
+  --brand-300: hsl(155.1, 100%, 8%);
+  --brand-500: hsl(154.9, 100%, 19.2%);
+  --brand-default: hsl(153.1, 60.2%, 52.7%);
+  --text-brand: hsl(153.1, 60.2%, 52.7%);
+  --brand-link: hsl(153.4, 100%, 36.7%);
+  --brand-500-hover: color-mix(in srgb, var(--brand-default) 50%, transparent);
+  --brand-100: #041b10;
+  --brand-700: #8ed2af;
+  --brand-800: #34b27b;
+  --brand-900: #3fcf8e;
+  --brand-1000: #40bf86;
+  --brand-1100: #2b825b;
+  --brand-1200: #ebfaf3;
+
+  /* Typography */
+  --font-family: Circular, custom-font, Helvetica, ui-sans-serif, system-ui, sans-serif;
+  --font-family-mono: "Source Code Pro", "Office Code Pro", ui-monospace, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+  --text-7xl: 4.5rem;
+
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 32px;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+}

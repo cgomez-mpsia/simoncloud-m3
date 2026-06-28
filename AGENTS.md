@@ -64,7 +64,8 @@ Al comenzar cualquier tarea, el agente **MUST** leer en orden:
 │   ├── notification-service/    ← worker RabbitMQ, push/email
 │   └── admin-service/           ← CQRS Read Model, auditoría PDF
 ├── libs/
-│   └── shared/src/crypto/       ← sha256.service.ts (generateFileHash)
+│   ├── shared/src/crypto/       ← sha256.service.ts (generateFileHash)
+│   └── design-system/           ← DS absorbido de supabase-ds (ADR-0007): atoms/molecules/organisms + tokens (Supabase dark). sources/ y *.mhtml gitignored
 ├── infra/                       ← IaC (Terraform / CDK — Módulo 6)
 └── old-docs/                    ← contexto histórico UX, auditorías
 ```
@@ -122,6 +123,9 @@ Al comenzar cualquier tarea, el agente **MUST** leer en orden:
 | `docs-agent` | Mantener y actualizar documentación | Claude Haiku 4.5 | read, edit | Solo `docs/`, `prompts/`; MUST sincronizar AGENTS.md si cambia DTI |
 | `infra-agent` | Cambios de IaC (Módulo 6) | Claude Sonnet 4.6 | read, edit, terraform plan | **MUST NOT** ejecutar `terraform apply` sin aprobación humana |
 | `trace-auditor` | Auditar trazabilidad `FSD-UC → DD-UC → PR-IMPL → PROMPT_MAPPING` antes de cada commit | Claude Haiku 4.5 | read, bash (git diff) | **Automático** (hook `PreToolUse` de tipo `agent`); advisory, **bloquea solo si se toca `docs/baseline/`**. Modelo barato para ahorrar tokens |
+| `trace-audit` (subagente) | Auditoría **completa** del grafo de trazabilidad del repo, bajo demanda | Claude Haiku 4.5 | read, grep, glob, bash | **Read-only** (no edita); `.claude/agents/trace-audit.md`. Complementa al hook |
+| `ds-page-analyzer` | Extraer tokens y componentes de `.mhtml` → manifiesto JSON (DS) | Claude Haiku 4.5 | read, bash, write | Portado de supabase-ds (ADR-0007); escribe en `libs/design-system/manifests/` |
+| `ds-component-builder` | Generar componentes React del DS desde un manifiesto | Claude Sonnet 4.6 | read, write, edit, bash | Portado (ADR-0007); escribe en `libs/design-system/components/`. Sin `any`, tokens CSS |
 
 ### Guardrails generales
 

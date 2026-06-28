@@ -277,6 +277,40 @@
 - **Trazabilidad**: refuerza CLAUDE.md §1 (trazabilidad obligatoria) por pedido del docente (entrada del prompt que modifica código)
 - **Verificación**: applied — JSON del hook validado; la propia entrada estrena el campo `Prompt`
 
+### PM-20260628-007
+- **Timestamp**: 2026-06-28T18:00:00-04:00
+- **Intent**: docs
+- **Prompt**: — (decisión de arquitectura + design doc, sin código)
+- **Artefactos generados**:
+  - `docs/adr/0007-absorcion-design-system-supabase-ds.md` — ADR: absorber `supabase-ds` como DS de SimonCloud (Modelo B, agentes portados, mhtml gitignored, tema Supabase dark)
+  - `docs/design/DD-SHELL-001.md` — design doc del cascarón (layout + routing + theme + integración DS)
+  - `docs/adr/README.md`, `docs/design/README.md` — índices actualizados
+- **Trazabilidad**: ADR-0007 → DD-SHELL-001; habilita FSD-UC-001/002/004/011; consigna del demo (cascarón antes de features)
+- **Verificación**: applied (decisión documentada); ejecución de la absorción y scaffolding del shell pendiente de aprobación
+
+### PM-20260628-008
+- **Timestamp**: 2026-06-28T18:30:00-04:00
+- **Intent**: chore
+- **Prompt**: — (vendoring/absorción por ADR-0007; el código NO se generó por prompt, se copió)
+- **Artefactos generados**:
+  - `libs/design-system/` — DS absorbido de `supabase-ds`: `components/` (11 .tsx: atoms/molecules/organisms), `tokens/` (Supabase dark), `index.css`, `manifests/` (3), `package.json`, `README.md`
+  - `.claude/agents/ds-page-analyzer.md`, `ds-component-builder.md` — agentes de extracción portados (Haiku/Sonnet, rutas adaptadas)
+  - `.gitignore` — `libs/design-system/sources/` y `**/*.mhtml` (material fuente no versionado)
+  - `docs/product/DTP.md` §A.1 — changelog de la absorción
+- **Trazabilidad**: ADR-0007 → DD-SHELL-001; el DS es infraestructura (trazado por ADR, no por PR-IMPL)
+- **Verificación**: applied — 11 componentes copiados, tokens y manifests presentes, mhtml gitignored
+
+### PM-20260628-009
+- **Timestamp**: 2026-06-28T18:55:00-04:00
+- **Intent**: docs
+- **Prompt**: — (corrección de gaps de consistencia, sin código)
+- **Artefactos generados** (2ª ronda de gaps tras la absorción):
+  - `docs/product/DTP.md` §B.1 — sub-sección "Arquitectura frontend" (DS + shell) que DD-SHELL-001 prometía
+  - `AGENTS.md` §3 — `libs/design-system/` en la estructura; §6 — agentes `ds-page-analyzer`, `ds-component-builder`, subagente `trace-audit`
+  - `CLAUDE.md` §10 — corregido conteo "12 comandos" + agregados `/feature-design-doc` y `/dtp-sync`
+- **Trazabilidad**: cierra gaps de consistencia de PM-007/008 (absorción DS); DD-SHELL-001 ↔ DTP §B
+- **Verificación**: applied — enlaces de ADR-0007/DD-SHELL-001 sin roturas; barrels completos; deps declaradas
+
 ---
 
 ## Métricas AI-SDLC — release/2.0.0

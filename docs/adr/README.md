@@ -15,6 +15,7 @@ Estado posibles: `Propuesta` | `Aceptada` | `Reemplazada por ADR-00NN` | `Obsole
 | [ADR-0004](0004-saga-orquestada-quota-upgrade.md) | Saga Orquestada para Upgrade de Cuota con QR Simple | Aceptada | 2026-05-18 | `FSD-UC-003`, `DTI §7.2` |
 | [ADR-0005](0005-cloud-provider-y-estilo-de-despliegue.md) | Cloud Provider y Estilo de Despliegue (On-Premise Docker Swarm) | Aceptada | 2026-05-18 | `DTI §8` |
 | [ADR-0006](0006-integracion-lms-lti.md) | Integración LMS via LTI 1.3 | Aceptada | 2026-05-18 | `FSD-UC-001`, `DTI §9` |
+| [ADR-0007](0007-absorcion-design-system-supabase-ds.md) | Absorción de `supabase-ds` como Design System | Aceptada | 2026-06-28 | `DD-SHELL-001`, `DTP §B` |
 
 ## Convenciones
 

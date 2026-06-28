@@ -63,6 +63,7 @@ flowchart LR
 | Fecha | Cambio | Disparador (FSD-UC / DD / hallazgo) | ADR | PR / commit | Autor |
 |-------|--------|-------------------------------------|-----|-------------|-------|
 | 28/06/2026 | Transición M4→implementación: baseline congelado + capa viva (`docs/product`, `docs/design`, `docs/prompts/impl`) + DTP v1.0 | Modelo documental M4 | — | _(pendiente commit)_ | Carlos A. Gomez |
+| 28/06/2026 | Absorción del Design System `supabase-ds` → `libs/design-system/` (components + tokens + 2 agentes de extracción; mhtml gitignored; tema Supabase dark) | DD-SHELL-001 | ADR-0007 | _(pendiente commit)_ | Carlos A. Gomez |
 
 ### A.2 Deltas respecto al DTI vFinal
 
@@ -106,7 +107,16 @@ flowchart LR
 | §8 Despliegue (Docker Swarm DTIC) | no | DTI vFinal §8 |
 | §10 Prompt mapping | sí (crece con `PR-IMPL-*`) | `docs/PROMPT_MAPPING.md` |
 | §11 NFRs (incl. cobertura ≥90%) | no | DTI vFinal §11 + `AGENTS.md` |
+| **§N Arquitectura frontend (nuevo)** | **sí** | **`docs/design/DD-SHELL-001.md` + `ADR-0007`** |
 | §21 ADRs | sí (crece) | `docs/adr/` |
+
+### §B.1 Arquitectura frontend (capa viva)
+
+SPA React 18 + Vite + Tailwind. **Design System** absorbido en `libs/design-system/`
+(Atomic Design, tokens Supabase dark, Radix) — decisión en **ADR-0007**. **App shell**
+(layout + routing v6 + theme + auth guard) diseñado en **DD-SHELL-001**; los features
+aportan sus páginas. Pipeline de extracción de componentes vía agentes `ds-page-analyzer`
+(Haiku) y `ds-component-builder` (Sonnet).
 
 > **Solo se escriben aquí las secciones que cambiaron.** El resto se mantiene por
 > referencia al DTI vFinal, preservando un único punto de verdad por release.

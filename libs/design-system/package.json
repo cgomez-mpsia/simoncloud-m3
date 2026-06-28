@@ -1,0 +1,22 @@
+{
+  "name": "@simoncloud/design-system",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Design System de SimonCloud (absorbido de supabase-ds — ver docs/adr/0007). Atomic Design + tokens CSS, tema Supabase dark.",
+  "type": "module",
+  "main": "components/index.ts",
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "dependencies": {
+    "@radix-ui/react-navigation-menu": "^1.2.0",
+    "@radix-ui/react-tabs": "^1.1.0"
+  },
+  "designSystem": {
+    "tema": "Supabase dark",
+    "origen": "supabase-ds (working tree, sin git propio)",
+    "adr": "docs/adr/0007-absorcion-design-system-supabase-ds.md",
+    "notas": "lucide-react aprobado pero aún no usado; agregar cuando un componente lo requiera."
+  }
+}

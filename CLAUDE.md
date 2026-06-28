@@ -173,7 +173,7 @@ adapter/out/     ← implementa ports de domain/
 
 ## 10. Slash commands disponibles
 
-En `.claude/commands/` hay 12 comandos especializados para este proyecto:
+En `.claude/commands/` hay comandos especializados para este proyecto (los principales):
 
 | Comando | Propósito |
 |---|---|
@@ -189,6 +189,11 @@ En `.claude/commands/` hay 12 comandos especializados para este proyecto:
 | `/ipc-selector` | Elegir patrón de comunicación entre servicios |
 | `/adr-recorder` | Redactar un ADR con ≥3 opciones y trade-offs |
 | `/dti-author` | Completar secciones del DTI vFinal |
+| `/feature-design-doc` | Crear un design doc (`DD-UC-NNN`) trazable al FSD (capa viva) |
+| `/dtp-sync` | Sincronizar specs vivas + DTP tras implementar, sin tocar el baseline |
+
+> También hay comandos de autoría (`/fsd-author`, `/prd-author`, `/mrd-author`, `/backend`,
+> `/frontend`). Ver `.claude/commands/` para el listado completo.
 
 ---
 

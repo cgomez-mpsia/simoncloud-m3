@@ -1,0 +1,75 @@
+{
+  "source": "supabase-dashboard-project-detail.mhtml",
+  "description": "Supabase dashboard - Project detail page with settings, configuration, and resources",
+  "tokens": {
+    "new_tokens": []
+  },
+  "components": [
+    {
+      "name": "breadcrumb",
+      "level": "molecule",
+      "description": "Navigation breadcrumb showing path (e.g., Org > my-project > Settings)",
+      "html_snippet": "<nav class=\"flex items-center gap-1\"><a href=\"#\" class=\"text-sm text-foreground-light hover:text-foreground\">Projects</a><span>/</span><span class=\"text-sm text-foreground-default\">my-project</span></nav>"
+    },
+    {
+      "name": "tabs",
+      "level": "molecule",
+      "description": "Tab navigation with multiple content panels. Includes active indicator and content switching.",
+      "html_snippet": "<div class=\"flex border-b border-border-default\"><button class=\"px-4 py-2 text-sm font-medium text-foreground-light hover:text-foreground border-b-2 border-transparent hover:border-brand-default data-[active]:border-brand-default data-[active]:text-foreground-default\">Overview</button><button class=\"px-4 py-2 text-sm font-medium text-foreground-light hover:text-foreground border-b-2 border-transparent\">Settings</button></div>"
+    },
+    {
+      "name": "metric-card",
+      "level": "molecule",
+      "description": "Stat or metric display card showing key project statistics (requests, storage, users, etc.)",
+      "html_snippet": "<div class=\"rounded-lg border border-border-default bg-surface-100 p-4\"><p class=\"text-xs text-foreground-light\">API Requests</p><p class=\"text-2xl font-semibold text-foreground-default mt-2\">45.2K</p><p class=\"text-xs text-foreground-muted mt-1\">+12% this month</p></div>"
+    },
+    {
+      "name": "alert",
+      "level": "molecule",
+      "description": "Alert or notification message. Shows warnings, errors, or informational notices.",
+      "html_snippet": "<div class=\"rounded-lg border border-border-default bg-brand-500/10 p-4 flex gap-3\"><svg class=\"h-5 w-5 text-brand-default flex-shrink-0\"></svg><div><p class=\"text-sm font-medium text-foreground-default\">Alert Title</p><p class=\"text-sm text-foreground-light mt-1\">Alert message content goes here</p></div></div>"
+    },
+    {
+      "name": "form-field",
+      "level": "molecule",
+      "description": "Form input with label, placeholder, and optional validation state. Used in settings and configuration.",
+      "html_snippet": "<div class=\"flex flex-col gap-2\"><label class=\"text-sm font-medium text-foreground-default\">Field Label</label><input type=\"text\" class=\"px-3 py-2 rounded-md border border-border-default bg-surface-100 text-foreground-default text-sm placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-brand-default\" placeholder=\"Placeholder text\"/></div>"
+    },
+    {
+      "name": "accordion",
+      "level": "molecule",
+      "description": "Collapsible section that expands on click to reveal additional content. Used for settings or documentation.",
+      "html_snippet": "<div class=\"border border-border-default rounded-lg\"><button class=\"w-full flex items-center justify-between p-4 hover:bg-surface-300\"><span class=\"text-sm font-medium text-foreground-default\">Section Title</span><svg class=\"h-4 w-4 text-foreground-muted transition-transform data-[open]:rotate-180\"></svg></button><div class=\"px-4 pb-4 text-sm text-foreground-light border-t border-border-default\">Content goes here</div></div>"
+    },
+    {
+      "name": "card",
+      "level": "molecule",
+      "description": "Generic content card with border and rounded corners. Used as container for related content.",
+      "html_snippet": "<div class=\"rounded-lg border border-border-default bg-surface-100 p-6\"><h3 class=\"text-lg font-semibold text-foreground-default\">Card Title</h3><p class=\"text-sm text-foreground-light mt-2\">Card content goes here</p></div>"
+    },
+    {
+      "name": "copy-button",
+      "level": "atom",
+      "description": "Button that copies text (like API keys or connection strings) to clipboard. Shows feedback on click.",
+      "html_snippet": "<button class=\"flex items-center gap-2 px-3 py-2 rounded-md bg-surface-300 hover:bg-surface-400 text-foreground-light hover:text-foreground text-sm\"><svg class=\"h-4 w-4\"></svg><span>Copy</span></button>"
+    },
+    {
+      "name": "menu-item",
+      "level": "atom",
+      "description": "Menu item in dropdown or context menu. Can have icon, label, and keyboard shortcut.",
+      "html_snippet": "<a href=\"#\" class=\"flex items-center gap-3 px-4 py-2 text-sm text-foreground-light hover:text-foreground hover:bg-surface-300 rounded-md\"><svg class=\"h-4 w-4\"></svg><span>Menu Item</span><span class=\"text-xs text-foreground-muted ml-auto\">⌘K</span></a>"
+    },
+    {
+      "name": "tooltip",
+      "level": "atom",
+      "description": "Tooltip hint displayed on hover. Shows additional information about UI elements.",
+      "html_snippet": "<div class=\"relative inline-block\"><button class=\"text-foreground-light hover:text-foreground\"><svg class=\"h-4 w-4\"></svg></button><div class=\"absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 rounded-md bg-foreground-default text-foreground-contrast text-xs whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100\">Tooltip text</div></div>"
+    },
+    {
+      "name": "switch",
+      "level": "atom",
+      "description": "Toggle switch or checkbox for boolean settings. Indicates on/off state.",
+      "html_snippet": "<button role=\"switch\" aria-checked=\"false\" class=\"relative inline-flex h-6 w-11 items-center rounded-full bg-surface-300 hover:bg-surface-400 transition-colors data-[state=checked]:bg-brand-500\"><span class=\"inline-block h-4 w-4 transform rounded-full bg-foreground-default transition-transform data-[state=checked]:translate-x-5\"></span></button>"
+    }
+  ]
+}
