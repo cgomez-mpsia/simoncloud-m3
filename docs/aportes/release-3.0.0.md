@@ -38,9 +38,17 @@
 | T-M5-015 | Convención Radix (comportamiento) + fidelidad de estilo Supabase | Carlos | `.claude/agents/ds-component-builder.md`, `libs/design-system/README.md` | ✅ |
 | T-M5-016 | Guardianes de trazabilidad (hook `trace-auditor` + subagente `trace-audit`) | Carlos | `.claude/settings.json`, `.claude/agents/trace-audit.md` | ✅ |
 | T-M5-017 | Playground del DS (vite + galería de componentes) | Carlos | `libs/design-system/{App,main}.tsx`, `vite.config.ts`, … | ✅ |
-| T-M5-018 | Generación de componentes faltantes (TextInput, FormField, CopyButton, DataTable, DropdownMenu…) | Carlos | `libs/design-system/components/` | ⏳ pendiente |
+| T-M5-018 | Generación de componentes (TextInput, FormField, CopyButton, DataTable, DropdownMenu, Select, Modal, Checkbox, Switch, Header…) | Carlos | `libs/design-system/components/` (25 comp.) | ✅ |
 | T-M5-019 | Hand-build de no-extraíbles (Textarea, Toast, Spinner, Radio) | Carlos | `libs/design-system/components/` | ⏳ pendiente |
 | T-M5-020 | Construcción del shell `apps/web` (`PR-IMPL-002`) | Carlos | `apps/web/` | ⏳ pendiente |
+| T-M5-021 | **ADR del feature oficial E2E** (alcance real vs stub) | Carlos | `docs/adr/0008-alcance-feature-e2e-subida-token-externo.md` | ✅ |
+| T-M5-022 | **Design docs del E2E** (auth, drop, subida, token) | Carlos | `docs/design/DD-UC-004,001,002,011.md` | ✅ |
+| T-M5-023 | **Prompt-contratos del E2E** (auth, drop, subida) | Carlos | `docs/prompts/impl/PR-IMPL-004,005,003.md` | ✅ |
+| T-M5-024 | Implementar slice **auth** (stub WebSISS + JWT RS256) + tests ≥90% | Carlos | `src/auth/**` (`PR-IMPL-004`) | ⏳ pendiente |
+| T-M5-025 | Implementar slice **drop** simplificado + tests ≥90% | Carlos | `src/drops/**` (`PR-IMPL-005`) | ⏳ pendiente |
+| T-M5-026 | Implementar slice **subida + SHA-256 + MinIO** + tests ≥90% | Carlos | `src/file/**` (`PR-IMPL-003`) | ⏳ pendiente |
+| T-M5-027 | Implementar slice **token externo HMAC** + tests ≥90% | Carlos | `src/external/**` (`PR-IMPL-001`) | ⏳ pendiente |
+| T-M5-028 | Frontend del E2E (pages con el DS) + `docker-compose` (MinIO+PG) | Carlos | `apps/web/`, `docker-compose.yml` | ⏳ pendiente |
 
 ---
 

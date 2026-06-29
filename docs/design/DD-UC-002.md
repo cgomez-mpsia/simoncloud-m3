@@ -76,6 +76,12 @@ flowchart LR
 - Presign in: `{ fileName, contentType, sizeBytes }` → out: `{ uploadUrl, objectKey, expiresIn }`.
 - Confirm in: `{ objectKey }` → out: `{ fileId, sha256 (64-hex), uploadedAt, solo_lectura:true }`.
 
+### 2.4 Frontend (touchpoint)
+Pantalla de subida dentro del shell (DD-SHELL-001), usando el design system:
+`FileDropzone`/`DropZone` para seleccionar, `Button` "Subir", `Card`/`FormField` para el
+archivo, y al completar un `CopyButton` muestra el **comprobante SHA-256** copiable. Sin
+valores propios: tokens del DS.
+
 ## 3. Alternativas consideradas
 
 | Alternativa | Pros | Contras | ¿Elegida? |

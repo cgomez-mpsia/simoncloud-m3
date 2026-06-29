@@ -444,6 +444,17 @@
 - **Trazabilidad**: completa el punto 7 del docente (prompt implementation). Cadena cerrada por slice: `FSD-UC → DD-UC → PR-IMPL` para los 4 tramos del E2E (004→005→003→001)
 - **Verificación**: applied — 4 PR-IMPL existen (001/003/004/005), cada uno con 6 elementos + invariantes + failure modes + trazabilidad. Documentación 100% completa para iniciar implementación
 
+### PM-20260629-002
+- **Timestamp**: 2026-06-29T01:00:00-04:00
+- **Intent**: docs
+- **Prompt**: — (rondas de gaps hasta limpieza total, previo a implementar)
+- **Artefactos generados** (3 rondas; ronda 2 halló 3 gaps, ronda 3 verificó limpio):
+  - `docs/product/DTP.md` §A.3 — UC-001/UC-004 ahora citan `DD-UC-001`/`DD-UC-004` (estaban "notas en ADR", stale)
+  - `docs/aportes/release-3.0.0.md` — tareas del E2E T-M5-021..028 (ADR/DDs/PR-IMPL + slices + frontend); T-M5-018 → ✅
+  - `docs/design/DD-UC-002.md` §2.4 — touchpoint frontend (subida con el DS), antes asimétrico vs DD-UC-011
+- **Trazabilidad**: cierra gaps de PM-20260629-001; auditoría amplia (links, índices, fsd_uc, PR-IMPL↔DD, DTP, aportes, frontend, baseline)
+- **Verificación**: applied — ronda 1 y 3 sin gaps; 0 enlaces rotos, baseline intacto, cadena diseño-primero completa. **Documentación lista, sin gaps, para implementar**
+
 ---
 
 ## Métricas AI-SDLC — release/2.0.0

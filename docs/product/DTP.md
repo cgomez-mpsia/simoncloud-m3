@@ -83,8 +83,8 @@ flowchart LR
 |--------|------------|--------|---------|-------------|-------|
 | `FSD-UC-002` Subida + hash | `DD-UC-002` | en curso (E2E tramo 1) | `release/3.0.0` | objetivo ≥90% | **Feature oficial E2E** (no POC). Real: MinIO/SHA-256. ADR-0008. |
 | `FSD-UC-011` Acceso usuario externo (token HMAC) | `DD-UC-011` | en curso (E2E tramo 2) | `release/3.0.0` | objetivo ≥90% | Token para el archivo de UC-002. ADR-0008. |
-| `FSD-UC-001` Creación SimonDrop (simplificado) | _(notas en ADR-0008)_ | habilitante (sin LTI) | `release/3.0.0` | — | Drop básico directo. Delta #1. |
-| `FSD-UC-004` Auth (stub WebSISS) | _(notas en ADR-0008)_ | habilitante (stub + JWT real) | `release/3.0.0` | — | Delta #3. |
+| `FSD-UC-001` Creación SimonDrop (simplificado) | `DD-UC-001` | habilitante (sin LTI) | `release/3.0.0` | objetivo ≥90% | Drop básico directo. Delta #1. PR-IMPL-005. |
+| `FSD-UC-004` Auth (stub WebSISS) | `DD-UC-004` | habilitante (stub + JWT real) | `release/3.0.0` | objetivo ≥90% | Delta #3. PR-IMPL-004. |
 
 ### A.4 Trazabilidad código ↔ DTP
 
