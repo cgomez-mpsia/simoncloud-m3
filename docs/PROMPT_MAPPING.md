@@ -22,7 +22,7 @@
 | `PR-UC-009` | Export PDF audit log streaming contrato | FSD-UC-010 | Claude Sonnet 4 | contrato-listo |
 | `PR-IMPL-001` | Slice NestJS acceso externo token HMAC (`docs/design/DD-UC-011.md`) | FSD-UC-011 | Claude Opus 4.8 | contrato-listo |
 | `PR-IMPL-003` | Slice subida + comprobante SHA-256 (`DD-UC-002`) | FSD-UC-002 | Claude Opus 4.8 | contrato-listo |
-| `PR-IMPL-004` | Slice auth stub WebSISS + JWT RS256 (`DD-UC-004`) | FSD-UC-004 | Claude Opus 4.8 | contrato-listo |
+| `PR-IMPL-004` | Slice auth stub WebSISS + JWT RS256 (`DD-UC-004`) → `apps/api/src/auth/**` | FSD-UC-004 | Claude Opus 4.8 | applied |
 | `PR-IMPL-005` | Slice creación SimonDrop simplificada (`DD-UC-001`) | FSD-UC-001 | Claude Opus 4.8 | contrato-listo |
 
 > **Leyenda capa viva (release/3.0.0+)**: los prompts de implementación viven en
@@ -454,6 +454,18 @@
   - `docs/design/DD-UC-002.md` §2.4 — touchpoint frontend (subida con el DS), antes asimétrico vs DD-UC-011
 - **Trazabilidad**: cierra gaps de PM-20260629-001; auditoría amplia (links, índices, fsd_uc, PR-IMPL↔DD, DTP, aportes, frontend, baseline)
 - **Verificación**: applied — ronda 1 y 3 sin gaps; 0 enlaces rotos, baseline intacto, cadena diseño-primero completa. **Documentación lista, sin gaps, para implementar**
+
+### PM-20260629-003
+- **Timestamp**: 2026-06-29T01:40:00-04:00
+- **Intent**: feature
+- **Prompt**: **PR-IMPL-004** (ejecutado)
+- **Artefactos generados** (primer slice de código del feature E2E):
+  - `apps/api/` — backend NestJS 10 nuevo (release/3.0.0): package.json (jest cov≥90), tsconfig, nest-cli, main, app.module, .env.example
+  - `apps/api/src/auth/**` — slice auth **hexagonal**: domain (Rol, AuthenticatedUser, `AuthProviderPort`, `TokenIssuerPort`, InvalidCredentialsError) · application (`LoginUseCase`) · adapter/out (`StubWebSissAuthProvider`, `JwtIssuer` RS256) · adapter/in (`AuthController`, `JwtAuthGuard`, CurrentUser, LoginDto) · auth.module
+  - 5 specs Jest (provider, issuer, use-case, guard, controller); DTO/decorator excluidos de cobertura (declarativos)
+  - `.gitignore` — apps/api node_modules/dist/coverage/.env
+- **Trazabilidad**: `FSD-UC-004 → DD-UC-004 → PR-IMPL-004 → apps/api/src/auth/**`; ADR-0008 (stub WebSISS + JWT RS256 real, puerto reemplazable)
+- **Verificación**: código aplicado; **pendiente correr `npm install && npm run test:cov`** para confirmar ≥90% (no ejecutable sin red en esta sesión)
 
 ---
 

@@ -44,7 +44,7 @@
 | T-M5-021 | **ADR del feature oficial E2E** (alcance real vs stub) | Carlos | `docs/adr/0008-alcance-feature-e2e-subida-token-externo.md` | ✅ |
 | T-M5-022 | **Design docs del E2E** (auth, drop, subida, token) | Carlos | `docs/design/DD-UC-004,001,002,011.md` | ✅ |
 | T-M5-023 | **Prompt-contratos del E2E** (auth, drop, subida) | Carlos | `docs/prompts/impl/PR-IMPL-004,005,003.md` | ✅ |
-| T-M5-024 | Implementar slice **auth** (stub WebSISS + JWT RS256) + tests ≥90% | Carlos | `src/auth/**` (`PR-IMPL-004`) | ⏳ pendiente |
+| T-M5-024 | Implementar slice **auth** (stub WebSISS + JWT RS256) + tests ≥90% | Carlos | `apps/api/src/auth/**` (`PR-IMPL-004`) | 🔨 código listo (correr `npm test`) |
 | T-M5-025 | Implementar slice **drop** simplificado + tests ≥90% | Carlos | `src/drops/**` (`PR-IMPL-005`) | ⏳ pendiente |
 | T-M5-026 | Implementar slice **subida + SHA-256 + MinIO** + tests ≥90% | Carlos | `src/file/**` (`PR-IMPL-003`) | ⏳ pendiente |
 | T-M5-027 | Implementar slice **token externo HMAC** + tests ≥90% | Carlos | `src/external/**` (`PR-IMPL-001`) | ⏳ pendiente |
