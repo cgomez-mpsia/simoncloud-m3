@@ -21,3 +21,10 @@ export type { CopyButtonProps } from './CopyButton'
 
 export { default as Breadcrumb } from './Breadcrumb'
 export type { BreadcrumbProps, BreadcrumbItem } from './Breadcrumb'
+
+export * from './DropdownMenu'
+
+export { default as Select } from './Select'
+export type { SelectProps, SelectOption } from './Select'
+
+export * from './Modal'

@@ -369,6 +369,39 @@
 - **Trazabilidad**: corrige gap reportado por el usuario (los icon-buttons del header llevan borde circular); ADR-0007
 - **Verificación**: applied — Header con outline, IconButton retrocompatible (default ghost), comentarios en inglés
 
+### PM-20260628-015
+- **Intent**: feature
+- **Prompt**: — (DS infraestructura; batch Radix, ADR-0007 + convención Radix)
+- **Artefactos generados**:
+  - `components/atoms/Checkbox/` — Radix Checkbox estilado con tokens (clases reales de `supabase-auth-users`)
+  - `components/molecules/DropdownMenu/` — partes componibles (Root/Trigger/Content/Item/Label/Separator/RadioGroup/RadioItem) sobre `@radix-ui/react-dropdown-menu`, estilo del menú de usuario real
+  - `package.json` — deps `@radix-ui/react-checkbox`, `@radix-ui/react-dropdown-menu`
+  - `App.tsx` — demos Checkbox + DropdownMenu (réplica del menú de usuario, anonimizado)
+- **Trazabilidad**: ADR-0007; convención Radix (comportamiento Radix + estilo Supabase/tokens); pendientes Radix: Select, Modal, DataTable, Tooltip
+- **Verificación**: applied — 21 componentes, barrels OK, comentarios en inglés. **Requiere `npm install`** (deps Radix nuevas)
+
+### PM-20260628-016
+- **Intent**: feature
+- **Prompt**: — (DS infraestructura; batch Radix sub-lote 2, ADR-0007)
+- **Artefactos generados**:
+  - `components/molecules/Select/` — Select de conveniencia (options) sobre `@radix-ui/react-select`; trigger/content de los filtros reales (`supabase-logs`)
+  - `components/molecules/Modal/` — partes componibles (Modal/Trigger/Content/Header/Title/Description/Body/Footer/Close) sobre `@radix-ui/react-dialog`; overlay black/40 + blur, panel surface (manifest `supabase-storage-files`)
+  - `package.json` — deps `@radix-ui/react-select`, `@radix-ui/react-dialog`
+  - `App.tsx` — demos: Select (TTL 24/48/72h para UC-011), Modal ("Generate external token")
+- **Trazabilidad**: ADR-0007; convención Radix; el Modal+Select arman el flujo de generación de token de UC-011. Pendiente Radix: DataTable, Tooltip
+- **Verificación**: applied — 23 componentes, barrels OK, comentarios en inglés. **Requiere `npm install`** (react-select, react-dialog)
+
+### PM-20260628-017
+- **Intent**: feature
+- **Prompt**: — (DS infraestructura; cierre batch Radix, ADR-0007)
+- **Artefactos generados**:
+  - `components/atoms/Switch/` — toggle sobre `@radix-ui/react-switch`; track checked usa brand token
+  - `components/organisms/DataTable/` — tabla genérica (`<T>`) semántica/accesible, estilo de la tabla real de logs (`supabase-logs`); columns/render/onRowClick/empty. NO replica el React-Data-Grid virtualizado
+  - `package.json` — dep `@radix-ui/react-switch`
+  - `App.tsx` — demos Switch + DataTable (archivos con Badge de estado)
+- **Trazabilidad**: ADR-0007; cierra el batch Radix (Checkbox, DropdownMenu, Select, Modal, Switch, DataTable). DataTable habilita listados de UC-011/audit log
+- **Verificación**: applied — 25 componentes (10 atoms / 11 molecules / 4 organisms), barrels OK, comentarios en inglés. **Requiere `npm install`** (react-switch)
+
 ---
 
 ## Métricas AI-SDLC — release/2.0.0

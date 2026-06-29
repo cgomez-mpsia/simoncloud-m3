@@ -21,3 +21,9 @@ export type { AvatarProps } from './Avatar'
 
 export { default as Logo } from './Logo'
 export type { LogoProps } from './Logo'
+
+export { default as Checkbox } from './Checkbox'
+export type { CheckboxProps } from './Checkbox'
+
+export { default as Switch } from './Switch'
+export type { SwitchProps } from './Switch'

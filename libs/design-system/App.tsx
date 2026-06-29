@@ -13,6 +13,32 @@ import TextInput from './components/atoms/TextInput'
 import FormField from './components/molecules/FormField'
 import CopyButton from './components/molecules/CopyButton'
 import Header from './components/organisms/Header'
+import Avatar from './components/atoms/Avatar'
+import Checkbox from './components/atoms/Checkbox'
+import Select from './components/molecules/Select'
+import Switch from './components/atoms/Switch'
+import DataTable from './components/organisms/DataTable'
+import {
+  Modal,
+  ModalTrigger,
+  ModalContent,
+  ModalHeader,
+  ModalTitle,
+  ModalDescription,
+  ModalBody,
+  ModalFooter,
+  ModalClose,
+} from './components/molecules/Modal'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+} from './components/molecules/DropdownMenu'
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -245,6 +271,140 @@ export default function App() {
             <TextInput id="ff-id" defaultValue="proj_abc123" readOnly />
           </FormField>
         </div>
+      </Section>
+
+      <Section title="Checkbox">
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 text-sm text-[var(--foreground-light)]">
+            <Checkbox defaultChecked /> Checked
+          </label>
+          <label className="flex items-center gap-2 text-sm text-[var(--foreground-light)]">
+            <Checkbox /> Unchecked
+          </label>
+          <label className="flex items-center gap-2 text-sm text-[var(--foreground-muted)]">
+            <Checkbox disabled /> Disabled
+          </label>
+        </div>
+      </Section>
+
+      <Section title="Switch">
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 text-sm text-[var(--foreground-light)]">
+            <Switch defaultChecked /> Enabled
+          </label>
+          <label className="flex items-center gap-2 text-sm text-[var(--foreground-light)]">
+            <Switch /> Disabled state
+          </label>
+          <label className="flex items-center gap-2 text-sm text-[var(--foreground-muted)]">
+            <Switch disabled /> Not editable
+          </label>
+        </div>
+      </Section>
+
+      <Section title="DataTable">
+        <DataTable
+          data={[
+            { id: '1', file: 'tesis_final.pdf', status: 'Closed', date: '2026-06-20' },
+            { id: '2', file: 'anexo_a.pdf', status: 'Open', date: '2026-06-22' },
+            { id: '3', file: 'defensa.pptx', status: 'Open', date: '2026-06-25' },
+          ]}
+          getRowKey={(r) => r.id}
+          columns={[
+            { key: 'file', header: 'File' },
+            {
+              key: 'status',
+              header: 'Status',
+              render: (r) => <Badge variant={r.status === 'Closed' ? 'warning' : 'default'}>{r.status}</Badge>,
+            },
+            { key: 'date', header: 'Uploaded', align: 'right' },
+          ]}
+        />
+      </Section>
+
+      <Section title="Select">
+        <div className="flex flex-wrap items-center gap-4">
+          <Select
+            aria-label="Token TTL"
+            placeholder="Expiration…"
+            defaultValue="72h"
+            options={[
+              { value: '24h', label: '24 hours' },
+              { value: '48h', label: '48 hours' },
+              { value: '72h', label: '72 hours (max)' },
+            ]}
+          />
+          <Select
+            aria-label="Log level"
+            placeholder="Level…"
+            options={[
+              { value: 'info', label: 'Info' },
+              { value: 'warning', label: 'Warning' },
+              { value: 'error', label: 'Error' },
+            ]}
+          />
+        </div>
+      </Section>
+
+      <Section title="Modal">
+        <Modal>
+          <ModalTrigger asChild>
+            <Button variant="default" size="small">Open modal</Button>
+          </ModalTrigger>
+          <ModalContent>
+            <ModalHeader>
+              <ModalTitle>Generate external token</ModalTitle>
+              <ModalDescription>Create a temporary link to share this SimonDrop.</ModalDescription>
+            </ModalHeader>
+            <ModalBody>
+              <div className="flex flex-col gap-3">
+                <Select
+                  aria-label="Token TTL"
+                  defaultValue="72h"
+                  options={[
+                    { value: '24h', label: '24 hours' },
+                    { value: '48h', label: '48 hours' },
+                    { value: '72h', label: '72 hours (max)' },
+                  ]}
+                />
+              </div>
+            </ModalBody>
+            <ModalFooter>
+              <ModalClose asChild>
+                <Button variant="default" size="small">Cancel</Button>
+              </ModalClose>
+              <Button variant="primary" size="small">Generate</Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      </Section>
+
+      <Section title="DropdownMenu (user menu)">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button aria-label="Open user menu" className="rounded-full outline-hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand-900)]">
+              <Avatar size={28} alt="User" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <div className="px-3 py-2">
+              <p className="text-sm font-medium text-[var(--foreground-default)]">Carlos Gomez</p>
+              <p className="text-xs text-[var(--foreground-lighter)]">user@example.com</p>
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>Account</DropdownMenuItem>
+            <DropdownMenuItem>Feature previews</DropdownMenuItem>
+            <DropdownMenuItem>Changelog</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Theme</DropdownMenuLabel>
+            <DropdownMenuRadioGroup defaultValue="system">
+              <DropdownMenuRadioItem value="dark">Dark</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="light">Light</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="system">System</DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>Log out</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </Section>
 
       <Section title="Badge">
