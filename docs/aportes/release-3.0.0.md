@@ -44,11 +44,18 @@
 
 ---
 
-## §3. Feature desarrollado (demo)
+## §3. Feature desarrollado (demo) — **E2E oficial: subida → acceso externo**
 
-- **Funcionalidad**: Acceso de usuario externo con token temporal HMAC-SHA256 (`FSD-UC-011`).
-- **Cadena de trazabilidad**: `FSD-UC-011` → `DD-UC-011` → `PR-IMPL-001` → (código) → (tests ≥90%) → DTP.
-- **Decisión de arquitectura**: ya resuelta en DTI vFinal §3 (token stateful HMAC); no requirió ADR nuevo (criterio registrado en `DD-UC-011 §3`).
+- **Funcionalidad**: flujo **end-to-end** real (no POC): un docente **sube un archivo**
+  (comprobante SHA-256, inmutable en MinIO) y **genera un token externo HMAC** para que un
+  evaluador externo lo descargue verificando el hash.
+- **Casos de uso**: `FSD-UC-002` (subida + hash, tramo 1) + `FSD-UC-011` (token externo, tramo 2);
+  habilitantes `FSD-UC-004` (auth, stub) y `FSD-UC-001` (drop simple, sin LTI).
+- **Cadena de trazabilidad**:
+  `UC-004 → UC-001 → UC-002 (DD-UC-002 → PR-IMPL-003) → UC-011 (DD-UC-011 → PR-IMPL-001)` → tests ≥90% → DTP.
+- **Decisiones de alcance** (real vs stub): **ADR-0008** — MinIO/SHA-256/HMAC/hexagonal **reales**;
+  SSO WebSISS stub (JWT real), UC-001 sin LTI, UC-002 sin reanudación en v1. Deltas en DTP §A.2.
+- **Estado**: documentación (ADR + DDs) ✅; implementación (código + tests) ⏳.
 
 ## §4. Sub-sistema Design System (infraestructura frontend)
 

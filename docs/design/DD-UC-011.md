@@ -28,6 +28,10 @@ autores:
 >
 > **Trazabilidad**: implementa `FSD-UC-011` (`docs/product/FSD.md` §4.11) → `PRD-REQ-013`,
 > `PRD-US-022` → `BR-011` (token HMAC-SHA256, TTL ≤ 72h, no revela recurso si inválido).
+>
+> **Parte del feature E2E** (ADR-0008): es el **segundo tramo** del flujo
+> `UC-004 → UC-001 → UC-002 (DD-UC-002) → UC-011 (esta)`. El token se genera para el archivo
+> subido en `DD-UC-002`, por el mismo dueño (DOCENTE).
 
 ## 1. Objetivo y contexto
 

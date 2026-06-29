@@ -16,6 +16,7 @@ Estado posibles: `Propuesta` | `Aceptada` | `Reemplazada por ADR-00NN` | `Obsole
 | [ADR-0005](0005-cloud-provider-y-estilo-de-despliegue.md) | Cloud Provider y Estilo de Despliegue (On-Premise Docker Swarm) | Aceptada | 2026-05-18 | `DTI §8` |
 | [ADR-0006](0006-integracion-lms-lti.md) | Integración LMS via LTI 1.3 | Aceptada | 2026-05-18 | `FSD-UC-001`, `DTI §9` |
 | [ADR-0007](0007-absorcion-design-system-supabase-ds.md) | Absorción de `supabase-ds` como Design System | Aceptada | 2026-06-28 | `DD-SHELL-001`, `DTP §B` |
+| [ADR-0008](0008-alcance-feature-e2e-subida-token-externo.md) | Alcance del primer feature E2E (subida + acceso externo): real vs stub | Aceptada | 2026-06-28 | `FSD-UC-002/011`, `DD-UC-002`, `DTP §A.2` |
 
 ## Convenciones
 

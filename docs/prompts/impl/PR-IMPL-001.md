@@ -35,6 +35,8 @@ archivos?token=, sin JWT) con ExternalTokenGuard HMAC-SHA256, URL presignada Min
 
 ### 1.3 Context
 ```text
+- Contexto E2E (ADR-0008): es el TRAMO 2 del feature oficial. El token se genera para el
+  archivo subido en el tramo 1 (UC-002 / DD-UC-002). Cadena: UC-004 → UC-001 → UC-002 → UC-011.
 - Documento fuente: docs/design/DD-UC-011.md y docs/product/FSD.md §4.11.
 - Decisión de arquitectura: DTI vFinal §3 (coexistencia JWT+HMAC, token stateful en
   tabla tokens_externos). No reabrir esta decisión.

@@ -135,6 +135,9 @@ Escenario: LMS no disponible al crear SimonDrop
 ```
 
 ### 4.2 FSD-UC-002 – Subida segura y Comprobante Hash
+> **Nota v1 (ADR-0008)**: el primer feature oficial implementa la subida en **una sola
+> operación** (presigned PUT) con comprobante SHA-256 real; la **reanudación por chunks** (A1)
+> y el **recibo PDF** quedan diferidos. Ver `docs/design/DD-UC-002.md`.
 - **Trazabilidad**: PRD-REQ-002 → BRD: BR-007 (hash SHA-256), BR-005 (inmutabilidad de actas)
 - **Actor principal**: Estudiante
 - **Precondiciones**:

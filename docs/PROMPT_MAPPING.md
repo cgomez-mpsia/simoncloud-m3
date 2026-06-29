@@ -402,6 +402,33 @@
 - **Trazabilidad**: ADR-0007; cierra el batch Radix (Checkbox, DropdownMenu, Select, Modal, Switch, DataTable). DataTable habilita listados de UC-011/audit log
 - **Verificación**: applied — 25 componentes (10 atoms / 11 molecules / 4 organisms), barrels OK, comentarios en inglés. **Requiere `npm install`** (react-switch)
 
+### PM-20260628-018
+- **Timestamp**: 2026-06-28T23:40:00-04:00
+- **Intent**: docs
+- **Prompt**: — (diseño-primero del primer feature oficial E2E)
+- **Artefactos generados**:
+  - `docs/adr/0008-alcance-feature-e2e-subida-token-externo.md` — **ADR-0008**: alcance del feature E2E (subida → token externo); real (MinIO/SHA-256/HMAC/hexagonal) vs stub/simplificado (SSO WebSISS stub, UC-001 sin LTI, UC-002 sin reanudación v1). 3 alternativas
+  - `docs/design/DD-UC-002.md` — design doc del slice subida + comprobante SHA-256 (tramo 1 del E2E)
+  - `docs/design/DD-UC-011.md` — enlazado al E2E (tramo 2)
+  - `docs/product/DTP.md` §A.1/§A.2/§A.3 — changelog + 3 deltas vs DTI (cada uno con ADR-0008) + estado UC-002/011/001/004
+  - índices `adr/README.md`, `design/README.md`
+- **Trazabilidad**: `FSD-UC-004 → UC-001 → UC-002 (DD-UC-002) → UC-011 (DD-UC-011)`; ADR-0008; feature oficial (no POC)
+- **Verificación**: applied (documentación). Código pendiente: PR-IMPL-003 (UC-002) + PR-IMPL-001 (UC-011). Diseño-primero antes de implementar
+
+### PM-20260628-019
+- **Timestamp**: 2026-06-29T00:10:00-04:00
+- **Intent**: docs
+- **Prompt**: — (ronda de gaps del E2E; aprobación ADR-0008)
+- **Artefactos generados**:
+  - `docs/adr/0008-*` + `adr/README.md` — estado → **Aceptada** (aprobado por el dueño)
+  - `docs/design/DD-UC-004.md` — DD ligero de auth habilitante (stub WebSISS + JWT RS256, puerto `AuthProviderPort` reemplazable)
+  - `docs/design/DD-UC-001.md` — DD ligero de creación de SimonDrop simplificada (sin LTI)
+  - `docs/prompts/impl/PR-IMPL-001.md` — nota de contexto E2E (tramo 2)
+  - `docs/product/FSD.md` — nota v1 en FSD-UC-002 (ADR-0008)
+  - `docs/design/README.md` — índice con DD-UC-001/004 + cadena PR-IMPL
+- **Trazabilidad**: cierra gaps de PM-018 (UC-001/UC-004 sin DD; PR-IMPL-001 sin E2E; FSD sin nota v1). Cadena completa de DDs del E2E
+- **Verificación**: applied — estado ADR consistente, 4 DDs del E2E (004/001/002/011), enlaces OK, baseline intacto
+
 ---
 
 ## Métricas AI-SDLC — release/2.0.0

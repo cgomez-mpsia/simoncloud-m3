@@ -64,6 +64,7 @@ flowchart LR
 |-------|--------|-------------------------------------|-----|-------------|-------|
 | 28/06/2026 | Transición M4→implementación: baseline congelado + capa viva (`docs/product`, `docs/design`, `docs/prompts/impl`) + DTP v1.0 | Modelo documental M4 | — | _(pendiente commit)_ | Carlos A. Gomez |
 | 28/06/2026 | Absorción del Design System `supabase-ds` → `libs/design-system/` (components + tokens + 2 agentes de extracción; mhtml gitignored; tema Supabase dark) | DD-SHELL-001 | ADR-0007 | _(pendiente commit)_ | Carlos A. Gomez |
+| 28/06/2026 | Definición del **primer feature oficial E2E** (subida + acceso externo): alcance real vs stub | FSD-UC-002 + FSD-UC-011 / DD-UC-002 | ADR-0008 | _(pendiente commit)_ | Carlos A. Gomez |
 
 ### A.2 Deltas respecto al DTI vFinal
 
@@ -72,16 +73,18 @@ flowchart LR
 
 | # | Sección del DTI afectada | Qué decía el DTI vFinal | Qué dice ahora el DTP | Motivo | ADR |
 |---|--------------------------|-------------------------|-----------------------|--------|-----|
-| — | _(sin deltas todavía)_ | | | | |
+| 1 | §9 Integración LMS (FSD-UC-001) | SimonDrop creado vía LTI 1.3 desde el LMS | v1: drop creado directo por el docente, **sin LTI** | Acotar el primer feature E2E | ADR-0008 |
+| 2 | §17 / ADR-0003 (FSD-UC-002) | Subida reanudable por chunks (S3 multipart, 2GB) | v1: **subida en una sola operación** (presigned PUT), sin reanudación; recibo JSON | Acotar v1; reanudación diferida | ADR-0008 |
+| 3 | §13.2 (FSD-UC-004) | SSO WebSISS real (OAuth2) | v1: **stub del IdP** que emite JWT real (RS256) con rol | No hay WebSISS accesible | ADR-0008 |
 
 ### A.3 Estado de implementación por FSD-UC
 
 | FSD-UC | Design Doc | Estado | Release | Tests/Evals | Notas |
 |--------|------------|--------|---------|-------------|-------|
-| `FSD-UC-011` Acceso usuario externo (token HMAC) | `DD-UC-011` _(en redacción)_ | en curso | `release/3.0.0` | objetivo ≥90% | Feature del demo (G01). Diseño primero, luego código. |
-| `FSD-UC-002` Subida + hash (POC-03) | — | poc | `release/2.0.0` | parcial | Construido como POC en M4. |
-| `FSD-UC-001` Creación SimonDrop (POC-03) | — | poc | `release/2.0.0` | parcial | Construido como POC en M4. |
-| `FSD-UC-004` SSO WebSISS (POC-03) | — | poc | `release/2.0.0` | parcial | Mock SSO en POC. |
+| `FSD-UC-002` Subida + hash | `DD-UC-002` | en curso (E2E tramo 1) | `release/3.0.0` | objetivo ≥90% | **Feature oficial E2E** (no POC). Real: MinIO/SHA-256. ADR-0008. |
+| `FSD-UC-011` Acceso usuario externo (token HMAC) | `DD-UC-011` | en curso (E2E tramo 2) | `release/3.0.0` | objetivo ≥90% | Token para el archivo de UC-002. ADR-0008. |
+| `FSD-UC-001` Creación SimonDrop (simplificado) | _(notas en ADR-0008)_ | habilitante (sin LTI) | `release/3.0.0` | — | Drop básico directo. Delta #1. |
+| `FSD-UC-004` Auth (stub WebSISS) | _(notas en ADR-0008)_ | habilitante (stub + JWT real) | `release/3.0.0` | — | Delta #3. |
 
 ### A.4 Trazabilidad código ↔ DTP
 
