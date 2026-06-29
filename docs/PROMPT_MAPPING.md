@@ -21,6 +21,9 @@
 | `PR-UC-008` | Worker RabbitMQ notificaciones push contrato | FSD-UC-007 | Claude Sonnet 4 | contrato-listo |
 | `PR-UC-009` | Export PDF audit log streaming contrato | FSD-UC-010 | Claude Sonnet 4 | contrato-listo |
 | `PR-IMPL-001` | Slice NestJS acceso externo token HMAC (`docs/design/DD-UC-011.md`) | FSD-UC-011 | Claude Opus 4.8 | contrato-listo |
+| `PR-IMPL-003` | Slice subida + comprobante SHA-256 (`DD-UC-002`) | FSD-UC-002 | Claude Opus 4.8 | contrato-listo |
+| `PR-IMPL-004` | Slice auth stub WebSISS + JWT RS256 (`DD-UC-004`) | FSD-UC-004 | Claude Opus 4.8 | contrato-listo |
+| `PR-IMPL-005` | Slice creación SimonDrop simplificada (`DD-UC-001`) | FSD-UC-001 | Claude Opus 4.8 | contrato-listo |
 
 > **Leyenda capa viva (release/3.0.0+)**: los prompts de implementación viven en
 > `docs/prompts/impl/PR-IMPL-NNN.md`, trazables vía `FSD-UC → DD-UC → PR-IMPL → código`.
@@ -428,6 +431,18 @@
   - `docs/design/README.md` — índice con DD-UC-001/004 + cadena PR-IMPL
 - **Trazabilidad**: cierra gaps de PM-018 (UC-001/UC-004 sin DD; PR-IMPL-001 sin E2E; FSD sin nota v1). Cadena completa de DDs del E2E
 - **Verificación**: applied — estado ADR consistente, 4 DDs del E2E (004/001/002/011), enlaces OK, baseline intacto
+
+### PM-20260629-001
+- **Timestamp**: 2026-06-29T00:30:00-04:00
+- **Intent**: docs
+- **Prompt**: — (escritura de los prompt-contratos de implementación; cierra el "diseño-primero")
+- **Artefactos generados**:
+  - `docs/prompts/impl/PR-IMPL-004.md` — auth (stub WebSISS + JWT RS256 + Guard), de `DD-UC-004`
+  - `docs/prompts/impl/PR-IMPL-005.md` — creación SimonDrop simplificada (sin LTI), de `DD-UC-001`
+  - `docs/prompts/impl/PR-IMPL-003.md` — subida + SHA-256 + inmutabilidad (MinIO), de `DD-UC-002`
+  - `docs/PROMPT_MAPPING.md` — índice ampliado con PR-IMPL-003/004/005 (estado contrato-listo)
+- **Trazabilidad**: completa el punto 7 del docente (prompt implementation). Cadena cerrada por slice: `FSD-UC → DD-UC → PR-IMPL` para los 4 tramos del E2E (004→005→003→001)
+- **Verificación**: applied — 4 PR-IMPL existen (001/003/004/005), cada uno con 6 elementos + invariantes + failure modes + trazabilidad. Documentación 100% completa para iniciar implementación
 
 ---
 
