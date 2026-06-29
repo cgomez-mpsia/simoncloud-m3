@@ -7,3 +7,7 @@ classes/
 # Design System — material fuente de extracción (no versionar; ver ADR-0007)
 libs/design-system/sources/
 **/*.mhtml
+
+# Design System playground (build local; deps no versionadas)
+libs/design-system/node_modules/
+libs/design-system/dist/
