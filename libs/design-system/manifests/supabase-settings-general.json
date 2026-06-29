@@ -1,0 +1,428 @@
+{
+  "source": "supabase-settings-general.mhtml",
+  "description": "Supabase dashboard - Project Settings / General tab. Contains project metadata forms, action buttons (restart, transfer, delete), and destructive operations.",
+  "tokens": {
+    "new_tokens": []
+  },
+  "components": [
+    {
+      "id": "project-name-input",
+      "name": "TextInput",
+      "level": "atom",
+      "description": "Editable text input for project name. Displayed throughout the dashboard.",
+      "variants": [
+        {
+          "name": "default",
+          "props": {
+            "placeholder": "Enter project name",
+            "value": "my-project",
+            "disabled": false,
+            "readOnly": false
+          }
+        }
+      ],
+      "props": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Form item identifier"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "default": "text",
+          "description": "Input type"
+        },
+        {
+          "name": "autocomplete",
+          "type": "string",
+          "default": "off",
+          "description": "Autocomplete attribute"
+        },
+        {
+          "name": "aria-describedby",
+          "type": "string",
+          "description": "ARIA description reference"
+        },
+        {
+          "name": "aria-invalid",
+          "type": "boolean",
+          "default": false,
+          "description": "Validation state"
+        }
+      ],
+      "cssClasses": [
+        "flex",
+        "w-full",
+        "rounded-md",
+        "border",
+        "border-control",
+        "read-only:border-button",
+        "bg-foreground/[.026]",
+        "py-2",
+        "px-3",
+        "text-sm",
+        "transition-colors",
+        "placeholder:text-foreground-muted",
+        "disabled:cursor-not-allowed",
+        "disabled:opacity-50",
+        "focus-visible:outline-hidden"
+      ],
+      "htmlSample": "<input autocomplete=\"off\" id=\"project-name-input\" aria-describedby=\"project-name-description\" aria-invalid=\"false\" class=\"flex w-full rounded-md border border-control read-only:border-button bg-foreground/[.026] py-2 px-3 text-sm transition-colors placeholder:text-foreground-muted disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-hidden\" type=\"text\" />",
+      "notes": "Standard form input used in Project Settings. Accessible with ARIA attributes. Supports read-only and disabled states."
+    },
+    {
+      "id": "project-id-input",
+      "name": "ReadOnlyTextInput",
+      "level": "atom",
+      "description": "Read-only text input displaying the Project ID used in APIs and URLs.",
+      "variants": [
+        {
+          "name": "default",
+          "props": {
+            "value": "my-project-abc123",
+            "readOnly": true,
+            "disabled": false
+          }
+        }
+      ],
+      "props": [
+        {
+          "name": "id",
+          "type": "string",
+          "description": "Form item identifier"
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "default": true,
+          "description": "Read-only state"
+        },
+        {
+          "name": "data-1p-ignore",
+          "type": "boolean",
+          "description": "Password manager ignore flag"
+        },
+        {
+          "name": "data-lpignore",
+          "type": "boolean",
+          "description": "LastPass ignore flag"
+        }
+      ],
+      "cssClasses": [
+        "flex",
+        "w-full",
+        "rounded-md",
+        "border",
+        "border-control",
+        "read-only:border-button",
+        "bg-foreground/[.026]",
+        "py-2",
+        "px-3",
+        "text-sm",
+        "text-foreground",
+        "cursor-not-allowed",
+        "opacity-70"
+      ],
+      "htmlSample": "<input data-slot=\"input-group-control\" readonly=\"\" id=\"project-id-input\" aria-describedby=\"project-id-description\" aria-invalid=\"false\" data-1p-ignore=\"true\" data-lpignore=\"true\" class=\"flex w-full rounded-md border border-control read-only:border-button bg-foreground/[.026] py-2 px-3 text-sm text-foreground cursor-not-allowed opacity-70\" type=\"text\" value=\"my-project-abc123\" />",
+      "notes": "Read-only input with password manager ignore flags. Used alongside copy-button for easy reference copying."
+    },
+    {
+      "id": "copy-button",
+      "name": "CopyButton",
+      "level": "molecule",
+      "description": "Small icon button to copy content (Project ID or API key) to clipboard. Paired with read-only input fields.",
+      "variants": [
+        {
+          "name": "default",
+          "props": {
+            "size": "tiny",
+            "icon": "copy",
+            "label": "Copy"
+          }
+        }
+      ],
+      "props": [
+        {
+          "name": "type",
+          "type": "string",
+          "default": "button",
+          "description": "Button type"
+        },
+        {
+          "name": "data-size",
+          "type": "string",
+          "default": "tiny",
+          "description": "Button size variant"
+        },
+        {
+          "name": "aria-label",
+          "type": "string",
+          "description": "Accessibility label"
+        },
+        {
+          "name": "data-state",
+          "type": "string",
+          "description": "Dropdown state (if part of group)"
+        }
+      ],
+      "cssClasses": [
+        "relative",
+        "inline-flex",
+        "items-center",
+        "justify-center",
+        "cursor-pointer",
+        "space-x-2",
+        "text-center",
+        "font-regular",
+        "ease-out",
+        "duration-200",
+        "rounded-md",
+        "outline-hidden",
+        "transition-all",
+        "outline-0",
+        "focus-visible:outline-solid",
+        "text-xs",
+        "py-1",
+        "h-6",
+        "gap-1",
+        "rounded-md",
+        "px-2.5"
+      ],
+      "htmlSample": "<button data-size=\"tiny\" type=\"button\" class=\"relative inline-flex items-center justify-center cursor-pointer space-x-2 text-center font-regular ease-out duration-200 rounded-md outline-hidden transition-all outline-0 focus-visible:outline-solid text-xs py-1 h-6 gap-1 px-2.5\"><span class=\"truncate\">Copy</span></button>",
+      "notes": "Compact button used with read-only inputs. Typically contains an icon (lucide) and text label. Used in pairs with input-group-control pattern."
+    },
+    {
+      "id": "form-field",
+      "name": "FormField",
+      "level": "molecule",
+      "description": "Complete form field component combining label, input, description, and optional copy button. Used for Project name, ID, and region.",
+      "variants": [
+        {
+          "name": "editable",
+          "props": {
+            "readonly": false
+          }
+        },
+        {
+          "name": "readonly-with-copy",
+          "props": {
+            "readonly": true,
+            "showCopyButton": true
+          }
+        }
+      ],
+      "props": [
+        {
+          "name": "label",
+          "type": "string",
+          "description": "Field label text"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "description": "Helper text below field"
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "description": "Input value"
+        },
+        {
+          "name": "readonly",
+          "type": "boolean",
+          "description": "Whether field is read-only"
+        }
+      ],
+      "cssClasses": [
+        "flex",
+        "flex-col",
+        "gap-2",
+        "py-4",
+        "px-4",
+        "border-b",
+        "last:border-b-0"
+      ],
+      "htmlSample": "<div class=\"flex flex-col gap-2 py-4 px-4 border-b last:border-b-0\"><label class=\"text peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sm transition-colors text-foreground\" data-formlayout-id=\"formLabel\"><span>Project name</span></label><div id=\"project-name-description\" class=\"text-foreground-lighter text-base md:text-sm\" data-formlayout-id=\"description\">Displayed throughout the dashboard.</div><div class=\"flex items-center gap-2\"><input class=\"flex w-full rounded-md border border-control bg-foreground/[.026] py-2 px-3 text-sm\" type=\"text\" /></div></div>",
+      "notes": "Molecule combining label, description text, input field, and optional actions. Flexbox layout with vertical stacking. Separators via border-b."
+    },
+    {
+      "id": "settings-section",
+      "name": "SettingsCard",
+      "level": "organism",
+      "description": "Container for a group of related settings fields. Provides visual grouping with padding and borders.",
+      "variants": [
+        {
+          "name": "default",
+          "props": {}
+        }
+      ],
+      "props": [
+        {
+          "name": "title",
+          "type": "string",
+          "description": "Optional section title"
+        }
+      ],
+      "cssClasses": [
+        "flex",
+        "flex-col",
+        "gap-1",
+        "py-4",
+        "px-6",
+        "border",
+        "border-default",
+        "rounded-lg",
+        "bg-surface-100"
+      ],
+      "htmlSample": "<div class=\"flex flex-col gap-1 py-4 px-6 border border-default rounded-lg bg-surface-100\"><!-- form fields --></div>",
+      "notes": "Visual container for grouping form fields in settings pages. Uses border and padding for visual separation."
+    },
+    {
+      "id": "action-button",
+      "name": "ActionButton",
+      "level": "atom",
+      "description": "Standard action button used throughout settings (Save changes, Restart project, Transfer project, Delete project).",
+      "variants": [
+        {
+          "name": "primary",
+          "props": {
+            "variant": "default",
+            "text": "Save changes"
+          }
+        },
+        {
+          "name": "secondary",
+          "props": {
+            "variant": "default",
+            "text": "Restart project"
+          }
+        },
+        {
+          "name": "destructive",
+          "props": {
+            "variant": "destructive",
+            "text": "Delete project"
+          }
+        }
+      ],
+      "props": [
+        {
+          "name": "type",
+          "type": "string",
+          "default": "button",
+          "description": "Button type (button or submit)"
+        },
+        {
+          "name": "data-size",
+          "type": "string",
+          "default": "tiny",
+          "description": "Button size"
+        },
+        {
+          "name": "disabled",
+          "type": "boolean",
+          "description": "Disabled state"
+        },
+        {
+          "name": "tabindex",
+          "type": "number",
+          "description": "Tab index for keyboard navigation"
+        }
+      ],
+      "cssClasses": [
+        "relative",
+        "inline-flex",
+        "items-center",
+        "justify-center",
+        "cursor-pointer",
+        "space-x-2",
+        "text-center",
+        "font-regular",
+        "ease-out",
+        "duration-200",
+        "rounded-md",
+        "outline-hidden",
+        "transition-all",
+        "outline-0",
+        "focus-visible:outline-solid",
+        "text-xs",
+        "py-1",
+        "h-6",
+        "gap-1",
+        "px-2.5"
+      ],
+      "htmlSample": "<button data-size=\"tiny\" type=\"button\" class=\"relative inline-flex items-center justify-center cursor-pointer space-x-2 text-center font-regular ease-out duration-200 rounded-md outline-hidden transition-all outline-0 focus-visible:outline-solid text-xs py-1 h-6 gap-1 px-2.5\"><span class=\"truncate\">Save changes</span></button>",
+      "notes": "Compact button component with consistent sizing, spacing, and focus states. Supports disabled state for submit buttons. Color/variant determined by context (default or destructive)."
+    },
+    {
+      "id": "danger-zone-section",
+      "name": "DangerZonePanel",
+      "level": "organism",
+      "description": "Special section for destructive actions (Delete project). Visually distinct to warn users about irreversible operations.",
+      "variants": [
+        {
+          "name": "default",
+          "props": {}
+        }
+      ],
+      "props": [
+        {
+          "name": "title",
+          "type": "string",
+          "default": "Danger Zone",
+          "description": "Section title"
+        }
+      ],
+      "cssClasses": [
+        "flex",
+        "flex-col",
+        "gap-4",
+        "py-4",
+        "px-6",
+        "border",
+        "border-destructive",
+        "rounded-lg",
+        "bg-destructive/[.05]"
+      ],
+      "htmlSample": "<div class=\"flex flex-col gap-4 py-4 px-6 border border-destructive rounded-lg bg-destructive/[.05]\"><h3 class=\"text-sm font-medium text-foreground\">Danger Zone</h3><p class=\"text-sm text-foreground-lighter\">Once you delete a project, there is no going back. Please be certain.</p><button type=\"button\" class=\"relative inline-flex items-center justify-center cursor-pointer text-xs py-1 h-6 px-2.5 rounded-md bg-destructive text-white\"><span>Delete project</span></button></div>",
+      "notes": "Visually distinct panel for destructive operations. Uses destructive color tokens (red/warning) and cautionary text. Contains delete or irreversible action buttons."
+    },
+    {
+      "id": "section-header",
+      "name": "SectionHeader",
+      "level": "atom",
+      "description": "Header text for a settings section or category (e.g., 'Configuration', 'Project Status').",
+      "variants": [
+        {
+          "name": "default",
+          "props": {}
+        }
+      ],
+      "props": [
+        {
+          "name": "text",
+          "type": "string",
+          "description": "Header text"
+        },
+        {
+          "name": "level",
+          "type": "string",
+          "default": "h4",
+          "description": "Heading level"
+        }
+      ],
+      "cssClasses": [
+        "text-lg",
+        "font-semibold",
+        "text-foreground",
+        "border-b",
+        "border-default",
+        "pb-4",
+        "mb-4"
+      ],
+      "htmlSample": "<h4 class=\"text-lg font-semibold text-foreground border-b border-default pb-4 mb-4\">Settings</h4>",
+      "notes": "Large heading for page sections. Uses border-bottom for visual separation from content below."
+    }
+  ]
+}

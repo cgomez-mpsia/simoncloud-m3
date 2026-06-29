@@ -14,8 +14,7 @@
       "Bash(npx tsc *)",
       "Bash(git tag *)",
       "Skill(update-config)",
-      "Skill(update-config:*)",
-      "Bash(git commit -m 'feat\\(ds\\): absorber supabase-ds como design system + shell \\(ADR-0007\\) *)"
+      "Skill(update-config:*)"
     ]
   },
   "hooks": {

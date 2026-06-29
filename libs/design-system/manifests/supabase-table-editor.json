@@ -1,0 +1,229 @@
+{
+  "source": "supabase-table-editor.mhtml",
+  "description": "Supabase dashboard - Table Editor (editable data grid with row selection and column management)",
+  "tokens": {
+    "new_tokens": []
+  },
+  "components": [
+    {
+      "id": "data-grid",
+      "name": "DataGrid",
+      "level": "organism",
+      "description": "React Data Grid (RDG) - editable table with virtualized rows, column headers, cell selection, and row selection. Displays ~100 rows with 19 columns showing database records.",
+      "variants": [
+        "rdg-row",
+        "rdg-header-row",
+        "rdg-row-odd",
+        "rdg-row-even"
+      ],
+      "props": [
+        "role=\"grid\"",
+        "aria-multiselectable=\"true\"",
+        "aria-colcount",
+        "aria-rowcount",
+        "dir=\"ltr\""
+      ],
+      "cssClasses": [
+        "rdg",
+        "grow",
+        "border-t-default",
+        "border-b-0",
+        "rdg-row",
+        "rdg-header-row",
+        "h-35px",
+        "rdg-row-odd",
+        "rdg-row-even"
+      ],
+      "htmlSample": "<div role=\"grid\" aria-multiselectable=\"true\" aria-colcount=\"19\" aria-rowcount=\"101\" class=\"rdg rnvodz57-0-0-beta-47 grow border-t-default! border-b-0!\" dir=\"ltr\" style=\"grid-template-columns: 65px 250px 250px...; grid-template-rows: repeat(1, 35px) repeat(100, 35px);\"><div role=\"row\" aria-rowindex=\"1\" class=\"rdg-header-row h-[35px]\">...</div></div>",
+      "notes": "Uses Tailwind CSS grid layout. Frozen column at left for row selection (65px). Supports multi-select, row/column aria roles."
+    },
+    {
+      "id": "grid-column-header",
+      "name": "GridColumnHeader",
+      "level": "molecule",
+      "description": "Column header cell in table grid. Contains column name, data type, and optional dropdown for column options.",
+      "variants": [],
+      "props": [
+        "role=\"columnheader\"",
+        "aria-colindex",
+        "aria-rowspan=\"1\"",
+        "aria-selected=\"false\""
+      ],
+      "cssClasses": [
+        "sb-grid-column-header",
+        "sb-grid-column-header__inner",
+        "sb-grid-column-header__inner__primary-key",
+        "sb-grid-column-header__inner__name",
+        "sb-grid-column-header__inner__format",
+        "grow"
+      ],
+      "htmlSample": "<div role=\"columnheader\" aria-colindex=\"2\" aria-rowspan=\"1\" aria-selected=\"false\" tabindex=\"-1\" class=\"sb-grid-column-header\"><div class=\"sb-grid-column-header__inner grow\" role=\"button\" tabindex=\"0\" aria-disabled=\"false\"><button data-state=\"closed\" class=\"\"><span class=\"sb-grid-column-header__inner__name\">tournament_id</span></button><span class=\"sb-grid-column-header__inner__format\">uuid</span></div></div>",
+      "notes": "Renders database column names with type annotations (uuid, text, timestamp, etc). Clickable for sorting/filtering."
+    },
+    {
+      "id": "grid-cell",
+      "name": "GridCell",
+      "level": "molecule",
+      "description": "Data cell in table grid. Contains formatted data values (UUIDs, timestamps, foreign key references).",
+      "variants": [
+        "sb-grid-select-cell",
+        "sb-grid-foreign-key-formatter",
+        "rdg-cell"
+      ],
+      "props": [
+        "role=\"gridcell\"",
+        "aria-colindex",
+        "tabindex",
+        "style=\"grid-column\""
+      ],
+      "cssClasses": [
+        "rdg-cell",
+        "sb-grid-select-cell__formatter",
+        "sb-grid-foreign-key-formatter",
+        "flex",
+        "justify-between"
+      ],
+      "htmlSample": "<div class=\"rdg-cell\" style=\"grid-column: 3 / 4;\"><div class=\"sb-grid-foreign-key-formatter flex justify-between\"><span class=\"sb-grid-foreign-key-formatter__text\">0152620f-13c2-4a95-b24b-3...</span></div></div>",
+      "notes": "302+ cells rendered. Foreign key cells show formatted references. Select column shows checkboxes (type=\"checkbox\")."
+    },
+    {
+      "id": "grid-row-select-checkbox",
+      "name": "RowSelectCheckbox",
+      "level": "atom",
+      "description": "Checkbox input for row selection in the frozen left column. Also includes 'Select All' checkbox in header.",
+      "variants": [
+        "select-all",
+        "select-row"
+      ],
+      "props": [
+        "type=\"checkbox\"",
+        "aria-label=\"Select All\" or \"Select\"",
+        "tabindex=\"-1\"",
+        "class=\"sb-grid-select-cell__formatter\""
+      ],
+      "cssClasses": [
+        "sb-grid-select-cell__formatter",
+        "rdg-row__select-column"
+      ],
+      "htmlSample": "<input aria-label=\"Select All\" tabindex=\"-1\" class=\"sb-grid-select-cell__formatter\" type=\"checkbox\">",
+      "notes": "26 checkboxes total (1 Select All + 25 row selectors visible). Enables row-level operations."
+    },
+    {
+      "id": "insert-button",
+      "name": "InsertButton",
+      "level": "atom",
+      "description": "Button to insert a new row into the table. Located in grid toolbar area.",
+      "variants": [],
+      "props": [
+        "type=\"button\"",
+        "class contains icon and text span"
+      ],
+      "cssClasses": [
+        "lucide lucide-chevron-down",
+        "truncate"
+      ],
+      "htmlSample": "<button type=\"button\"><div><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-chevron-down\"><path d=\"m6 9 6 6 6-6\"></path></svg></div><span class=\"truncate\">Insert</span></button>",
+      "notes": "Visible in toolbar above grid. Chevron-down icon. Allows adding new database records."
+    },
+    {
+      "id": "search-input",
+      "name": "SearchInput",
+      "level": "atom",
+      "description": "Text input field for searching/filtering tables in the sidebar.",
+      "variants": [],
+      "props": [
+        "type=\"text\"",
+        "placeholder=\"Search tables...\"",
+        "aria-labelledby=\"Search tables\"",
+        "name=\"search-tables\""
+      ],
+      "cssClasses": [
+        "flex",
+        "border",
+        "border-control",
+        "bg-foreground/[.026]",
+        "h-[28px]",
+        "text-base",
+        "md:text-xs",
+        "pl-7",
+        "pr-7",
+        "w-full",
+        "rounded-sm"
+      ],
+      "htmlSample": "<input placeholder=\"Search tables...\" aria-labelledby=\"Search tables\" class=\"flex border border-control read-only:border-button bg-foreground/[.026] file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground-lighter disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive-400 aria-[invalid=true]:focus:border-destructive aria-[invalid=true]:focus-visible:border-destructive px-3 py-2 h-[32px] md:h-[28px] text-base md:text-xs pl-7 pr-7 w-full rounded-sm\" type=\"text\" value=\"\" name=\"search-tables\">",
+      "notes": "Located in left sidebar. Controlled input with border styling. Used for table discovery/filtering."
+    },
+    {
+      "id": "button-generic",
+      "name": "Button",
+      "level": "atom",
+      "description": "Generic button component used throughout interface (toolbar buttons, column header buttons, etc.)",
+      "variants": [
+        "data-state=\"closed\"",
+        "data-state=\"open\""
+      ],
+      "props": [
+        "type=\"button\"",
+        "data-state",
+        "aria-disabled",
+        "role=\"button\" (on divs)"
+      ],
+      "cssClasses": [
+        "truncate",
+        "inline-flex",
+        "items-center",
+        "justify-center",
+        "cursor-pointer",
+        "space-x-2",
+        "text-center",
+        "font-regular",
+        "ease-out",
+        "duration-200",
+        "rounded-md"
+      ],
+      "htmlSample": "<button data-state=\"closed\" class=\"\"><span class=\"sb-grid-column-header__inner__name\">id</span></button>",
+      "notes": "Multiple button variants throughout page. Many use Radix UI patterns (data-state attribute)."
+    },
+    {
+      "id": "grid-toolbar",
+      "name": "GridToolbar",
+      "level": "molecule",
+      "description": "Toolbar above the data grid containing Insert button, Sort controls, and filter options.",
+      "variants": [],
+      "props": [
+        "class contains flex layout",
+        "flex-wrap",
+        "md:min-h-10"
+      ],
+      "cssClasses": [
+        "flex",
+        "flex-wrap",
+        "md:min-h-10",
+        "sb-grid-header__inner",
+        "items-center",
+        "gap"
+      ],
+      "htmlSample": "<div class=\"flex flex-wrap md:min-h-10 items-center gap-4\"><div class=\"sb-grid-header__inner\"><button>Sort</button></div><button type=\"button\">Insert</button></div>",
+      "notes": "Coordinates Insert button, Sort dropdown, and other grid controls. Responsive layout (md breakpoint)."
+    },
+    {
+      "id": "foreign-key-formatter",
+      "name": "ForeignKeyFormatter",
+      "level": "molecule",
+      "description": "Special cell formatter for displaying foreign key references with clickable links to related records.",
+      "variants": [],
+      "props": [
+        "class=\"sb-grid-foreign-key-formatter\"",
+        "flex justify-between"
+      ],
+      "cssClasses": [
+        "sb-grid-foreign-key-formatter",
+        "sb-grid-foreign-key-formatter__text",
+        "flex",
+        "justify-between"
+      ],
+      "htmlSample": "<div class=\"sb-grid-foreign-key-formatter flex justify-between\"><span class=\"sb-grid-foreign-key-formatter__text\">0152620f-13c2-4a95-b24b-3c8f8a4d8f3c</span></div>",
+      "notes": "Used for UUID/FK columns (tournament_id, home_team_id, away_team_id). Shows formatted reference values."
+    }
+  ]
+}

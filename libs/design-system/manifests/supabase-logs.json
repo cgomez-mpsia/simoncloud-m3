@@ -1,0 +1,285 @@
+{
+  "source": "supabase-logs.mhtml",
+  "description": "Supabase dashboard - Unified Logs (filterable log table with time range, log type, level, and status filters)",
+  "tokens": {
+    "new_tokens": []
+  },
+  "components": [
+    {
+      "id": "time-range-dropdown",
+      "name": "TimeRangeDropdown",
+      "level": "molecule",
+      "description": "Time range selector dropdown for filtering logs (e.g. Last hour, Last 24h, Custom)",
+      "variants": [
+        "closed",
+        "open"
+      ],
+      "props": [
+        "aria-haspopup",
+        "aria-expanded",
+        "aria-controls",
+        "data-state"
+      ],
+      "cssClasses": [
+        "relative",
+        "inline-flex",
+        "items-center",
+        "justify-center",
+        "text-xs",
+        "px-2.5",
+        "py-1",
+        "h-8",
+        "border",
+        "bg-alternative",
+        "dark:bg-muted",
+        "hover:bg-selection",
+        "border-strong",
+        "hover:border-stronger",
+        "focus-visible:outline-border-strong",
+        "data-[state=open]:bg-selection",
+        "data-[state=open]:outline-border-strong"
+      ],
+      "htmlSample": "<button type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"time-range-popover\" data-state=\"closed\" class=\"relative inline-flex items-center justify-center text-xs px-2.5 py-1 h-8 border bg-alternative dark:bg-muted hover:bg-selection border-strong hover:border-stronger focus-visible:outline-border-strong data-[state=open]:bg-selection data-[state=open]:outline-border-strong\"><p class=\"text-sm\">Time Range</p><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-chevron-down h-4 w-4 shrink-0 transition-transform duration-200\"><path d=\"m6 9 6 6 6-6\"></path></svg></button>",
+      "notes": "Dropdown for selecting predefined time ranges or custom date range for log filtering"
+    },
+    {
+      "id": "log-type-select",
+      "name": "LogTypeSelect",
+      "level": "molecule",
+      "description": "Dropdown selector for log source type (postgres, postgrest, auth, storage, edge-function, realtime, supavisor, pgbouncer)",
+      "variants": [
+        "closed",
+        "open"
+      ],
+      "props": [
+        "aria-haspopup",
+        "aria-expanded",
+        "aria-controls",
+        "data-state"
+      ],
+      "cssClasses": [
+        "relative",
+        "inline-flex",
+        "items-center",
+        "justify-center",
+        "text-xs",
+        "px-2.5",
+        "py-1",
+        "h-8",
+        "border",
+        "bg-alternative",
+        "dark:bg-muted",
+        "hover:bg-selection",
+        "border-strong",
+        "hover:border-stronger",
+        "focus-visible:outline-border-strong",
+        "data-[state=open]:bg-selection",
+        "data-[state=open]:outline-border-strong"
+      ],
+      "htmlSample": "<button type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"log-type-popover\" data-state=\"closed\" class=\"relative inline-flex items-center justify-center text-xs px-2.5 py-1 h-8 border bg-alternative dark:bg-muted hover:bg-selection border-strong hover:border-stronger focus-visible:outline-border-strong\"><p class=\"text-sm\">Log Type</p><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-chevron-down\"><path d=\"m6 9 6 6 6-6\"></path></svg></button>",
+      "notes": "Multi-select dropdown for filtering by log type (postgres, postgrest, auth, storage, edge-function, realtime, supavisor, pgbouncer)"
+    },
+    {
+      "id": "log-level-filter",
+      "name": "LogLevelCheckboxGroup",
+      "level": "molecule",
+      "description": "Checkbox group for filtering logs by severity level (success, warning, error, info, debug)",
+      "variants": [
+        "unchecked",
+        "checked"
+      ],
+      "props": [
+        "role",
+        "aria-checked",
+        "data-state",
+        "value",
+        "id",
+        "type"
+      ],
+      "cssClasses": [
+        "flex",
+        "items-center",
+        "gap-2",
+        "h-2.5",
+        "w-2.5",
+        "rounded-[2px]",
+        "bg-warning",
+        "text-warning",
+        "bg-error",
+        "text-error",
+        "peer-disabled:cursor-not-allowed"
+      ],
+      "htmlSample": "<button type=\"button\" role=\"checkbox\" aria-checked=\"false\" data-state=\"unchecked\" value=\"on\" id=\"level-warning\" class=\"peer transition-colors hover:text-accent-foreground text-[0.8rem] min-w-0\"></button><label class=\"text peer-disabled:cursor-not-allowed accent-foreground text-[0.8rem] min-w-0\" for=\"level-warning\"><div class=\"flex-1 min-w-0 overflow-hidden\"><div class=\"text-xs\">warning</div><div class=\"flex items-center gap-2\"><div class=\"h-2.5 w-2.5 rounded-[2px] bg-warning\"></div><span class=\"text-muted-foreground text-xs\">warning</span></div></div></label>",
+      "notes": "Checkboxes for level filtering displayed in filter popover. Includes visual indicators (colored squares) for each level"
+    },
+    {
+      "id": "status-filter",
+      "name": "StatusDropdown",
+      "level": "molecule",
+      "description": "Dropdown selector for log status (Success, Error, In Progress)",
+      "variants": [
+        "closed",
+        "open"
+      ],
+      "props": [
+        "aria-haspopup",
+        "aria-expanded",
+        "aria-controls",
+        "data-state"
+      ],
+      "cssClasses": [
+        "relative",
+        "inline-flex",
+        "items-center",
+        "justify-center",
+        "text-xs",
+        "px-2.5",
+        "py-1",
+        "h-8",
+        "border",
+        "bg-alternative",
+        "dark:bg-muted",
+        "hover:bg-selection",
+        "border-strong",
+        "hover:border-stronger"
+      ],
+      "htmlSample": "<button type=\"button\" aria-haspopup=\"dialog\" aria-expanded=\"false\" aria-controls=\"status-popover\" data-state=\"closed\" class=\"relative inline-flex items-center justify-center text-xs px-2.5 py-1 h-8 border bg-alternative dark:bg-muted hover:bg-selection border-strong hover:border-stronger\"><div class=\"flex gap-2 truncate py-2\"><p class=\"text-sm\">Status</p></div><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"m6 9 6 6 6-6\"></path></svg></button>",
+      "notes": "Dropdown for filtering logs by status"
+    },
+    {
+      "id": "filter-input",
+      "name": "FilterSearchInput",
+      "level": "atom",
+      "description": "Text search input for filtering logs by type, level, or status",
+      "variants": [],
+      "props": [
+        "placeholder",
+        "data-testid",
+        "value",
+        "type"
+      ],
+      "cssClasses": [
+        "px-2.5",
+        "rounded-md",
+        "border",
+        "text-foreground",
+        "bg-alternative",
+        "dark:bg-muted",
+        "placeholder-foreground-lighter",
+        "text-xs",
+        "focus:outline-none",
+        "focus:ring-1",
+        "focus:ring-offset-1"
+      ],
+      "htmlSample": "<input type=\"text\" placeholder=\"Filter by Log Type, Level, Status...\" data-testid=\"filter-bar-freetext\" value=\"\" class=\"px-2.5 rounded-md border text-foreground bg-alternative dark:bg-muted placeholder-foreground-lighter text-xs\"/>",
+      "notes": "Freetext input for filtering logs dynamically"
+    },
+    {
+      "id": "logs-data-table",
+      "name": "LogsDataTable",
+      "level": "organism",
+      "description": "Data table displaying log entries with columns: select checkbox, date/time, log level, status, and event message",
+      "variants": [],
+      "props": [
+        "role",
+        "aria-label",
+        "data-testid"
+      ],
+      "cssClasses": [
+        "w-full",
+        "border-collapse",
+        "text-left",
+        "align-middle",
+        "bg-alternative",
+        "dark:bg-muted",
+        "text-foreground",
+        "group",
+        "border-b",
+        "transition-colors",
+        "hover:bg-muted"
+      ],
+      "htmlSample": "<table class=\"w-full border-collapse text-left align-middle\" style=\"--header-select-size: 48px; --col-select-size: 48px; --header-level-size: 48px; --col-level-size: 48px; --header-date-size: 140px; --col-date-size: 140px; --header-log_type-size: 40px; --col-log_type-size: 40px; --header-status-size: 70px; --col-status-size: 70px;\"><thead><tr class=\"border-b\"><th class=\"h-9 px-2 text-left align-middle w-[32px]\"><button type=\"button\" role=\"checkbox\" aria-checked=\"false\" data-state=\"unchecked\"></button></th><th id=\"date\" class=\"h-9 px-2 text-left align-middle\" style=\"width: var(--header-date-size);\">Date</th><th id=\"level\" class=\"h-9 px-2 text-left align-middle\" style=\"width: var(--header-level-size);\">Level</th><th id=\"status\" aria-sort=\"none\" class=\"h-9 px-2 text-left align-middle\" style=\"width: var(--header-status-size);\">Status</th><th id=\"event_message\" aria-sort=\"none\" class=\"text-foreground\">Event message</th></tr></thead><tbody><tr class=\"group border-b\"><td class=\"align-middle py-1 px-2 *[[role=checkbox]]:translate-y-[2px]\"><button type=\"button\" role=\"checkbox\" aria-checked=\"false\" data-state=\"unchecked\"></button></td><td class=\"text-muted-foreground\">connection authenticated: identity=\"postgres\" method=scram-sha-256</td></tr></tbody></table>",
+      "notes": "Virtualized table rendering log entries with fixed column widths. Rows are selectable via checkbox. Supports sorting by clicking column headers"
+    },
+    {
+      "id": "table-header-select",
+      "name": "TableHeaderCheckbox",
+      "level": "atom",
+      "description": "Checkbox in table header for selecting all visible logs",
+      "variants": [
+        "unchecked",
+        "checked",
+        "indeterminate"
+      ],
+      "props": [
+        "role",
+        "aria-checked",
+        "data-state",
+        "type"
+      ],
+      "cssClasses": [
+        "transition-colors",
+        "align-middle",
+        "px-2",
+        "hover:bg-accent/50",
+        "w-[32px]"
+      ],
+      "htmlSample": "<button type=\"button\" role=\"checkbox\" aria-checked=\"false\" data-state=\"unchecked\" value=\"on\" class=\"transition-colors align-middle px-2 hover:bg-accent/50\"></button>",
+      "notes": "Header checkbox for bulk selection of all visible logs in the current view"
+    },
+    {
+      "id": "log-level-badge",
+      "name": "LevelBadge",
+      "level": "atom",
+      "description": "Visual badge indicating log severity level (warning, error, success, info, debug)",
+      "variants": [
+        "warning",
+        "error",
+        "success",
+        "info",
+        "debug"
+      ],
+      "props": [
+        "class",
+        "data-level"
+      ],
+      "cssClasses": [
+        "inline-block",
+        "h-2.5",
+        "w-2.5",
+        "rounded-[2px]",
+        "bg-warning",
+        "bg-error",
+        "bg-success",
+        "bg-info",
+        "bg-debug"
+      ],
+      "htmlSample": "<div class=\"h-2.5 w-2.5 rounded-[2px] bg-warning\"></div>",
+      "notes": "Color-coded square badge used in filter pills and table rows to visually indicate log severity level"
+    },
+    {
+      "id": "toolbar-actions",
+      "name": "LogsToolbar",
+      "level": "molecule",
+      "description": "Toolbar with actions for logs: refresh, hide/show filters, download, more options",
+      "variants": [],
+      "props": [
+        "aria-label",
+        "data-state",
+        "tabindex"
+      ],
+      "cssClasses": [
+        "flex",
+        "items-center",
+        "gap-2",
+        "h-full",
+        "px-3",
+        "border-b",
+        "border-strong",
+        "bg-alternative"
+      ],
+      "htmlSample": "<div class=\"flex items-center gap-2 h-[26px]\"><button type=\"button\" aria-label=\"Hide filters\" data-state=\"closed\" class=\"w-[26px] hidden sm:flex\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" class=\"lucide lucide-chevron-left\"><path d=\"M15 18l-6-6 6-6\"></path></svg></button><button type=\"button\" aria-label=\"Refresh logs\" data-state=\"closed\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"lucide lucide-refresh-cw\"><path d=\"M1 4v6h6M23 20v-6h-6\"></path></svg></button><button type=\"button\" id=\"download-dropdown\" aria-haspopup=\"menu\" aria-label=\"Download logs\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"lucide lucide-download\"><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"></path></svg></button></div>",
+      "notes": "Toolbar providing quick actions: filter visibility toggle, refresh button, download menu"
+    }
+  ]
+}

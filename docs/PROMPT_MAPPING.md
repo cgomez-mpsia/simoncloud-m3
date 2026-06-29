@@ -311,6 +311,17 @@
 - **Trazabilidad**: cierra gaps de consistencia de PM-007/008 (absorción DS); DD-SHELL-001 ↔ DTP §B
 - **Verificación**: applied — enlaces de ADR-0007/DD-SHELL-001 sin roturas; barrels completos; deps declaradas
 
+### PM-20260628-010
+- **Timestamp**: 2026-06-28T20:10:00-04:00
+- **Intent**: chore
+- **Prompt**: — (extracción vía agente `ds-page-analyzer`/general-purpose Haiku; convención de diseño)
+- **Artefactos generados**:
+  - `libs/design-system/manifests/` — 6 manifiestos nuevos extraídos de páginas Supabase (settings-general, auth-users, storage-files, table-editor, auth-emails, logs); ~40 componentes analizados (Input, FormField, CopyButton, DataTable, DropdownMenu, Select, FileDropzone, ProgressBar, EmptyState, etc.). Limpios de PII/provenance
+  - `.claude/agents/ds-component-builder.md` — regla **Radix: cuándo sí/no, sin perder fidelidad Supabase** (Radix = comportamiento; estilo siempre del manifiesto + tokens)
+  - `libs/design-system/README.md` — convención Radix resumida
+- **Trazabilidad**: ADR-0007 (DS); preparación del batch de generación de componentes para el shell + features
+- **Verificación**: applied — 9 manifiestos válidos (JSON parseable), sin "BettoGamer"/"pronostico" ni datos reales. Faltantes a hand-build: Textarea, Toast, Spinner, Radio
+
 ---
 
 ## Métricas AI-SDLC — release/2.0.0

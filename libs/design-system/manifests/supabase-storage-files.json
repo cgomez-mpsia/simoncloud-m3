@@ -1,0 +1,206 @@
+{
+  "source": "supabase-storage-files.mhtml",
+  "description": "Supabase dashboard - Storage / Files explorer page showing bucket management and file listing interface",
+  "page_url": "https://supabase.com/dashboard/project/{project-id}/storage/files",
+  "tokens": {
+    "new_tokens": []
+  },
+  "components": [
+    {
+      "id": "file-list-table",
+      "name": "FileListTable",
+      "level": "organism",
+      "description": "Data table displaying storage buckets with columns for icon, name, policies, file size limit, and allowed MIME types. Supports hover states and row selection.",
+      "variants": [
+        "default",
+        "hover",
+        "selected"
+      ],
+      "props": [
+        "data-bucket-id",
+        "className",
+        "tabindex"
+      ],
+      "cssClasses": [
+        "group/table",
+        "w-full",
+        "caption-bottom",
+        "text-sm",
+        "border-b",
+        "hover:bg-surface-200",
+        "data-[state=selected]:bg-muted",
+        "h-16",
+        "cursor-pointer",
+        "inset-focus"
+      ],
+      "htmlSample": "<table class=\"group/table w-full caption-bottom text-sm\"><thead class=\"[&_tr]:border-b\"><tr class=\"border-b group hover:bg-surface-200\"><th class=\"h-10 px-4 text-left align-middle heading-meta whitespace-nowrap sticky top-0 z-10 bg-200\">Icon</th><th class=\"h-10 px-4 text-left align-middle heading-meta\">Name</th><th class=\"h-10 px-4 text-left align-middle heading-meta\">Policies</th><th class=\"h-10 px-4 text-left align-middle heading-meta\">File size limit</th><th class=\"h-10 px-4 text-left align-middle heading-meta\">Allowed MIME types</th><th class=\"h-10 px-4 text-left align-middle heading-meta\"><span class=\"sr-only\">Actions</span></th></tr></thead><tbody class=\"[&_tr:last-child]:border-0\"><tr class=\"border-b group hover:bg-surface-200 relative cursor-pointer h-16\" data-bucket-id=\"my-bucket\" tabindex=\"0\"><td class=\"transition-colors p-4 align-middle w-2 pr-1\"><svg class=\"lucide lucide-files-bucket\"></svg></td><td class=\"p-4\">my-bucket</td></tr></tbody></table>",
+      "notes": "Uses Tailwind CSS for styling with custom Supabase color tokens. Supports sticky headers for horizontal scrolling."
+    },
+    {
+      "id": "storage-navigation",
+      "name": "StorageNavigation",
+      "level": "molecule",
+      "description": "Navigation component for Storage section with tabs for Files, Buckets, Settings, and Policies. Provides context-aware routing.",
+      "variants": [
+        "files-active",
+        "buckets-active",
+        "settings-active",
+        "policies-active"
+      ],
+      "props": [
+        "aria-label",
+        "role",
+        "href"
+      ],
+      "cssClasses": [
+        "flex",
+        "items-center",
+        "gap-2",
+        "text-sm",
+        "border-b",
+        "relative"
+      ],
+      "htmlSample": "<nav role=\"menu\" aria-label=\"Storage Sidebar\" class=\"my-2 flex flex-col\"><ul><li><a href=\"/storage/files\" class=\"active\">Files</a></li><li><a href=\"/storage/files\">Buckets</a></li><li><a href=\"/storage/files/settings\">Settings</a></li><li><a href=\"/storage/files/policies\">Policies</a></li></ul></nav>",
+      "notes": "Part of the main sidebar navigation. Uses aria-label for accessibility."
+    },
+    {
+      "id": "create-bucket-modal",
+      "name": "CreateBucketModal",
+      "level": "organism",
+      "description": "Modal dialog for creating a new file storage bucket. Includes form fields for bucket name, file size restrictions, and MIME type filtering.",
+      "variants": [
+        "open",
+        "closed"
+      ],
+      "props": [
+        "id",
+        "data-state",
+        "aria-labelledby",
+        "role"
+      ],
+      "cssClasses": [
+        "fixed",
+        "inset-0",
+        "z-50",
+        "bg-black/40",
+        "backdrop-blur-xs",
+        "data-[state=open]:slide-in-from-left",
+        "sm:rounded-lg",
+        "bg-dash-sidebar"
+      ],
+      "htmlSample": "<div role=\"dialog\" data-state=\"open\" class=\"fixed inset-0 z-50 bg-black/40 backdrop-blur-xs grid place-items-center\"><div class=\"relative bg-dash-sidebar sm:rounded-lg md:w-full sm:max-w-lg\"><div class=\"flex flex-col gap-1.5 text-center sm:text-left py-4 px-4 md:px-5\"><h2 class=\"text-base leading-none font-normal\">Create file bucket</h2></div><div class=\"w-full h-px bg-border\"></div><form id=\"create-storage-bucket-form\"><div class=\"py-4 px-4 md:px-5 overflow-hidden flex flex-col gap-y-2\"><div><label for=\"name\" class=\"text-sm\">Bucket name</label><input id=\"name\" type=\"text\" placeholder=\"Enter bucket name\"/></div></div></form></div></div>",
+      "notes": "Uses Radix UI primitives for dialog behavior. Background has backdrop blur effect."
+    },
+    {
+      "id": "file-input-control",
+      "name": "FileInput",
+      "level": "atom",
+      "description": "HTML file input element for uploading files. Part of the bucket creation form with styling for file upload button appearance.",
+      "variants": [
+        "default",
+        "focused"
+      ],
+      "props": [
+        "type",
+        "accept",
+        "class",
+        "placeholder"
+      ],
+      "cssClasses": [
+        "file:border-0",
+        "file:bg-transparent",
+        "file:text-sm",
+        "file:font-medium",
+        "placeholder:text-foreground-lighter",
+        "file:cursor-pointer"
+      ],
+      "htmlSample": "<input type=\"file\" class=\"file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-foreground-lighter\" data-form-type=\"other\" data-bwignore=\"true\"/>",
+      "notes": "Styled with Tailwind's file pseudo-element classes. Used within form contexts."
+    },
+    {
+      "id": "page-header",
+      "name": "PageHeader",
+      "level": "molecule",
+      "description": "Page title and description section for the Files page. Displays 'Files' as heading with descriptive text about storage functionality.",
+      "variants": [
+        "default"
+      ],
+      "props": [
+        "data-slot",
+        "class"
+      ],
+      "cssClasses": [
+        "heading-title",
+        "heading-subSection",
+        "text-foreground",
+        "text-foreground-light"
+      ],
+      "htmlSample": "<div><h1 class=\"heading-title\">Files</h1><div data-slot=\"page-header-description\" class=\"heading-subSection text-foreground-light\">General file storage for your project</div></div>",
+      "notes": "Uses Supabase heading utility classes for consistent typography."
+    },
+    {
+      "id": "bucket-icon",
+      "name": "BucketIcon",
+      "level": "atom",
+      "description": "SVG icon representing a storage bucket. Used in table rows and navigation elements throughout the Storage interface.",
+      "variants": [
+        "default",
+        "muted"
+      ],
+      "props": [
+        "xmlns",
+        "viewBox",
+        "class",
+        "aria-label"
+      ],
+      "cssClasses": [
+        "lucide",
+        "lucide-files-bucket",
+        "text-foreground-muted"
+      ],
+      "htmlSample": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-files-bucket\" aria-label=\"bucket icon\"><path d=\"M3.99988 20H19.9999C20.5303 20 21.039 19.7893 21.4141 19.4142C21.7892 19.0391 21.9999 18.5304 21.9999 18V8C21.9999 7.46957 21.7892 6.96086 21.4141 6.58579C21.039 6.21071 20.5303 6 19.9999 6H12.0699\"/></svg>",
+      "notes": "Uses Lucide icon library. Stroke width: 1.5, renders at 16x16px in tables."
+    },
+    {
+      "id": "action-menu-button",
+      "name": "ActionMenuButton",
+      "level": "atom",
+      "description": "Small dropdown button in table rows for bucket actions (edit, delete, etc). Uses chevron-down icon.",
+      "variants": [
+        "closed",
+        "open"
+      ],
+      "props": [
+        "type",
+        "data-size",
+        "data-state",
+        "aria-haspopup",
+        "aria-expanded"
+      ],
+      "cssClasses": [
+        "relative",
+        "inline-flex",
+        "items-center",
+        "justify-center",
+        "cursor-pointer",
+        "space-x-2",
+        "text-center",
+        "font-regular",
+        "ease-out",
+        "duration-200",
+        "rounded-md",
+        "outline-hidden",
+        "transition-all",
+        "text-xs",
+        "px-2.5",
+        "py-1",
+        "h-[26px]",
+        "text-foreground",
+        "border",
+        "border-transparent"
+      ],
+      "htmlSample": "<button type=\"button\" data-size=\"tiny\" data-state=\"closed\" aria-haspopup=\"dialog\" aria-expanded=\"false\" class=\"relative inline-flex items-center justify-center cursor-pointer text-center font-regular ease-out duration-200 rounded-md outline-hidden border border-transparent text-xs h-[26px] px-2.5 py-1\"><div class=\"inline-flex items-center justify-center\"><svg class=\"lucide lucide-chevron-down\"></svg></div></button>",
+      "notes": "Part of table row actions. Integrates with dropdown menu pattern via aria-haspopup."
+    }
+  ]
+}

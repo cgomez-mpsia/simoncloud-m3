@@ -39,6 +39,21 @@ import Button from '@simoncloud/design-system/components/atoms/Button'
 3. `@ds-component-builder <pagina>.json` → genera los `.tsx` en `components/` (Sonnet).
 4. Revisar props/tipos.
 
+## Convención Radix (cuándo sí, cuándo no)
+
+Radix = **comportamiento + accesibilidad**, no estilo. Igual que Supabase/shadcn:
+*Radix headless + clases Supabase encima*.
+
+- **Puro** (HTML + Tailwind) si el componente **solo se ve**: Button, Badge, Card, Input,
+  breadcrumb, empty-state, skeleton, metric-card, copy-button, form-field.
+- **Radix** si **abre/cierra, atrapa foco, navega con teclado o vive en overlay**:
+  Dialog/Modal, DropdownMenu, Tabs, Tooltip, Popover, Select, Switch, Checkbox, Accordion.
+- **Fidelidad Supabase**: al usar Radix, el estilo SIEMPRE sale del manifiesto
+  (`cssClasses`/`htmlSample`) + tokens; se aplica a cada parte de Radix. Nunca el look por
+  defecto, nunca inventar valores. No retrofitear Radix en componentes puros.
+
+Estado actual: `Tabs` y `Navbar` usan Radix; el resto es puro — el patrón correcto.
+
 > **Regla (ADR-0007)**: el DS es **infraestructura**. Los átomos nuevos no requieren un
 > design doc por componente; basta registrar el prompt en `PROMPT_MAPPING.md` si modifican
 > código. Cobertura ≥90% aplica a lógica de features; los componentes presentacionales

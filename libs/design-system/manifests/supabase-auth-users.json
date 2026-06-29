@@ -1,0 +1,466 @@
+{
+  "source": "supabase-auth-users.mhtml",
+  "description": "Supabase dashboard - Authentication / Users list and management interface",
+  "tokens": {
+    "new_tokens": []
+  },
+  "components": [
+    {
+      "id": "data-table",
+      "name": "DataTable",
+      "level": "organism",
+      "description": "React Data Grid (RDG) showing users with 9 columns: checkbox selector, UID, Display name, Email, Phone, Providers, Provider type, Created at, Last sign in at. Supports multi-select, sorting, pagination.",
+      "variants": [
+        "selectable",
+        "sorted",
+        "paginated"
+      ],
+      "props": [
+        "aria-colcount: 9",
+        "aria-multiselectable: true",
+        "aria-rowcount: 30 (estimated from grid-template-rows)",
+        "enableSort: true",
+        "enableMultiSelect: true",
+        "columns: [{id, name, width}, ...]"
+      ],
+      "cssClasses": [
+        "rdg",
+        "rdg-row",
+        "rdg-row-even",
+        "rdg-cell",
+        "rdg-header-row",
+        "border-t-0!",
+        "border-b-0!",
+        "cursor-pointer"
+      ],
+      "htmlSample": "<div role=\"grid\" aria-multiselectable=\"true\" aria-colcount=\"9\" aria-rowcount=\"30\" class=\"rdg grow border-t-0! border-b-0!\" style=\"grid-template-rows: repeat(1, 36px) repeat(29, 44px);\"><div role=\"row\" aria-rowindex=\"1\" class=\"rdg-header-row\"><div role=\"columnheader\" aria-colindex=\"1\" class=\"rdg-cell\"><button type=\"button\" role=\"checkbox\" aria-checked=\"false\" data-state=\"unchecked\"></button></div><div role=\"columnheader\" aria-colindex=\"2\"><p class=\"text-foreground!\">UID</p></div></div><div role=\"row\" aria-rowindex=\"2\" class=\"rdg-row rdg-row-even cursor-pointer\"><div role=\"gridcell\" aria-colindex=\"1\"><button type=\"button\" role=\"checkbox\" aria-checked=\"false\"></button></div><div role=\"gridcell\" aria-colindex=\"2\"><p>00000000-0000-0000-0000-000000000000</p></div></div></div>",
+      "notes": "Built with react-data-grid. Header is sticky. Rows are virtualized for performance. Each column is 44px height (except header 36px)."
+    },
+    {
+      "id": "search-input",
+      "name": "SearchInput",
+      "level": "atom",
+      "description": "Search field for filtering users by email. Integrated with input-group compound component.",
+      "variants": [],
+      "props": [
+        "placeholder: 'Search by email'",
+        "type: text",
+        "aria-label: (implicit from placeholder)",
+        "disabled: false (default)",
+        "value: empty"
+      ],
+      "cssClasses": [
+        "w-full",
+        "px-2.5",
+        "py-1",
+        "h-[26px]",
+        "rounded-none",
+        "border",
+        "border-transparent",
+        "bg-transparent",
+        "focus:border-transparent",
+        "focus-visible:ring-0",
+        "text-xs"
+      ],
+      "htmlSample": "<input data-slot=\"input-group-control\" placeholder=\"Search by email\" class=\"w-full px-2.5 py-1 h-[26px] flex-1 block rounded-none border border-transparent text-xs\" value=\"\">",
+      "notes": "Part of input-group wrapper. No visible border by default, focus state uses ring-0."
+    },
+    {
+      "id": "checkbox-input",
+      "name": "Checkbox",
+      "level": "atom",
+      "description": "Checkbox for row selection (bulk actions). Used in header and each data row. Supports checked/unchecked/indeterminate states via aria-checked.",
+      "variants": [
+        "unchecked",
+        "checked"
+      ],
+      "props": [
+        "type: button",
+        "role: checkbox",
+        "aria-checked: boolean",
+        "data-state: 'checked' | 'unchecked'",
+        "value: on"
+      ],
+      "cssClasses": [
+        "peer",
+        "flex",
+        "items-center",
+        "justify-center",
+        "h-4",
+        "w-4",
+        "shrink-0",
+        "rounded-sm",
+        "border",
+        "border-control",
+        "bg-control/25",
+        "transition-colors",
+        "duration-150",
+        "ease-in-out",
+        "hover:border-strong",
+        "focus-visible:ring-2",
+        "focus-visible:ring-background-control",
+        "focus-visible:ring-offset-2",
+        "disabled:cursor-not-allowed",
+        "disabled:opacity-50",
+        "data-[state=checked]:bg-foreground",
+        "data-[state=checked]:text-background"
+      ],
+      "htmlSample": "<button type=\"button\" role=\"checkbox\" aria-checked=\"false\" data-state=\"unchecked\" value=\"on\" class=\"peer flex items-center justify-center h-4 w-4 shrink-0 rounded-sm border border-control bg-control/25 transition-colors duration-150 ease-in-out hover:border-strong focus-visible:ring-2 focus-visible:ring-background-control focus-visible:ring-offset-2\"></button>",
+      "notes": "Uses data-state attr for styling. Checked state applies bg-foreground and text-background. Focus ring includes offset."
+    },
+    {
+      "id": "user-avatar",
+      "name": "Avatar",
+      "level": "atom",
+      "description": "Circular user avatar displayed next to checkbox in first column. Falls back to lucide-user icon if no image.",
+      "variants": [
+        "with-image",
+        "with-icon"
+      ],
+      "props": [
+        "background-image: url or none",
+        "width: 24px",
+        "height: 24px",
+        "fallback-icon: lucide-user"
+      ],
+      "cssClasses": [
+        "flex",
+        "items-center",
+        "justify-center",
+        "w-6",
+        "h-6",
+        "rounded-full",
+        "bg-center",
+        "bg-cover",
+        "bg-no-repeat",
+        "bg-selection"
+      ],
+      "htmlSample": "<div class=\"flex items-center justify-center w-6 h-6 rounded-full bg-center bg-cover bg-no-repeat bg-selection\" style=\"background-image: none;\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" class=\"lucide lucide-user\"><path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"></path><circle cx=\"12\" cy=\"7\" r=\"4\"></circle></svg></div>",
+      "notes": "24px container. Uses CSS custom property --rdg-cell-padding. Icon is 12x12."
+    },
+    {
+      "id": "button",
+      "name": "Button",
+      "level": "atom",
+      "description": "Generic button component with size variants (tiny, sm, default, lg). Used throughout header, sidebar, and row actions.",
+      "variants": [
+        "tiny",
+        "sm",
+        "default",
+        "lg"
+      ],
+      "props": [
+        "type: 'button'",
+        "data-size: 'tiny' | 'sm' | 'default' | 'lg'",
+        "aria-label: (optional)",
+        "aria-haspopup: (for dropdowns)",
+        "aria-expanded: (for disclosure)",
+        "disabled: boolean"
+      ],
+      "cssClasses": [
+        "relative",
+        "inline-flex",
+        "items-center",
+        "justify-center",
+        "cursor-pointer",
+        "space-x-2",
+        "rounded",
+        "border",
+        "text-xs",
+        "px-2.5",
+        "py-1",
+        "h-[26px]",
+        "focus-visible:outline-hidden",
+        "focus-visible:ring-2",
+        "hover:border-strong",
+        "data-[state=open]:outline-border-strong",
+        "data-[state=open]:border-button-hover"
+      ],
+      "htmlSample": "<button data-size=\"tiny\" type=\"button\" aria-label=\"Refresh\" class=\"relative inline-flex items-center justify-center cursor-pointer rounded border text-xs px-2.5 py-1 h-[26px] hover:border-strong focus-visible:ring-2\"></button>",
+      "notes": "data-size controls padding/height. Uses Tailwind arbitrary values. Focus ring includes 2px ring-offset."
+    },
+    {
+      "id": "icon-button",
+      "name": "IconButton",
+      "level": "atom",
+      "description": "Small button containing only an icon (lucide). Used for actions like refresh, sort, expand/collapse.",
+      "variants": [
+        "refresh",
+        "chevron-down",
+        "more-vertical",
+        "help",
+        "settings"
+      ],
+      "props": [
+        "icon: string (lucide icon name)",
+        "aria-label: string",
+        "type: 'button'",
+        "data-size: 'tiny' | 'sm'"
+      ],
+      "cssClasses": [
+        "[&_svg]:w-4",
+        "[&_svg]:h-4",
+        "text-foreground-lighter",
+        "group-hover:text-foreground",
+        "transition-colors",
+        "hover:text-foreground"
+      ],
+      "htmlSample": "<button type=\"button\" aria-label=\"Refresh\" class=\"relative inline-flex items-center justify-center cursor-pointer rounded\"><svg class=\"lucide lucide-refresh-cw\"><path d=\"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8\"></path></svg></button>",
+      "notes": "Icons are 4x4 (16px via [&_svg]). Color transitions on hover."
+    },
+    {
+      "id": "table-header",
+      "name": "TableHeader",
+      "level": "molecule",
+      "description": "Header row of data table. Contains column headers, search input, and action buttons (Refresh, Sort, Filter).",
+      "variants": [],
+      "props": [
+        "columns: [{id, name, sortable}, ...]",
+        "onSearch: (value) => void",
+        "onRefresh: () => void",
+        "onSort: (columnId) => void"
+      ],
+      "cssClasses": [
+        "rdg-header-row",
+        "z-50",
+        "outline-hidden",
+        "shadow-none!"
+      ],
+      "htmlSample": "<div role=\"row\" aria-rowindex=\"1\" class=\"rdg-header-row h10tskcx7-0-0-beta-47 z-50 outline-hidden shadow-none!\"><div role=\"columnheader\" aria-colindex=\"1\" class=\"rdg-cell\"><button role=\"checkbox\" data-state=\"unchecked\"></button></div><div role=\"columnheader\" aria-colindex=\"2\"><p>UID</p></div></div>",
+      "notes": "Fixed z-index 50 for sticky positioning. Draggable=true for column reordering."
+    },
+    {
+      "id": "table-row",
+      "name": "TableRow",
+      "level": "molecule",
+      "description": "Single data row in table. Contains checkbox, avatar, and text cells for each column value. Clickable for detail view.",
+      "variants": [
+        "even",
+        "odd"
+      ],
+      "props": [
+        "rowIndex: number",
+        "rowData: UserRecord",
+        "selected: boolean",
+        "onSelect: (id) => void",
+        "onClick: () => void"
+      ],
+      "cssClasses": [
+        "rdg-row",
+        "rdg-row-even",
+        "rdg-row-odd",
+        "bg-200",
+        "cursor-pointer",
+        "border-box",
+        "outline-hidden",
+        "shadow-none"
+      ],
+      "htmlSample": "<div role=\"row\" aria-rowindex=\"2\" aria-selected=\"false\" class=\"rdg-row rdg-row-even bg-200 cursor-pointer [&>.rdg-cell]:border-box\"><div role=\"gridcell\" aria-colindex=\"1\"><button role=\"checkbox\" aria-checked=\"false\"></button></div><div role=\"gridcell\" aria-colindex=\"2\"><p>00000000-0000-0000-0000-000000000000</p></div><div role=\"gridcell\" aria-colindex=\"3\"><p>-</p></div></div>",
+      "notes": "Alternating even/odd classes for striping. Height 44px. aria-selected false by default."
+    },
+    {
+      "id": "sidebar",
+      "name": "Sidebar",
+      "level": "organism",
+      "description": "Left navigation sidebar with collapsible menu items grouped by category (Manage, Notifications, Settings, Integrations). Uses data-sidebar attributes.",
+      "variants": [
+        "expanded",
+        "collapsed"
+      ],
+      "props": [
+        "data-sidebar: 'sidebar' | 'content' | 'footer' | 'menu' | 'group' | 'menu-item' | 'menu-button'",
+        "data-collapsible: boolean",
+        "data-variant: 'sidebar' | 'floating'",
+        "data-side: 'left' | 'right'",
+        "collapsedWidth: 3rem (icon-only)"
+      ],
+      "cssClasses": [
+        "flex",
+        "flex-col",
+        "h-screen",
+        "w-screen",
+        "bg-sidebar",
+        "group-data-[variant=floating]:floating",
+        "group-data-[collapsible=icon]:overflow-hidden",
+        "peer",
+        "border-r"
+      ],
+      "htmlSample": "<div data-sidebar=\"sidebar\" class=\"flex h-full w-full flex-col bg-sidebar\"><div data-sidebar=\"content\" class=\"flex min-h-0 flex-1 flex-col gap-2 overflow-auto\"><ul data-sidebar=\"menu\" class=\"flex w-full min-w-0 flex-col gap-1\"><div data-sidebar=\"group\" class=\"relative flex w-full min-w-0 flex-col\"><li data-sidebar=\"menu-item\"><a href=\"#auth/users\" data-sidebar=\"menu-button\">Users</a></li></div></ul></div></div>",
+      "notes": "Resizable sidebar with data-collapsible to show icon-only mode. Uses flex for layout. bg-sidebar is custom color token."
+    },
+    {
+      "id": "menu-item",
+      "name": "MenuItem",
+      "level": "molecule",
+      "description": "Individual navigation item in sidebar menu. Can be active or inactive. Supports nested structure.",
+      "variants": [
+        "active",
+        "inactive"
+      ],
+      "props": [
+        "data-sidebar: 'menu-item' | 'menu-button'",
+        "data-active: true | false",
+        "data-has-icon: true | false",
+        "href: string",
+        "tabindex: 0 | -1",
+        "onClick: () => void"
+      ],
+      "cssClasses": [
+        "cursor-pointer",
+        "flex",
+        "space-x-3",
+        "items-center",
+        "outline-hidden",
+        "focus-visible:ring-2",
+        "px-3",
+        "py-2",
+        "rounded-md",
+        "text-sm",
+        "text-foreground-light",
+        "group-hover:text-foreground",
+        "group-hover:border-foreground-muted",
+        "bg-sidebar-accent/50"
+      ],
+      "htmlSample": "<li data-sidebar=\"menu-item\" class=\"group/menu-item relative\"><a data-sidebar=\"menu-button\" data-active=\"true\" href=\"https://supabase.com/dashboard/project/PROJECT_ID/auth/users\" tabindex=\"0\" class=\"peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded px-3 text-foreground\"><span class=\"truncate flex-1 min-w-0\">Users</span></a></li>",
+      "notes": "Active item inherits bg-sidebar-accent/50. Uses group classes for hover states."
+    },
+    {
+      "id": "badge",
+      "name": "Badge",
+      "level": "atom",
+      "description": "Status or label badge displayed inline. Examples: 'Production', 'Free', 'Beta' in header. Small, rounded, with colored background.",
+      "variants": [
+        "default",
+        "warning",
+        "success",
+        "destructive"
+      ],
+      "props": [
+        "children: ReactNode",
+        "variant: 'default' | 'warning' | 'success' | 'secondary'"
+      ],
+      "cssClasses": [
+        "inline-flex",
+        "items-center",
+        "gap-1",
+        "justify-center",
+        "rounded-full",
+        "whitespace-nowrap",
+        "text-xs",
+        "py-1",
+        "border",
+        "text-warning",
+        "border-warning-500",
+        "mt-px"
+      ],
+      "htmlSample": "<div class=\"inline-flex items-center gap-1 justify-center rounded-full whitespace-nowrap text-xs py-1 h-6 px-2 border text-warning border-warning-500 mt-px\">Production</div>",
+      "notes": "mt-px for pixel-perfect alignment. Warning variant shown; other variants follow same pattern."
+    },
+    {
+      "id": "header",
+      "name": "Header",
+      "level": "organism",
+      "description": "Top navigation bar (12px height md:12px). Contains breadcrumbs, connection status, help menu, search, SQL editor, AI assistant, and user dropdown.",
+      "variants": [],
+      "props": [
+        "height: h-11 (mobile) | h-12 (desktop)",
+        "sticky: true",
+        "items: [{type, label, action}, ...]"
+      ],
+      "cssClasses": [
+        "hidden",
+        "md:flex",
+        "h-11",
+        "md:h-12",
+        "items-center",
+        "shrink-0",
+        "border-b",
+        "px-3",
+        "gap-x-8"
+      ],
+      "htmlSample": "<header class=\"hidden md:flex h-11 md:h-12 items-center shrink-0 border-b\"><div class=\"flex items-center justify-between h-full pr-3 flex-1 overflow-x-auto gap-x-8 pl-4\"><div class=\"flex md:hidden items-center text-sm not-sr-only\"></div><div class=\"flex md:hidden items-center text-sm\"><a class=\"items-center justify-center shrink-0 flex\" href=\"...\"></a></div></div></header>",
+      "notes": "Hidden on mobile (hidden md:flex). Responsive: h-11 mobile, h-12 desktop. Border-b for separator."
+    },
+    {
+      "id": "dropdown-menu",
+      "name": "DropdownMenu",
+      "level": "molecule",
+      "description": "Dropdown menu for selecting options (e.g., organization/project selector in header). Uses combobox pattern.",
+      "variants": [],
+      "props": [
+        "role: 'combobox'",
+        "aria-controls: string (menu ID)",
+        "aria-expanded: boolean",
+        "options: [{label, value}, ...]",
+        "onSelect: (value) => void"
+      ],
+      "cssClasses": [
+        "relative",
+        "inline-flex",
+        "items-center",
+        "gap-1",
+        "cursor-pointer",
+        "space-x-2",
+        "text-center",
+        "font-medium",
+        "text-sm",
+        "rounded"
+      ],
+      "htmlSample": "<button type=\"button\" role=\"combobox\" aria-controls=\"radix-_r_d9_\" data-state=\"closed\" class=\"relative inline-flex items-center gap-1 cursor-pointer space-x-2 font-medium text-sm\"><span>my-project</span><svg class=\"lucide lucide-chevrons-up-down\"><path d=\"m7 15 5 5 5-5\"></path><path d=\"m7 9 5-5 5 5\"></path></svg></button>",
+      "notes": "Uses radix-ui primitives. data-state toggles closed/open. Chevrons icon indicates expandable."
+    },
+    {
+      "id": "input-group",
+      "name": "InputGroup",
+      "level": "molecule",
+      "description": "Compound input component that groups search input with icon prefix/suffix buttons. Wraps search box.",
+      "variants": [],
+      "props": [
+        "data-slot: 'input-group' | 'input-group-control'",
+        "role: 'group'",
+        "placeholder: string",
+        "onSearch: (value) => void"
+      ],
+      "cssClasses": [
+        "group/input-group",
+        "relative",
+        "items-center",
+        "outline-hidden",
+        "transition-[color,box-shadow]",
+        "rounded-r-none",
+        "-ml-px",
+        "w-[245px]",
+        "flex"
+      ],
+      "htmlSample": "<div data-slot=\"input-group\" role=\"group\" class=\"group/input-group relative items-center outline-hidden transition-[color,box-shadow] rounded-r-none -ml-px w-[245px] flex\"><input data-slot=\"input-group-control\" placeholder=\"Search by email\" class=\"w-full text-xs px-2.5 py-1 h-[26px]\" value=\"\"><button aria-label=\"Clear\" class=\"relative inline-flex items-center cursor-pointer\"></button></div>",
+      "notes": "Flexbox layout. -ml-px removes margin between input and adjacent button. width 245px fixed."
+    },
+    {
+      "id": "empty-state",
+      "name": "EmptyState",
+      "level": "organism",
+      "description": "Placeholder shown when no users match search criteria or table is empty. Typically contains icon, heading, and action button.",
+      "variants": [
+        "no-results",
+        "no-data"
+      ],
+      "props": [
+        "title: string",
+        "description: string",
+        "action: {label, onClick}",
+        "icon: ReactNode"
+      ],
+      "cssClasses": [
+        "flex",
+        "flex-col",
+        "items-center",
+        "justify-center",
+        "min-h-[300px]",
+        "text-center",
+        "gap-4"
+      ],
+      "htmlSample": "<div class=\"flex flex-col items-center justify-center min-h-[300px] text-center gap-4\"><svg class=\"lucide lucide-inbox w-12 h-12 text-foreground-lighter\"></svg><h3 class=\"text-sm font-medium\">No users found</h3><p class=\"text-xs text-foreground-lighter\">Try adjusting your search criteria</p></div>",
+      "notes": "min-h-[300px] ensures consistent spacing. Icon and text are centered."
+    }
+  ]
+}
